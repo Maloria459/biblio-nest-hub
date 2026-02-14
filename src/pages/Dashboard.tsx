@@ -2,7 +2,7 @@ import { TopBar } from "@/components/TopBar";
 
 const Dashboard = () => (
   <div className="flex flex-col flex-1">
-    <TopBar title="Mon tableau de bord" />
+    <TopBar />
     <div className="flex-1" />
   </div>
 );
