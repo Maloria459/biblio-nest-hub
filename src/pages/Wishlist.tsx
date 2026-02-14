@@ -2,7 +2,7 @@ import { TopBar } from "@/components/TopBar";
 
 const Wishlist = () => (
   <div className="flex flex-col flex-1">
-    <TopBar title="Ma wishlist" />
+    <TopBar />
     <div className="flex-1" />
   </div>
 );

@@ -1,19 +1,18 @@
 import { useState } from "react";
 import { TopBar } from "@/components/TopBar";
-import { BottomTabBar } from "@/components/BottomTabBar";
+import { BottomTabBar, type TabItem } from "@/components/BottomTabBar";
 
 interface TabbedPageProps {
-  title: string;
-  tabs: string[];
+  tabs: TabItem[];
   defaultTab: string;
 }
 
-export function TabbedPage({ title, tabs, defaultTab }: TabbedPageProps) {
+export function TabbedPage({ tabs, defaultTab }: TabbedPageProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   return (
     <div className="flex flex-col flex-1">
-      <TopBar title={title} subtitle={activeTab} />
+      <TopBar />
       <div className="flex-1" />
       <BottomTabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
     </div>

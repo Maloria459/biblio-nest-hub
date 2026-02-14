@@ -9,14 +9,12 @@ import {
   Settings,
 } from "lucide-react";
 
-const menuItems = [
+const mainMenuItems = [
   { title: "Mon tableau de bord", path: "/", icon: LayoutDashboard },
   { title: "Mon aventure littéraire", path: "/aventure", icon: BookOpen },
   { title: "Mon coin lecture", path: "/lecture", icon: Library },
   { title: "Ma wishlist", path: "/wishlist", icon: Heart },
   { title: "Communauté", path: "/communaute", icon: Users },
-  { title: "Mon profil", path: "/profil", icon: User },
-  { title: "Paramètres", path: "/parametres", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -36,10 +34,10 @@ export function AppSidebar() {
         </span>
       </div>
 
-      {/* Nav */}
+      {/* Main nav */}
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         <ul className="space-y-1">
-          {menuItems.map((item) => {
+          {mainMenuItems.map((item) => {
             const active = isActive(item.path);
             return (
               <li key={item.path}>
@@ -59,6 +57,34 @@ export function AppSidebar() {
           })}
         </ul>
       </nav>
+
+      {/* Bottom section: Profil + Paramètres */}
+      <div className="border-t border-border px-3 py-3">
+        <div className="flex items-center gap-1">
+          <RouterNavLink
+            to="/profil"
+            className={`flex flex-1 items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+              isActive("/profil")
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <User className="h-4 w-4 shrink-0" />
+            <span>Mon profil</span>
+          </RouterNavLink>
+          <RouterNavLink
+            to="/parametres"
+            className={`flex items-center justify-center rounded-md p-2.5 transition-colors ${
+              isActive("/parametres")
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+            title="Paramètres"
+          >
+            <Settings className="h-4 w-4" />
+          </RouterNavLink>
+        </div>
+      </div>
     </aside>
   );
 }
