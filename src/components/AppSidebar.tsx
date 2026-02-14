@@ -28,7 +28,8 @@ export function AppSidebar() {
   return (
     <aside className="fixed left-0 top-0 bottom-0 z-40 flex w-[var(--sidebar-width)] flex-col border-r border-border bg-card">
       {/* Logo */}
-      <div className="flex h-[var(--topbar-height)] items-center px-6 border-b border-border">
+      <div className="flex h-[var(--topbar-height)] items-center gap-2.5 px-6 border-b border-border">
+        <BookOpen className="h-5 w-5 shrink-0 text-foreground" />
         <span className="font-display text-lg font-bold tracking-tight text-foreground">
           Biblio Nest
         </span>
@@ -59,7 +60,7 @@ export function AppSidebar() {
       </nav>
 
       {/* Bottom section: Profil + Paramètres */}
-      <div className="border-t border-border px-3 py-3">
+      <div className="flex items-center border-t border-border px-3 h-[var(--bottombar-height)]">
         <div className="flex items-center gap-1">
           <RouterNavLink
             to="/profil"
