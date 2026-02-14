@@ -59,7 +59,7 @@ export function AppSidebar() {
       </nav>
 
       {/* Bottom section: Profil + Paramètres */}
-      <div className="border-t border-border px-0 my-0 py-[3px]">
+      <div className="border-t border-border px-0 my-0 py-[4px]">
         <div className="flex items-center gap-1">
           <RouterNavLink
             to="/profil"
