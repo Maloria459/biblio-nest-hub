@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { Search, SlidersHorizontal, Plus, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -70,8 +72,25 @@ export function BibliothequeContent() {
       return true;
     });
 
+  const [topBarSlot, setTopBarSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = document.getElementById(TOPBAR_RIGHT_ID);
+    setTopBarSlot(el);
+    return () => {
+      if (el) el.innerHTML = "";
+    };
+  }, []);
+
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
+      {/* Book count — portalled into the top bar */}
+      {topBarSlot && createPortal(
+        <span className="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
+          {books.length} {books.length <= 1 ? "livre" : "livres"}
+        </span>,
+        topBarSlot
+      )}
+
       {/* Action bar */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
@@ -83,9 +102,6 @@ export function BibliothequeContent() {
             className="pl-9"
           />
         </div>
-        <span className="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground whitespace-nowrap">
-          {books.length} {books.length <= 1 ? "livre" : "livres"}
-        </span>
         <Button variant="outline" size="default" onClick={() => setFiltersOpen(true)}>
           <SlidersHorizontal className="h-4 w-4 mr-1.5" />
           Filtres
