@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect } from "react";
 import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { Search, SlidersHorizontal, Plus, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -72,24 +71,25 @@ export function BibliothequeContent() {
       return true;
     });
 
-  const [topBarSlot, setTopBarSlot] = useState<HTMLElement | null>(null);
+  const libraryCount = books.filter(b => b.status !== "Wishlist").length;
+
   useEffect(() => {
     const el = document.getElementById(TOPBAR_RIGHT_ID);
-    setTopBarSlot(el);
+    if (el) {
+      el.textContent = `${libraryCount} ${libraryCount <= 1 ? "livre" : "livres"}`;
+      el.className = "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
+    }
     return () => {
-      if (el) el.innerHTML = "";
+      const el = document.getElementById(TOPBAR_RIGHT_ID);
+      if (el) {
+        el.textContent = "";
+        el.className = "ml-auto";
+      }
     };
-  }, []);
+  }, [libraryCount]);
 
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
-      {/* Book count — portalled into the top bar (excludes Wishlist, matching displayed cards) */}
-      {topBarSlot && createPortal(
-        <span className="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          {books.filter(b => b.status !== "Wishlist").length} {books.filter(b => b.status !== "Wishlist").length <= 1 ? "livre" : "livres"}
-        </span>,
-        topBarSlot
-      )}
 
       {/* Action bar */}
       <div className="flex items-center gap-2">
