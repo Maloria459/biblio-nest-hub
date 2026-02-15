@@ -60,8 +60,7 @@ export function AppSidebar() {
       </nav>
 
       {/* Bottom section: Profil + Paramètres */}
-      <div className="flex items-center border-t border-border px-3 h-[var(--bottombar-height)]">
-        <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between border-t border-border px-3 h-[var(--bottombar-height)]">
           <RouterNavLink
             to="/profil"
             className={`flex flex-1 items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
@@ -84,7 +83,6 @@ export function AppSidebar() {
           >
             <Settings className="h-4 w-4" />
           </RouterNavLink>
-        </div>
       </div>
     </aside>
   );
