@@ -7,10 +7,9 @@ interface FlipBookCardProps {
   onMarkPAL?: (id: string) => void;
   onClick?: () => void;
   renderBack?: (book: Book) => ReactNode;
-  className?: string;
 }
 
-export function FlipBookCard({ book, onMarkPAL, onClick, renderBack, className }: FlipBookCardProps) {
+export function FlipBookCard({ book, onMarkPAL, onClick, renderBack }: FlipBookCardProps) {
   const handlePAL = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMarkPAL?.(book.id);
@@ -18,8 +17,8 @@ export function FlipBookCard({ book, onMarkPAL, onClick, renderBack, className }
 
   return (
     <div
-      className={`group cursor-pointer ${className ?? ""}`}
-      style={{ perspective: "1000px", width: className ? "100%" : 180, height: className ? undefined : 244, aspectRatio: className ? "180/244" : undefined }}
+      className="group cursor-pointer"
+      style={{ perspective: "1000px", width: 180, height: 244 }}
       onClick={onClick}
     >
       <div
