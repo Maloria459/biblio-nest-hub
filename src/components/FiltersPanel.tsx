@@ -160,10 +160,10 @@ export function FiltersPanel({
           {/* Series */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase tracking-wide">Par série</Label>
-            <Select value={local.series} onValueChange={(v) => setLocal({ ...local, series: v })}>
+            <Select value={local.series || "__all__"} onValueChange={(v) => setLocal({ ...local, series: v === "__all__" ? "" : v })}>
               <SelectTrigger><SelectValue placeholder="Toutes les séries" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes</SelectItem>
+                <SelectItem value="__all__">Toutes</SelectItem>
                 {allSeries.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -189,10 +189,10 @@ export function FiltersPanel({
           {/* Status */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase tracking-wide">Par statut</Label>
-            <Select value={local.status} onValueChange={(v) => setLocal({ ...local, status: v })}>
+            <Select value={local.status || "__all__"} onValueChange={(v) => setLocal({ ...local, status: v === "__all__" ? "" : v })}>
               <SelectTrigger><SelectValue placeholder="Tous les statuts" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous</SelectItem>
+                <SelectItem value="__all__">Tous</SelectItem>
                 {settingsStatuses.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -202,10 +202,10 @@ export function FiltersPanel({
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase tracking-wide">Livres lus par période</Label>
             <div className="flex gap-2">
-              <Select value={local.readMonth} onValueChange={(v) => setLocal({ ...local, readMonth: v })}>
+              <Select value={local.readMonth || "__all__"} onValueChange={(v) => setLocal({ ...local, readMonth: v === "__all__" ? "" : v })}>
                 <SelectTrigger className="flex-1"><SelectValue placeholder="Mois" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous</SelectItem>
+                  <SelectItem value="__all__">Tous</SelectItem>
                   {months.map((m) => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
                 </SelectContent>
               </Select>
