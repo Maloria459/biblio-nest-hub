@@ -35,7 +35,6 @@ export interface Book {
   personnagesPreferes?: string;
   chapterNotes?: Record<number, string>;
   chapterNotesEnabled?: boolean;
-  wishlistOrder?: number;
 }
 
 export const mockBooks: Book[] = [

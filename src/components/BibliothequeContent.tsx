@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TOPBAR_RIGHT_ID, TOPBAR_TITLE_ID } from "@/components/TopBar";
+import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { Search, SlidersHorizontal, Plus, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,29 +8,11 @@ import { BookDetailModal } from "@/components/BookDetailModal";
 import { FiltersPanel, emptyFilters, type Filters } from "@/components/FiltersPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AddBookModal } from "@/components/AddBookModal";
-import type { Book } from "@/data/mockBooks";
+import { mockBooks, type Book } from "@/data/mockBooks";
+import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librarySettings";
 
-interface BibliothequeContentProps {
-  books: Book[];
-  onAddBook: (book: Book) => void;
-  onSaveBook: (book: Book) => void;
-  onDeleteBook: (id: string) => void;
-  genres: string[];
-  formats: string[];
-  statuses: string[];
-  onSettingsSave: (g: string[], f: string[], s: string[]) => void;
-}
-
-export function BibliothequeContent({
-  books,
-  onAddBook,
-  onSaveBook,
-  onDeleteBook,
-  genres,
-  formats,
-  statuses,
-  onSettingsSave,
-}: BibliothequeContentProps) {
+export function BibliothequeContent() {
+  const [books, setBooks] = useState<Book[]>(mockBooks);
   const [search, setSearch] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -38,13 +20,35 @@ export function BibliothequeContent({
   const [addOpen, setAddOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
 
+  const [genres, setGenres] = useState<string[]>(DEFAULT_GENRES);
+  const [formats, setFormats] = useState<string[]>(DEFAULT_FORMATS);
+  const [statuses, setStatuses] = useState<string[]>(DEFAULT_STATUSES);
+
   const handleMarkPAL = (id: string) => {
-    const book = books.find((b) => b.id === id);
-    if (book) onSaveBook({ ...book, status: "Dans ma PAL" });
+    setBooks((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, status: "Dans ma PAL" } : b))
+    );
+  };
+
+  const handleAddBook = (book: Book) => {
+    setBooks((prev) => [...prev, book]);
+  };
+
+  const handleSaveBook = (updated: Book) => {
+    // Also handle recommandation du mois: uncheck others for same month
+    setBooks((prev) =>
+      prev.map((b) => {
+        if (b.id === updated.id) return updated;
+        if (updated.recommandationDuMois && updated.recommandationMonth && b.recommandationDuMois && b.recommandationMonth === updated.recommandationMonth) {
+          return { ...b, recommandationDuMois: false, recommandationMonth: undefined };
+        }
+        return b;
+      })
+    );
   };
 
   const handleDeleteBook = (id: string) => {
-    onDeleteBook(id);
+    setBooks((prev) => prev.filter((b) => b.id !== id));
     setSelectedBook(null);
   };
 
@@ -70,17 +74,12 @@ export function BibliothequeContent({
   const libraryCount = books.filter(b => b.status !== "Wishlist").length;
 
   useEffect(() => {
-    const titleEl = document.getElementById(TOPBAR_TITLE_ID);
-    if (titleEl) titleEl.textContent = "Ma bibliothèque";
-
     const el = document.getElementById(TOPBAR_RIGHT_ID);
     if (el) {
       el.textContent = `${libraryCount} ${libraryCount <= 1 ? "livre" : "livres"}`;
-      el.className = "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap ml-auto";
+      el.className = "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
     }
     return () => {
-      const titleEl = document.getElementById(TOPBAR_TITLE_ID);
-      if (titleEl) titleEl.textContent = "";
       const el = document.getElementById(TOPBAR_RIGHT_ID);
       if (el) {
         el.textContent = "";
@@ -138,7 +137,7 @@ export function BibliothequeContent({
         book={selectedBook}
         open={!!selectedBook}
         onOpenChange={(o) => !o && setSelectedBook(null)}
-        onSave={onSaveBook}
+        onSave={handleSaveBook}
         onDelete={handleDeleteBook}
         allBooks={books}
         genres={genres}
@@ -161,7 +160,7 @@ export function BibliothequeContent({
         genres={genres}
         formats={formats}
         statuses={statuses}
-        onSave={onSettingsSave}
+        onSave={(g, f, s) => { setGenres(g); setFormats(f); setStatuses(s); }}
       />
       <AddBookModal
         open={addOpen}
@@ -169,7 +168,7 @@ export function BibliothequeContent({
         genres={genres}
         formats={formats}
         statuses={statuses}
-        onAdd={onAddBook}
+        onAdd={handleAddBook}
       />
     </div>
   );

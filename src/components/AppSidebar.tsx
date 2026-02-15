@@ -5,9 +5,9 @@ import {
   Library,
   Heart,
   Users,
+  User,
   Settings,
 } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const mainMenuItems = [
   { title: "Mon tableau de bord", path: "/", icon: LayoutDashboard },
@@ -69,10 +69,7 @@ export function AppSidebar() {
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             }`}
           >
-            <Avatar className="h-5 w-5 shrink-0">
-              <AvatarImage src="" alt="Avatar" />
-              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">U</AvatarFallback>
-            </Avatar>
+            <User className="h-4 w-4 shrink-0" />
             <span>Mon profil</span>
           </RouterNavLink>
           <RouterNavLink
