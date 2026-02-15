@@ -77,7 +77,7 @@ export function BibliothequeContent() {
     const el = document.getElementById(TOPBAR_RIGHT_ID);
     if (el) {
       el.textContent = `${libraryCount} ${libraryCount <= 1 ? "livre" : "livres"}`;
-      el.className = "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
+      el.className = "ml-auto inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
     }
     return () => {
       const el = document.getElementById(TOPBAR_RIGHT_ID);
