@@ -26,7 +26,7 @@ export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
       onClick={handleClick}
     >
       <div
-        className="relative w-full h-full transition-transform duration-[1200ms]"
+        className="relative w-full h-full transition-transform duration-[1500ms]"
         style={{ transformStyle: "preserve-3d" }}
       >
         {/* Hover flip via group */}
