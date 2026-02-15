@@ -87,25 +87,26 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
         {/* Modal */}
         <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "70%", maxHeight: "90%" }}>
-          {/* Fixed title bar */}
-          <div className="flex items-center justify-between h-14 px-6 border-b border-border shrink-0">
-            <h2 className="text-base font-semibold" style={{ fontFamily: "var(--font-display)" }}>Fiche de lecture</h2>
+          {/* Close button */}
+          <div className="flex justify-end px-4 pt-3 shrink-0">
             <button onClick={handleClose} className="p-1 rounded-md hover:bg-accent transition-colors">
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {/* TOP SECTION — Two columns */}
-            <div className="flex gap-6">
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
+            {/* TOP SECTION — Two columns, equal height */}
+            <div className="flex gap-6 items-stretch">
               {/* LEFT COLUMN */}
-              <div className="flex flex-col items-center gap-4 min-w-[200px]">
-                <div className="w-[200px] h-[280px] rounded-lg border-2 border-foreground overflow-hidden bg-muted flex items-center justify-center">
+              <div className="flex flex-col gap-4 w-[200px] flex-shrink-0">
+                <div className="w-full flex-1 rounded-lg border-2 border-foreground overflow-hidden bg-muted">
                   {eb.coverUrl ? (
-                    <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-contain" />
+                    <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xs text-muted-foreground">Pas de couverture</span>
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-xs text-muted-foreground">Pas de couverture</span>
+                    </div>
                   )}
                 </div>
 
@@ -173,10 +174,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
               {/* RIGHT COLUMN */}
               <div className="flex-1 flex flex-col gap-3">
-                <h2 className="text-xl font-bold underline" style={{ fontFamily: "var(--font-display)" }}>{eb.title}</h2>
-                <p className="text-base font-bold italic text-muted-foreground">{eb.author}</p>
+                <p className="text-xl" style={{ fontFamily: "var(--font-display)" }}>
+                  <span className="font-bold italic">{eb.title}</span>
+                  <span className="text-muted-foreground">, {eb.author}</span>
+                </p>
 
-                {(eb.series || allSeries.length > 0) && (
+                {eb.series && (
                   <div className="space-y-1">
                     <Label className="text-xs">Série</Label>
                     <Select value={eb.series || "__none__"} onValueChange={v => set({ series: v === "__none__" ? "" : v })}>
