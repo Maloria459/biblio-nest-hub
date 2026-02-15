@@ -134,7 +134,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
 
               <div className="w-[140px] h-[190px] rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden flex items-center justify-center bg-muted">
                 {resolvedCover ? (
-                  <img src={resolvedCover} alt="Couverture" className="w-full h-full object-contain" />
+                  <img src={resolvedCover} alt="Couverture" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-xs text-muted-foreground">Couverture</span>
                 )}
