@@ -100,20 +100,84 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto px-6 pb-6">
-            {/* TOP SECTION — Two columns, equal height */}
-            <div className="flex gap-6 items-stretch">
-              {/* LEFT COLUMN — cover only, stretches to match right */}
-              <div className="w-[200px] flex-shrink-0 rounded-lg border-2 border-foreground overflow-hidden bg-muted">
-                {eb.coverUrl ? (
-                  <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-xs text-muted-foreground">Pas de couverture</span>
+            {/* TWO-COLUMN LAYOUT for entire modal content */}
+            <div className="flex gap-6">
+              {/* LEFT COLUMN — cover + metadata */}
+              <div className="flex flex-col gap-4 w-[200px] flex-shrink-0">
+                {/* Cover image — stretches to match book info height */}
+                <div className="rounded-lg border-2 border-foreground overflow-hidden bg-muted" style={{ minHeight: 260 }}>
+                  {eb.coverUrl ? (
+                    <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-xs text-muted-foreground">Pas de couverture</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Spicy + Mature */}
+                <div className="flex items-center gap-2 w-full">
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map(level => (
+                      <button key={level} type="button" onClick={() => set({ spicyLevel: eb.spicyLevel === level ? 0 : level })} className="p-0.5">
+                        <Flame className={`h-4 w-4 transition-colors ${level <= (eb.spicyLevel || 0) ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
+                      </button>
+                    ))}
                   </div>
-                )}
+                  {eb.matureContent && <span className="text-lg" title="Public averti">🔞</span>}
+                </div>
+
+                {/* Rating */}
+                <div className="flex gap-0.5 w-full">
+                  {[1, 2, 3, 4, 5].map(star => {
+                    const filled = (eb.rating || 0) >= star;
+                    const half = !filled && (eb.rating || 0) >= star - 0.5;
+                    return (
+                      <button key={star} type="button" className="relative p-0.5" onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const isLeft = (e.clientX - rect.left) < rect.width / 2;
+                        set({ rating: isLeft ? star - 0.5 : star });
+                      }}>
+                        <Star className={`h-5 w-5 ${filled ? "fill-foreground text-foreground" : half ? "text-foreground" : "text-muted-foreground/30"}`} />
+                        {half && <Star className="h-5 w-5 fill-foreground text-foreground absolute inset-0 m-0.5" style={{ clipPath: "inset(0 50% 0 0)" }} />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Coup de coeur */}
+                <div className="flex items-center gap-2 w-full">
+                  <button type="button" onClick={() => set({ coupDeCoeur: !eb.coupDeCoeur })} className="p-0.5">
+                    <Heart className={`h-5 w-5 transition-colors ${eb.coupDeCoeur ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
+                  </button>
+                  <span className="text-sm">Coup de cœur</span>
+                </div>
+
+                {/* Recommandation du mois */}
+                <div className="flex items-center gap-2 w-full">
+                  <Checkbox checked={eb.recommandationDuMois && eb.recommandationMonth === currentMonth} onCheckedChange={(v) => handleRecommToggle(v === true)} id="recomm" />
+                  <Label htmlFor="recomm" className="text-sm">Recommandation du mois</Label>
+                </div>
+
+                {/* Dates */}
+                <div className="space-y-2 w-full">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Date de début de lecture</Label>
+                    <Input value={eb.startDate || ""} onChange={e => set({ startDate: e.target.value })} placeholder="JJ/MM/AAAA" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Date de fin de lecture</Label>
+                    <Input value={eb.endDate || ""} onChange={e => set({ endDate: e.target.value })} placeholder="JJ/MM/AAAA" />
+                  </div>
+                </div>
+
+                {/* Chapter notes toggle */}
+                <Button variant={chapterNotesEnabled ? "default" : "outline"} className="w-full text-xs" onClick={() => setChapterNotesEnabled(!chapterNotesEnabled)}>
+                  {chapterNotesEnabled ? "Désactiver" : "Activer"} les notes de chapitres
+                </Button>
               </div>
 
-              {/* RIGHT COLUMN */}
+              {/* RIGHT COLUMN — book info + avis + citations + passages */}
               <div className="flex-1 flex flex-col gap-3">
                 <p className="text-xl font-bold underline" style={{ fontFamily: "var(--font-display)" }}>{eb.title}</p>
                 <p className="text-base font-bold italic text-muted-foreground">{eb.author}</p>
@@ -187,146 +251,80 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                     <span className="text-sm font-medium min-w-[3rem] text-right">{progressPct}%</span>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* LEFT-COLUMN METADATA — below cover */}
-            <div className="flex flex-col gap-4 w-[200px] mt-4">
-              {/* Spicy + Mature */}
-              <div className="flex items-center gap-2 w-full">
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map(level => (
-                    <button key={level} type="button" onClick={() => set({ spicyLevel: eb.spicyLevel === level ? 0 : level })} className="p-0.5">
-                      <Flame className={`h-4 w-4 transition-colors ${level <= (eb.spicyLevel || 0) ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
-                    </button>
+                {/* Avis */}
+                <div className="space-y-1 mt-3">
+                  <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
+                  <Textarea value={eb.avis || ""} onChange={e => set({ avis: e.target.value })} placeholder="Votre avis sur ce livre..." className="min-h-[100px] resize-y" />
+                </div>
+
+                {/* Chapter notes */}
+                {chapterNotesEnabled && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold uppercase tracking-wide">Notes de chapitres</Label>
+                    {(!eb.chapters || eb.chapters === 0) ? (
+                      <p className="text-sm text-muted-foreground italic">Aucun chapitre renseigné. Modifiez le nombre de chapitres pour activer cette fonctionnalité.</p>
+                    ) : (
+                      Array.from({ length: eb.chapters }, (_, i) => i + 1).map(chapterNum => (
+                        <Collapsible key={chapterNum}>
+                          <CollapsibleTrigger className="flex items-center gap-2 w-full text-left p-2 rounded-md hover:bg-accent text-sm font-medium">
+                            <ChevronDown className="h-4 w-4" />
+                            Chapitre {chapterNum}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="pl-6 pt-1">
+                            <Textarea value={(eb.chapterNotes || {})[chapterNum] || ""} onChange={e => setChapterNote(chapterNum, e.target.value)} placeholder={`Notes pour le chapitre ${chapterNum}...`} className="min-h-[60px] resize-y" />
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Citations */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold uppercase tracking-wide">Citations</Label>
+                    <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCitationPopup(true)}><Plus className="h-4 w-4" /></Button>
+                  </div>
+                  {(eb.citations || []).map(cit => (
+                    <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
+                      {cit.page && <p className="text-xs text-muted-foreground mt-1">Page {cit.page}</p>}
+                      <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => handleDeleteCitation(cit.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   ))}
                 </div>
-                {eb.matureContent && <span className="text-lg" title="Public averti">🔞</span>}
-              </div>
 
-              {/* Rating */}
-              <div className="flex gap-0.5 w-full">
-                {[1, 2, 3, 4, 5].map(star => {
-                  const filled = (eb.rating || 0) >= star;
-                  const half = !filled && (eb.rating || 0) >= star - 0.5;
-                  return (
-                    <button key={star} type="button" className="relative p-0.5" onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const isLeft = (e.clientX - rect.left) < rect.width / 2;
-                      set({ rating: isLeft ? star - 0.5 : star });
-                    }}>
-                      <Star className={`h-5 w-5 ${filled ? "fill-foreground text-foreground" : half ? "text-foreground" : "text-muted-foreground/30"}`} />
-                      {half && <Star className="h-5 w-5 fill-foreground text-foreground absolute inset-0 m-0.5" style={{ clipPath: "inset(0 50% 0 0)" }} />}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Coup de coeur */}
-              <div className="flex items-center gap-2 w-full">
-                <button type="button" onClick={() => set({ coupDeCoeur: !eb.coupDeCoeur })} className="p-0.5">
-                  <Heart className={`h-5 w-5 transition-colors ${eb.coupDeCoeur ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
-                </button>
-                <span className="text-sm">Coup de cœur</span>
-              </div>
-
-              {/* Recommandation du mois */}
-              <div className="flex items-center gap-2 w-full">
-                <Checkbox checked={eb.recommandationDuMois && eb.recommandationMonth === currentMonth} onCheckedChange={(v) => handleRecommToggle(v === true)} id="recomm" />
-                <Label htmlFor="recomm" className="text-sm">Recommandation du mois</Label>
-              </div>
-
-              {/* Dates */}
-              <div className="space-y-2 w-full">
-                <div className="space-y-1">
-                  <Label className="text-xs">Date de début de lecture</Label>
-                  <Input value={eb.startDate || ""} onChange={e => set({ startDate: e.target.value })} placeholder="JJ/MM/AAAA" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Date de fin de lecture</Label>
-                  <Input value={eb.endDate || ""} onChange={e => set({ endDate: e.target.value })} placeholder="JJ/MM/AAAA" />
-                </div>
-              </div>
-
-              {/* Chapter notes toggle */}
-              <Button variant={chapterNotesEnabled ? "default" : "outline"} className="w-full text-xs" onClick={() => setChapterNotesEnabled(!chapterNotesEnabled)}>
-                {chapterNotesEnabled ? "Désactiver" : "Activer"} les notes de chapitres
-              </Button>
-            </div>
-
-            {/* FULL-WIDTH SECTION */}
-            <div className="flex flex-col gap-5 mt-6">
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
-                <Textarea value={eb.avis || ""} onChange={e => set({ avis: e.target.value })} placeholder="Votre avis sur ce livre..." className="min-h-[100px] resize-y" />
-              </div>
-
-              {/* Chapter notes */}
-              {chapterNotesEnabled && (
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide">Notes de chapitres</Label>
-                  {(!eb.chapters || eb.chapters === 0) ? (
-                    <p className="text-sm text-muted-foreground italic">Aucun chapitre renseigné. Modifiez le nombre de chapitres pour activer cette fonctionnalité.</p>
-                  ) : (
-                    Array.from({ length: eb.chapters }, (_, i) => i + 1).map(chapterNum => (
-                      <Collapsible key={chapterNum}>
-                        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left p-2 rounded-md hover:bg-accent text-sm font-medium">
-                          <ChevronDown className="h-4 w-4" />
-                          Chapitre {chapterNum}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="pl-6 pt-1">
-                          <Textarea value={(eb.chapterNotes || {})[chapterNum] || ""} onChange={e => setChapterNote(chapterNum, e.target.value)} placeholder={`Notes pour le chapitre ${chapterNum}...`} className="min-h-[60px] resize-y" />
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ))
-                  )}
-                </div>
-              )}
-
-              {/* Citations */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold uppercase tracking-wide">Citations</Label>
-                  <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCitationPopup(true)}><Plus className="h-4 w-4" /></Button>
-                </div>
-                {(eb.citations || []).map(cit => (
-                  <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative">
-                    <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
-                    {cit.page && <p className="text-xs text-muted-foreground mt-1">Page {cit.page}</p>}
-                    <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => handleDeleteCitation(cit.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                {/* Citation add popup */}
+                {citationPopup && (
+                  <div className="border rounded-lg p-4 bg-card shadow-lg space-y-3">
+                    <h3 className="text-sm font-semibold">Ajouter une citation</h3>
+                    <Textarea value={newCitationText} onChange={e => setNewCitationText(e.target.value)} placeholder="Citation..." />
+                    <Input value={newCitationPage} onChange={e => setNewCitationPage(e.target.value)} placeholder="Numéro de page" />
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddCitation}>Ajouter</Button>
+                      <Button variant="outline" onClick={() => setCitationPopup(false)}>Annuler</Button>
+                    </div>
                   </div>
-                ))}
-              </div>
+                )}
 
-              {/* Citation add popup */}
-              {citationPopup && (
-                <div className="border rounded-lg p-4 bg-card shadow-lg space-y-3">
-                  <h3 className="text-sm font-semibold">Ajouter une citation</h3>
-                  <Textarea value={newCitationText} onChange={e => setNewCitationText(e.target.value)} placeholder="Citation..." />
-                  <Input value={newCitationPage} onChange={e => setNewCitationPage(e.target.value)} placeholder="Numéro de page" />
-                  <div className="flex gap-2">
-                    <Button onClick={handleAddCitation}>Ajouter</Button>
-                    <Button variant="outline" onClick={() => setCitationPopup(false)}>Annuler</Button>
+                {/* Passages + Personnages */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold uppercase tracking-wide">Passages préférés</Label>
+                    <Textarea value={eb.passagesPreferes || ""} onChange={e => set({ passagesPreferes: e.target.value })} placeholder="Vos passages préférés..." className="min-h-[80px] resize-y" />
                   </div>
-                </div>
-              )}
-
-              {/* Passages + Personnages */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold uppercase tracking-wide">Passages préférés</Label>
-                  <Textarea value={eb.passagesPreferes || ""} onChange={e => set({ passagesPreferes: e.target.value })} placeholder="Vos passages préférés..." className="min-h-[80px] resize-y" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold uppercase tracking-wide">Personnages préférés</Label>
-                  <Textarea value={eb.personnagesPreferes || ""} onChange={e => set({ personnagesPreferes: e.target.value })} placeholder="Vos personnages préférés..." className="min-h-[80px] resize-y" />
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold uppercase tracking-wide">Personnages préférés</Label>
+                    <Textarea value={eb.personnagesPreferes || ""} onChange={e => set({ personnagesPreferes: e.target.value })} placeholder="Vos personnages préférés..." className="min-h-[80px] resize-y" />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom buttons */}
+            {/* Bottom buttons — full width, centered */}
             <div className="flex justify-center gap-4 mt-6 pt-4 border-t">
               <Button onClick={handleSave}>Enregistrer les modifications</Button>
               <Button variant="outline" onClick={() => setDeleteConfirm(true)}>Supprimer le livre</Button>
