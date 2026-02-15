@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { useState, useMemo, useEffect } from "react";
+import { Sheet, SheetContent, SheetFooter } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -59,11 +59,16 @@ export function FiltersPanel({
 }: FiltersPanelProps) {
   const [local, setLocal] = useState<Filters>(filters);
 
-  // Reset local when opening
+  // Sync local from parent when opening
   const handleOpenChange = (o: boolean) => {
     if (o) setLocal(filters);
     onOpenChange(o);
   };
+
+  // Real-time: push every local change immediately
+  useEffect(() => {
+    onApply(local);
+  }, [local]);
 
   const allAuthors = useMemo(() => [...new Set(books.map((b) => b.author))].sort(), [books]);
   const allPublishers = useMemo(() => [...new Set(books.map((b) => b.publisher).filter(Boolean) as string[])].sort(), [books]);
@@ -86,12 +91,13 @@ export function FiltersPanel({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="w-[380px] sm:max-w-[380px] flex flex-col overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Filtres</SheetTitle>
-        </SheetHeader>
+      <SheetContent side="right" className="w-[380px] sm:max-w-[380px] flex flex-col p-0">
+        {/* Fixed title bar */}
+        <div className="flex items-center h-14 px-6 border-b border-border shrink-0">
+          <h2 className="text-base font-semibold" style={{ fontFamily: "var(--font-display)" }}>Filtres</h2>
+        </div>
 
-        <div className="flex flex-col gap-5 flex-1 py-4">
+        <div className="flex flex-col gap-5 flex-1 py-4 px-6 overflow-y-auto">
           {/* Author */}
           <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase tracking-wide">Par auteur</Label>
@@ -241,12 +247,9 @@ export function FiltersPanel({
           </div>
         </div>
 
-        <SheetFooter className="flex-row gap-2 pt-4 border-t">
-          <Button variant="outline" className="flex-1" onClick={() => setLocal(emptyFilters)}>
+        <SheetFooter className="px-6 py-4 border-t">
+          <Button variant="outline" className="w-full" onClick={() => setLocal(emptyFilters)}>
             Effacer les filtres
-          </Button>
-          <Button className="flex-1" onClick={() => { onApply(local); onOpenChange(false); }}>
-            Appliquer
           </Button>
         </SheetFooter>
       </SheetContent>

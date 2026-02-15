@@ -63,7 +63,7 @@ export function AppSidebar() {
       <div className="flex items-center justify-between border-t border-border px-3 h-[var(--bottombar-height)]">
           <RouterNavLink
             to="/profil"
-            className={`flex flex-1 items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+            className={`flex flex-1 items-center gap-3 rounded-md px-3 h-9 text-sm font-medium transition-colors ${
               isActive("/profil")
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -74,7 +74,7 @@ export function AppSidebar() {
           </RouterNavLink>
           <RouterNavLink
             to="/parametres"
-            className={`flex items-center justify-center rounded-md p-2.5 transition-colors ${
+            className={`flex items-center justify-center rounded-md h-9 w-9 transition-colors ${
               isActive("/parametres")
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"

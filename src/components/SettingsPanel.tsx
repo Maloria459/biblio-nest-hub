@@ -58,13 +58,14 @@ export function SettingsPanel({ open, onOpenChange, genres, formats, statuses, o
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="w-[380px] sm:max-w-[380px] flex flex-col">
-        <SheetHeader>
-          <SheetTitle>Paramètres de la bibliothèque</SheetTitle>
-        </SheetHeader>
+      <SheetContent side="right" className="w-[380px] sm:max-w-[380px] flex flex-col p-0">
+        {/* Fixed title bar */}
+        <div className="flex items-center h-14 px-6 border-b border-border shrink-0">
+          <h2 className="text-base font-semibold" style={{ fontFamily: "var(--font-display)" }}>Paramètres de la bibliothèque</h2>
+        </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-muted rounded-lg p-1 mt-2">
+        <div className="flex gap-1 bg-muted rounded-lg p-1 mt-4 mx-6">
           {tabs.map((t) => (
             <button
               key={t.key}
@@ -78,7 +79,7 @@ export function SettingsPanel({ open, onOpenChange, genres, formats, statuses, o
           ))}
         </div>
 
-        <div className="flex flex-col gap-4 flex-1 py-4 overflow-y-auto">
+        <div className="flex flex-col gap-4 flex-1 py-4 px-6 overflow-y-auto">
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5">
             {currentList.map((item) => {
@@ -108,7 +109,7 @@ export function SettingsPanel({ open, onOpenChange, genres, formats, statuses, o
           </div>
         </div>
 
-        <SheetFooter className="pt-4 border-t">
+        <SheetFooter className="pt-4 border-t px-6 pb-4">
           <Button
             className="w-full"
             onClick={() => {

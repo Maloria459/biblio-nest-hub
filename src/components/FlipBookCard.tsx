@@ -21,7 +21,7 @@ export function FlipBookCard({ book, onMarkPAL, onClick }: FlipBookCardProps) {
     >
       <div
         className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d", transition: "transform 0.9s ease-in-out" }}
+        style={{ transformStyle: "preserve-3d", transition: "transform 0.5s ease-in-out" }}
       >
         {/* Hover flip via group */}
         <style>{`
