@@ -83,6 +83,9 @@ export function BibliothequeContent() {
             className="pl-9"
           />
         </div>
+        <span className="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground whitespace-nowrap">
+          {books.length} {books.length <= 1 ? "livre" : "livres"}
+        </span>
         <Button variant="outline" size="default" onClick={() => setFiltersOpen(true)}>
           <SlidersHorizontal className="h-4 w-4 mr-1.5" />
           Filtres
