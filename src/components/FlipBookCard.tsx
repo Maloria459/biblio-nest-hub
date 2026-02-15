@@ -59,11 +59,18 @@ export function FlipBookCard({ book, onMarkPAL, onClick }: FlipBookCardProps) {
           <span className="text-sm font-bold text-center leading-tight">{book.title}</span>
           <span className="text-xs mt-1 opacity-80 text-center">{book.author}</span>
 
-          {book.rating && (
+          {(book.rating != null && book.rating > 0) && (
             <div className="flex gap-0.5 mt-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className={`h-3.5 w-3.5 ${i < book.rating! ? "fill-current" : "opacity-30"}`} />
-              ))}
+              {[1, 2, 3, 4, 5].map(star => {
+                const filled = book.rating! >= star;
+                const half = !filled && book.rating! >= star - 0.5;
+                return (
+                  <span key={star} className="relative" style={{ width: 14, height: 14 }}>
+                    <Star className={`h-3.5 w-3.5 ${filled ? "fill-current" : half ? "" : "opacity-30"}`} />
+                    {half && <Star className="h-3.5 w-3.5 fill-current absolute inset-0" style={{ clipPath: "inset(0 50% 0 0)" }} />}
+                  </span>
+                );
+              })}
             </div>
           )}
 
