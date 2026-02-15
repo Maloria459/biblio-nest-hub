@@ -106,86 +106,77 @@ export function WishlistContent() {
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
       <style>{`
-         font-size: 1.5em;
-    font-weight: 900;
-    text-align: center;
-    margin: 0;
-  }
-
-  .flip-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    transition: transform 0.8s;
-    transform-style: preserve-3d;
-  }
-
-  .flip-card:hover .flip-card-inner {
-    transform: rotateY(180deg);
-  }
-
-  .flip-card-front, .flip-card-back {
-    box-shadow: 0 8px 14px 0 rgba(0,0,0,0.2);
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    border: 3px solid black;
-    border-radius: 1rem;Voici le code des cartes : 
-import React from 'react';
-import styled from 'styled-components';
-
-const Card = () => {
-  return (
-    <StyledWrapper>
-      <div className="flip-card">
-        <div className="flip-card-inner">
-          <div className="flip-card-front">
-            <p className="title">FLIP CARD</p>
-            <p>Hover Me</p>
-          </div>
-          <div className="flip-card-back">
-            <p className="title">BACK</p>
-            <p>Leave Me</p>
-          </div>
-        </div>
-      </div>
-    </StyledWrapper>
-  );
-}
-
-const StyledWrapper = styled.div`
-  .flip-card {
-    background-color: transparent;
-    width: 180px;
-    height: 244px;
-    perspective: 1000px;
-    font-family: sans-serif;
-  }
-
-  .title {
-
-  }
-
-  .flip-card-front {
-    background: white
-    color: black;
-  }
-
-  .flip-card-back {
-    background: linear-gradient(120deg, black 100%,
-       bisque 100%, rgb(255, 185, 160) 78%);
-    color: white;
-    transform: rotateY(180deg);
-  }`;
-
-export default Card;
-
+        .${cls}-card {
+          background-color: transparent;
+          width: 190px;
+          height: 254px;
+          perspective: 1000px;
+          font-family: sans-serif;
+          cursor: pointer;
+        }
+        .${cls}-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          text-align: center;
+          transition: transform 0.8s;
+          transform-style: preserve-3d;
+        }
+        .${cls}-card:hover .${cls}-inner {
+          transform: rotateY(180deg);
+        }
+        .${cls}-front, .${cls}-back {
+          box-shadow: 0 8px 14px 0 rgba(0,0,0,0.2);
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          border: 3px solid black;
+          border-radius: 1rem;
+        }
+        .${cls}-front {
+          background: white;
+          color: black;
+        }
+        .${cls}-front img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: calc(1rem - 3px);
+        }
+        .${cls}-back {
+          background: linear-gradient(120deg, black 100%, bisque 100%, rgb(255, 185, 160) 78%);
+          color: white;
+          transform: rotateY(180deg);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 10px;
+          position: relative;
+        }
+        .${cls}-title {
+          font-size: 1em;
+          font-weight: 900;
+          text-align: center;
+          margin: 0 0 5px 0;
+        }
+        .${cls}-author {
+          font-size: 0.8em;
+          text-align: center;
+          margin: 0;
+        }
+        .${cls}-date {
+          position: absolute;
+          bottom: 10px;
+          font-size: 0.7em;
+          text-align: center;
+          width: 100%;
+        }
       `}</style>
 
       {/* Search bar */}
