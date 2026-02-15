@@ -1,19 +1,13 @@
 import { Heart, Star } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import type { Book } from "@/data/mockBooks";
 
 interface FlipBookCardProps {
   book: Book;
   onMarkPAL?: (id: string) => void;
+  onClick?: () => void;
 }
 
-export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(`/book/${book.id}`);
-  };
-
+export function FlipBookCard({ book, onMarkPAL, onClick }: FlipBookCardProps) {
   const handlePAL = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMarkPAL?.(book.id);
@@ -23,10 +17,10 @@ export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
     <div
       className="group cursor-pointer"
       style={{ perspective: "1000px", width: 180, height: 244 }}
-      onClick={handleClick}
+      onClick={onClick}
     >
       <div
-        className="relative w-full h-full transition-transform duration-[800ms]"
+        className="relative w-full h-full transition-transform duration-[1500ms]"
         style={{ transformStyle: "preserve-3d" }}
       >
         {/* Hover flip via group */}
@@ -60,13 +54,11 @@ export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
             boxShadow: "0 8px 14px 0 rgba(0,0,0,0.2)",
           }}
         >
-          {/* Coup de cœur */}
           {book.coupDeCoeur && <Heart className="absolute top-2.5 right-2.5 h-4 w-4 fill-current" />}
 
           <span className="text-sm font-bold text-center leading-tight">{book.title}</span>
           <span className="text-xs mt-1 opacity-80 text-center">{book.author}</span>
 
-          {/* Stars */}
           {book.rating && (
             <div className="flex gap-0.5 mt-2">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -75,7 +67,6 @@ export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
             </div>
           )}
 
-          {/* À lire button */}
           {book.status === "Acheté" && (
             <button
               onClick={handlePAL}
