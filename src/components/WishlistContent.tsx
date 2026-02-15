@@ -44,7 +44,7 @@ export function WishlistContent() {
     const el = document.getElementById(TOPBAR_RIGHT_ID);
     if (el) {
       el.innerHTML = "";
-      el.className = "ml-auto flex items-center gap-2";
+      el.className = "ml-auto flex items-center gap-2 mr-4";
 
       const countBox = document.createElement("span");
       countBox.className =
