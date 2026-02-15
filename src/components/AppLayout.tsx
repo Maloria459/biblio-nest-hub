@@ -5,7 +5,7 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen w-full">
       <AppSidebar />
-      <main className="relative flex-1 ml-[var(--sidebar-width)] flex flex-col min-h-screen">
+      <main className="relative flex-1 ml-[var(--sidebar-width)] flex flex-col min-h-screen overflow-x-hidden">
         <Outlet />
       </main>
     </div>
