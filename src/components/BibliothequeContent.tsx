@@ -83,10 +83,10 @@ export function BibliothequeContent() {
 
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
-      {/* Book count — portalled into the top bar */}
+      {/* Book count — portalled into the top bar (excludes Wishlist, matching displayed cards) */}
       {topBarSlot && createPortal(
         <span className="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          {books.length} {books.length <= 1 ? "livre" : "livres"}
+          {books.filter(b => b.status !== "Wishlist").length} {books.filter(b => b.status !== "Wishlist").length <= 1 ? "livre" : "livres"}
         </span>,
         topBarSlot
       )}
