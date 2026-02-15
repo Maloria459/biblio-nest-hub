@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Book } from "@/data/mockBooks";
+import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { Search, SlidersHorizontal, Plus, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,21 @@ export function BibliothequeContent() {
 
   const libraryCount = books.filter(b => b.status !== "Wishlist").length;
 
+  useEffect(() => {
+    const el = document.getElementById(TOPBAR_RIGHT_ID);
+    if (el) {
+      el.textContent = `${libraryCount} ${libraryCount <= 1 ? "livre" : "livres"}`;
+      el.className = "ml-auto inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
+    }
+    return () => {
+      const el = document.getElementById(TOPBAR_RIGHT_ID);
+      if (el) {
+        el.textContent = "";
+        el.className = "ml-auto";
+      }
+    };
+  }, [libraryCount]);
+
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
 
@@ -74,9 +90,6 @@ export function BibliothequeContent() {
         <Button variant="outline" size="icon" onClick={() => setSettingsOpen(true)}>
           <Settings className="h-4 w-4" />
         </Button>
-        <span className="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          {libraryCount} {libraryCount <= 1 ? "livre" : "livres"}
-        </span>
       </div>
 
       {/* Book grid */}
