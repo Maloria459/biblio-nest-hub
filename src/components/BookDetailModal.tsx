@@ -115,16 +115,13 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   )}
                 </div>
 
-                {/* Spicy + Mature */}
-                <div className="flex items-center gap-2 w-full">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map(level => (
-                      <button key={level} type="button" onClick={() => set({ spicyLevel: eb.spicyLevel === level ? 0 : level })} className="p-0.5">
-                        <Flame className={`h-4 w-4 transition-colors ${level <= (eb.spicyLevel || 0) ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
-                      </button>
-                    ))}
-                  </div>
-                  {eb.matureContent && <span className="text-lg" title="Public averti">🔞</span>}
+                {/* Spicy level only (18+ icon moved to title line) */}
+                <div className="flex gap-0.5 w-full">
+                  {[1, 2, 3, 4, 5].map(level => (
+                    <button key={level} type="button" onClick={() => set({ spicyLevel: eb.spicyLevel === level ? 0 : level })} className="p-0.5">
+                      <Flame className={`h-4 w-4 transition-colors ${level <= (eb.spicyLevel || 0) ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
+                    </button>
+                  ))}
                 </div>
 
                 {/* Rating */}
@@ -171,16 +168,21 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 </div>
 
-                {/* Chapter notes toggle */}
-                <Button variant={chapterNotesEnabled ? "default" : "outline"} className="w-full text-xs" onClick={() => setChapterNotesEnabled(!chapterNotesEnabled)}>
-                  {chapterNotesEnabled ? "Désactiver" : "Activer"} les notes de chapitres
-                </Button>
+                {/* Chapter notes toggle — only if chapters were entered */}
+                {(eb.chapters && eb.chapters > 0) && (
+                  <Button variant={chapterNotesEnabled ? "default" : "outline"} className="w-full text-xs" onClick={() => setChapterNotesEnabled(!chapterNotesEnabled)}>
+                    {chapterNotesEnabled ? "Désactiver" : "Activer"} les notes de chapitres
+                  </Button>
+                )}
               </div>
 
               {/* RIGHT COLUMN — book info + avis + citations + passages */}
               <div className="flex-1 flex flex-col gap-3">
-                <p className="text-xl font-bold underline" style={{ fontFamily: "var(--font-display)" }}>{eb.title}</p>
-                <p className="text-base font-bold italic text-muted-foreground">{eb.author}</p>
+                <div className="flex items-baseline gap-3">
+                  <p className="text-xl font-bold italic" style={{ fontFamily: "var(--font-display)" }}>{eb.title}</p>
+                  <p className="text-base text-muted-foreground">{eb.author}</p>
+                  {eb.matureContent && <span className="text-lg ml-auto" title="Public averti">🔞</span>}
+                </div>
 
                 {eb.series && (
                   <div className="space-y-1">
