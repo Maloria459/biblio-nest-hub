@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useId } from "react";
+import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { BookDetailModal } from "@/components/BookDetailModal";
@@ -38,6 +39,35 @@ export function WishlistContent() {
 
   const totalPrice = wishlistBooks.reduce((sum, b) => sum + (b.price ?? 0), 0);
   const bookCount = wishlistBooks.length;
+
+  useEffect(() => {
+    const el = document.getElementById(TOPBAR_RIGHT_ID);
+    if (el) {
+      el.innerHTML = "";
+      el.className = "ml-auto flex items-center gap-2 mr-4";
+
+      const countBox = document.createElement("span");
+      countBox.className =
+        "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
+      countBox.textContent = `${bookCount} ${bookCount <= 1 ? "livre" : "livres"}`;
+
+      const priceBox = document.createElement("span");
+      priceBox.className =
+        "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
+      priceBox.textContent = `${totalPrice.toFixed(2)} €`;
+
+      el.appendChild(countBox);
+      el.appendChild(priceBox);
+    }
+    return () => {
+      const el = document.getElementById(TOPBAR_RIGHT_ID);
+      if (el) {
+        el.innerHTML = "";
+        el.textContent = "";
+        el.className = "ml-auto";
+      }
+    };
+  }, [bookCount, totalPrice]);
 
   const handleMarkAchete = useCallback(
     (id: string) => {
@@ -160,12 +190,6 @@ export function WishlistContent() {
             className="pl-9"
           />
         </div>
-        <span className="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          {bookCount} {bookCount <= 1 ? "livre" : "livres"}
-        </span>
-        <span className="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          {totalPrice.toFixed(2)} €
-        </span>
       </div>
 
       {/* Card grid */}
