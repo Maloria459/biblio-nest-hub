@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { Book } from "@/data/mockBooks";
 import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { Search, SlidersHorizontal, Plus, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -8,11 +9,15 @@ import { BookDetailModal } from "@/components/BookDetailModal";
 import { FiltersPanel, emptyFilters, type Filters } from "@/components/FiltersPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AddBookModal } from "@/components/AddBookModal";
-import { mockBooks, type Book } from "@/data/mockBooks";
-import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librarySettings";
+import { useBooks } from "@/contexts/BooksContext";
 
 export function BibliothequeContent() {
-  const [books, setBooks] = useState<Book[]>(mockBooks);
+  const {
+    books, genres, formats, statuses,
+    setGenres, setFormats, setStatuses,
+    addBook, updateBook, deleteBook, markPAL,
+  } = useBooks();
+
   const [search, setSearch] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -20,35 +25,8 @@ export function BibliothequeContent() {
   const [addOpen, setAddOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
 
-  const [genres, setGenres] = useState<string[]>(DEFAULT_GENRES);
-  const [formats, setFormats] = useState<string[]>(DEFAULT_FORMATS);
-  const [statuses, setStatuses] = useState<string[]>(DEFAULT_STATUSES);
-
-  const handleMarkPAL = (id: string) => {
-    setBooks((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, status: "Dans ma PAL" } : b))
-    );
-  };
-
-  const handleAddBook = (book: Book) => {
-    setBooks((prev) => [...prev, book]);
-  };
-
-  const handleSaveBook = (updated: Book) => {
-    // Also handle recommandation du mois: uncheck others for same month
-    setBooks((prev) =>
-      prev.map((b) => {
-        if (b.id === updated.id) return updated;
-        if (updated.recommandationDuMois && updated.recommandationMonth && b.recommandationDuMois && b.recommandationMonth === updated.recommandationMonth) {
-          return { ...b, recommandationDuMois: false, recommandationMonth: undefined };
-        }
-        return b;
-      })
-    );
-  };
-
   const handleDeleteBook = (id: string) => {
-    setBooks((prev) => prev.filter((b) => b.id !== id));
+    deleteBook(id);
     setSelectedBook(null);
   };
 
@@ -126,7 +104,7 @@ export function BibliothequeContent() {
           <FlipBookCard
             key={book.id}
             book={book}
-            onMarkPAL={handleMarkPAL}
+            onMarkPAL={markPAL}
             onClick={() => setSelectedBook(book)}
           />
         ))}
@@ -137,7 +115,7 @@ export function BibliothequeContent() {
         book={selectedBook}
         open={!!selectedBook}
         onOpenChange={(o) => !o && setSelectedBook(null)}
-        onSave={handleSaveBook}
+        onSave={updateBook}
         onDelete={handleDeleteBook}
         allBooks={books}
         genres={genres}
@@ -168,7 +146,7 @@ export function BibliothequeContent() {
         genres={genres}
         formats={formats}
         statuses={statuses}
-        onAdd={handleAddBook}
+        onAdd={addBook}
       />
     </div>
   );

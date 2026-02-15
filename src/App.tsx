@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import { AvatarProvider } from "./contexts/AvatarContext";
+import { BooksProvider } from "./contexts/BooksContext";
 import Dashboard from "./pages/Dashboard";
 import Aventure from "./pages/Aventure";
 import Lecture from "./pages/Lecture";
@@ -20,25 +21,27 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AvatarProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/aventure" element={<Aventure />} />
-              <Route path="/lecture" element={<Lecture />} />
-              
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/communaute" element={<Communaute />} />
-              <Route path="/profil" element={<Profil />} />
-              <Route path="/parametres" element={<Parametres />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <BooksProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/aventure" element={<Aventure />} />
+                <Route path="/lecture" element={<Lecture />} />
+                
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/communaute" element={<Communaute />} />
+                <Route path="/profil" element={<Profil />} />
+                <Route path="/parametres" element={<Parametres />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </BooksProvider>
     </AvatarProvider>
   </QueryClientProvider>
 );
