@@ -102,78 +102,15 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
           <div className="flex-1 overflow-y-auto px-6 pb-6">
             {/* TOP SECTION — Two columns, equal height */}
             <div className="flex gap-6 items-stretch">
-              {/* LEFT COLUMN */}
-              <div className="flex flex-col gap-4 w-[200px] flex-shrink-0">
-                <div className="w-full flex-1 rounded-lg border-2 border-foreground overflow-hidden bg-muted">
-                  {eb.coverUrl ? (
-                    <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-xs text-muted-foreground">Pas de couverture</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Spicy + Mature */}
-                <div className="flex items-center gap-2 w-full">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map(level => (
-                      <button key={level} type="button" onClick={() => set({ spicyLevel: eb.spicyLevel === level ? 0 : level })} className="p-0.5">
-                        <Flame className={`h-4 w-4 transition-colors ${level <= (eb.spicyLevel || 0) ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
-                      </button>
-                    ))}
+              {/* LEFT COLUMN — cover only, stretches to match right */}
+              <div className="w-[200px] flex-shrink-0 rounded-lg border-2 border-foreground overflow-hidden bg-muted">
+                {eb.coverUrl ? (
+                  <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-xs text-muted-foreground">Pas de couverture</span>
                   </div>
-                  {eb.matureContent && <span className="text-lg" title="Public averti">🔞</span>}
-                </div>
-
-                {/* Rating */}
-                <div className="flex gap-0.5 w-full">
-                  {[1, 2, 3, 4, 5].map(star => {
-                    const filled = (eb.rating || 0) >= star;
-                    const half = !filled && (eb.rating || 0) >= star - 0.5;
-                    return (
-                      <button key={star} type="button" className="relative p-0.5" onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const isLeft = (e.clientX - rect.left) < rect.width / 2;
-                        set({ rating: isLeft ? star - 0.5 : star });
-                      }}>
-                        <Star className={`h-5 w-5 ${filled ? "fill-foreground text-foreground" : half ? "text-foreground" : "text-muted-foreground/30"}`} />
-                        {half && <Star className="h-5 w-5 fill-foreground text-foreground absolute inset-0 m-0.5" style={{ clipPath: "inset(0 50% 0 0)" }} />}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Coup de coeur */}
-                <div className="flex items-center gap-2 w-full">
-                  <button type="button" onClick={() => set({ coupDeCoeur: !eb.coupDeCoeur })} className="p-0.5">
-                    <Heart className={`h-5 w-5 transition-colors ${eb.coupDeCoeur ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
-                  </button>
-                  <span className="text-sm">Coup de cœur</span>
-                </div>
-
-                {/* Recommandation du mois */}
-                <div className="flex items-center gap-2 w-full">
-                  <Checkbox checked={eb.recommandationDuMois && eb.recommandationMonth === currentMonth} onCheckedChange={(v) => handleRecommToggle(v === true)} id="recomm" />
-                  <Label htmlFor="recomm" className="text-sm">Recommandation du mois</Label>
-                </div>
-
-                {/* Dates */}
-                <div className="space-y-2 w-full">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Date de début de lecture</Label>
-                    <Input value={eb.startDate || ""} onChange={e => set({ startDate: e.target.value })} placeholder="JJ/MM/AAAA" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Date de fin de lecture</Label>
-                    <Input value={eb.endDate || ""} onChange={e => set({ endDate: e.target.value })} placeholder="JJ/MM/AAAA" />
-                  </div>
-                </div>
-
-                {/* Chapter notes toggle */}
-                <Button variant={chapterNotesEnabled ? "default" : "outline"} className="w-full text-xs" onClick={() => setChapterNotesEnabled(!chapterNotesEnabled)}>
-                  {chapterNotesEnabled ? "Désactiver" : "Activer"} les notes de chapitres
-                </Button>
+                )}
               </div>
 
               {/* RIGHT COLUMN */}
@@ -253,6 +190,70 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* LEFT-COLUMN METADATA — below cover */}
+            <div className="flex flex-col gap-4 w-[200px] mt-4">
+              {/* Spicy + Mature */}
+              <div className="flex items-center gap-2 w-full">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map(level => (
+                    <button key={level} type="button" onClick={() => set({ spicyLevel: eb.spicyLevel === level ? 0 : level })} className="p-0.5">
+                      <Flame className={`h-4 w-4 transition-colors ${level <= (eb.spicyLevel || 0) ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
+                    </button>
+                  ))}
+                </div>
+                {eb.matureContent && <span className="text-lg" title="Public averti">🔞</span>}
+              </div>
+
+              {/* Rating */}
+              <div className="flex gap-0.5 w-full">
+                {[1, 2, 3, 4, 5].map(star => {
+                  const filled = (eb.rating || 0) >= star;
+                  const half = !filled && (eb.rating || 0) >= star - 0.5;
+                  return (
+                    <button key={star} type="button" className="relative p-0.5" onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const isLeft = (e.clientX - rect.left) < rect.width / 2;
+                      set({ rating: isLeft ? star - 0.5 : star });
+                    }}>
+                      <Star className={`h-5 w-5 ${filled ? "fill-foreground text-foreground" : half ? "text-foreground" : "text-muted-foreground/30"}`} />
+                      {half && <Star className="h-5 w-5 fill-foreground text-foreground absolute inset-0 m-0.5" style={{ clipPath: "inset(0 50% 0 0)" }} />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Coup de coeur */}
+              <div className="flex items-center gap-2 w-full">
+                <button type="button" onClick={() => set({ coupDeCoeur: !eb.coupDeCoeur })} className="p-0.5">
+                  <Heart className={`h-5 w-5 transition-colors ${eb.coupDeCoeur ? "fill-red-500 text-red-500" : "text-muted-foreground/30"}`} />
+                </button>
+                <span className="text-sm">Coup de cœur</span>
+              </div>
+
+              {/* Recommandation du mois */}
+              <div className="flex items-center gap-2 w-full">
+                <Checkbox checked={eb.recommandationDuMois && eb.recommandationMonth === currentMonth} onCheckedChange={(v) => handleRecommToggle(v === true)} id="recomm" />
+                <Label htmlFor="recomm" className="text-sm">Recommandation du mois</Label>
+              </div>
+
+              {/* Dates */}
+              <div className="space-y-2 w-full">
+                <div className="space-y-1">
+                  <Label className="text-xs">Date de début de lecture</Label>
+                  <Input value={eb.startDate || ""} onChange={e => set({ startDate: e.target.value })} placeholder="JJ/MM/AAAA" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Date de fin de lecture</Label>
+                  <Input value={eb.endDate || ""} onChange={e => set({ endDate: e.target.value })} placeholder="JJ/MM/AAAA" />
+                </div>
+              </div>
+
+              {/* Chapter notes toggle */}
+              <Button variant={chapterNotesEnabled ? "default" : "outline"} className="w-full text-xs" onClick={() => setChapterNotesEnabled(!chapterNotesEnabled)}>
+                {chapterNotesEnabled ? "Désactiver" : "Activer"} les notes de chapitres
+              </Button>
             </div>
 
             {/* FULL-WIDTH SECTION */}
