@@ -115,10 +115,8 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
               {/* RIGHT COLUMN */}
               <div className="flex-1 flex flex-col gap-3">
-                <p className="text-xl" style={{ fontFamily: "var(--font-display)" }}>
-                  <span className="font-bold italic">{eb.title}</span>
-                  <span className="text-muted-foreground">, {eb.author}</span>
-                </p>
+                <p className="text-xl font-bold underline" style={{ fontFamily: "var(--font-display)" }}>{eb.title}</p>
+                <p className="text-base font-bold italic text-muted-foreground">{eb.author}</p>
 
                 {eb.series && (
                   <div className="space-y-1">
