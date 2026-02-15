@@ -34,7 +34,7 @@ export function WishlistContent() {
       (b) =>
         b.title.toLowerCase().includes(search.toLowerCase()) ||
         b.author.toLowerCase().includes(search.toLowerCase()) ||
-        (b.series && b.series.toLowerCase().includes(search.toLowerCase()))
+        (b.series && b.series.toLowerCase().includes(search.toLowerCase())),
     );
 
   const totalPrice = wishlistBooks.reduce((sum, b) => sum + (b.price ?? 0), 0);
@@ -76,7 +76,7 @@ export function WishlistContent() {
         updateBook({ ...book, status: "Acheté" });
       }
     },
-    [books, updateBook]
+    [books, updateBook],
   );
 
   const handleDragEnd = (result: DropResult) => {
@@ -108,8 +108,8 @@ export function WishlistContent() {
       <style>{`
         .${cls}-card {
           background-color: transparent;
-          width: 190px;
-          height: 254px;
+          width: 180px;
+          height: 244px;
           perspective: 1000px;
           font-family: sans-serif;
           cursor: pointer;
@@ -219,10 +219,7 @@ export function WishlistContent() {
                       }}
                     >
                       {/* Flip card */}
-                      <div
-                        className={`${cls}-card`}
-                        onClick={() => setSelectedBook(book)}
-                      >
+                      <div className={`${cls}-card`} onClick={() => setSelectedBook(book)}>
                         <div className={`${cls}-inner`}>
                           <div className={`${cls}-front`}>
                             {book.coverUrl ? (
@@ -234,9 +231,7 @@ export function WishlistContent() {
                           <div className={`${cls}-back`}>
                             <p className={`${cls}-title`}>{book.title}</p>
                             <p className={`${cls}-author`}>{book.author}</p>
-                            {book.publicationDate && (
-                              <p className={`${cls}-date`}>{book.publicationDate}</p>
-                            )}
+                            {book.publicationDate && <p className={`${cls}-date`}>{book.publicationDate}</p>}
                           </div>
                         </div>
                       </div>
