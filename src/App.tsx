@@ -7,6 +7,7 @@ import { AppLayout } from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Aventure from "./pages/Aventure";
 import Lecture from "./pages/Lecture";
+import BookDetail from "./pages/BookDetail";
 import Wishlist from "./pages/Wishlist";
 import Communaute from "./pages/Communaute";
 import Profil from "./pages/Profil";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/aventure" element={<Aventure />} />
             <Route path="/lecture" element={<Lecture />} />
+            <Route path="/book/:id" element={<BookDetail />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/communaute" element={<Communaute />} />
             <Route path="/profil" element={<Profil />} />
