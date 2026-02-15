@@ -76,7 +76,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[70vw] max-w-[70vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ajouter un livre</DialogTitle>
         </DialogHeader>
@@ -86,7 +86,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
           <div className="flex flex-col items-center gap-2">
             <div className="w-[140px] h-[190px] rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden flex items-center justify-center bg-muted">
               {resolvedCover ? (
-                <img src={resolvedCover} alt="Couverture" className="w-full h-full object-cover" />
+                <img src={resolvedCover} alt="Couverture" className="w-full h-full object-contain" />
               ) : (
                 <span className="text-xs text-muted-foreground">Couverture</span>
               )}
@@ -183,9 +183,9 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-2 pt-4">
+            <div className="flex items-center gap-2 pt-4 ml-auto">
               <Checkbox checked={mature} onCheckedChange={(v) => setMature(v === true)} id="mature" />
-              <Label htmlFor="mature" className="text-xs">Public averti</Label>
+              <Label htmlFor="mature" className="text-xs">Destiné à un public averti</Label>
             </div>
           </div>
 

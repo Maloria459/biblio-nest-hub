@@ -33,6 +33,24 @@ export function BibliothequeContent() {
     setBooks((prev) => [...prev, book]);
   };
 
+  const handleSaveBook = (updated: Book) => {
+    // Also handle recommandation du mois: uncheck others for same month
+    setBooks((prev) =>
+      prev.map((b) => {
+        if (b.id === updated.id) return updated;
+        if (updated.recommandationDuMois && updated.recommandationMonth && b.recommandationDuMois && b.recommandationMonth === updated.recommandationMonth) {
+          return { ...b, recommandationDuMois: false, recommandationMonth: undefined };
+        }
+        return b;
+      })
+    );
+  };
+
+  const handleDeleteBook = (id: string) => {
+    setBooks((prev) => prev.filter((b) => b.id !== id));
+    setSelectedBook(null);
+  };
+
   const visibleBooks = books
     .filter((b) => b.status !== "Wishlist")
     .filter(
@@ -77,7 +95,7 @@ export function BibliothequeContent() {
         </Button>
       </div>
 
-      {/* Book grid — 8 per row, edge-to-edge */}
+      {/* Book grid */}
       <div
         className="grid gap-y-5"
         style={{
@@ -96,7 +114,17 @@ export function BibliothequeContent() {
       </div>
 
       {/* Modals & Panels */}
-      <BookDetailModal book={selectedBook} open={!!selectedBook} onOpenChange={(o) => !o && setSelectedBook(null)} />
+      <BookDetailModal
+        book={selectedBook}
+        open={!!selectedBook}
+        onOpenChange={(o) => !o && setSelectedBook(null)}
+        onSave={handleSaveBook}
+        onDelete={handleDeleteBook}
+        allBooks={books}
+        genres={genres}
+        formats={formats}
+        statuses={statuses}
+      />
       <FiltersPanel
         open={filtersOpen}
         onOpenChange={setFiltersOpen}
