@@ -37,15 +37,19 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
     if (o && book) {
       setEditBook({ ...book, citations: book.citations ? [...book.citations] : [], chapterNotes: book.chapterNotes ? { ...book.chapterNotes } : {} });
       setChapterNotesEnabled(book.chapterNotesEnabled || false);
+    } else if (!o) {
+      setEditBook(null);
     }
     onOpenChange(o);
   };
 
   if (!open || !book) return null;
 
-  // Initialize editBook on first render if needed
-  if (!editBook) {
-    handleOpenChange(true);
+  // Initialize editBook on first render or when book prop changes
+  if (!editBook || editBook.id !== book.id) {
+    const initialized = { ...book, citations: book.citations ? [...book.citations] : [], chapterNotes: book.chapterNotes ? { ...book.chapterNotes } : {} };
+    setEditBook(initialized);
+    setChapterNotesEnabled(book.chapterNotesEnabled || false);
     return null;
   }
 
