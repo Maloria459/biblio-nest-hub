@@ -100,10 +100,7 @@ export function WishlistContent() {
       <span className="text-sm font-bold text-center leading-tight">{book.title}</span>
       <span className="text-xs mt-1 opacity-80 text-center">{book.author}</span>
       {book.publicationDate && (
-        <span className="text-xs mt-1 opacity-60 text-center">{book.publicationDate}</span>
-      )}
-      {book.price != null && (
-        <span className="text-xs mt-2 font-medium">{book.price.toFixed(2)} €</span>
+        <span className="text-xs opacity-60 text-center" style={{ marginTop: "auto" }}>{book.publicationDate}</span>
       )}
     </>
   );
@@ -152,7 +149,7 @@ export function WishlistContent() {
                       ref={dragProvided.innerRef}
                       {...dragProvided.draggableProps}
                       {...dragProvided.dragHandleProps}
-                      className="flex flex-col items-center gap-2"
+                      className="flex flex-col items-center"
                       style={{
                         ...dragProvided.draggableProps.style,
                         opacity: snapshot.isDragging ? 0.7 : 1,
@@ -163,15 +160,20 @@ export function WishlistContent() {
                         onClick={() => setSelectedBook(book)}
                         renderBack={renderWishlistBack}
                       />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkAchete(book.id);
-                        }}
-                        className="rounded-md border border-foreground px-4 py-1 text-xs font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
-                      >
-                        Acheté
-                      </button>
+                      <div className="flex items-center justify-between w-[180px] mt-2">
+                        <span className="text-xs text-foreground">
+                          {book.price != null ? `${book.price.toFixed(2)} €` : "— €"}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkAchete(book.id);
+                          }}
+                          className="rounded-md border border-foreground px-4 py-1 text-xs font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+                        >
+                          Acheté
+                        </button>
+                      </div>
                     </div>
                   )}
                 </Draggable>
