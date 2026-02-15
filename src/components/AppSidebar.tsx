@@ -8,6 +8,8 @@ import {
   User,
   Settings,
 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useAvatar } from "@/contexts/AvatarContext";
 
 const mainMenuItems = [
   { title: "Mon tableau de bord", path: "/", icon: LayoutDashboard },
@@ -19,6 +21,7 @@ const mainMenuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { avatarUrl } = useAvatar();
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -69,7 +72,14 @@ export function AppSidebar() {
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             }`}
           >
-            <User className="h-4 w-4 shrink-0" />
+            <Avatar className="h-5 w-5 shrink-0">
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt="Mon profil" />
+              ) : null}
+              <AvatarFallback className="bg-muted text-muted-foreground">
+                <User className="h-3 w-3" />
+              </AvatarFallback>
+            </Avatar>
             <span>Mon profil</span>
           </RouterNavLink>
           <RouterNavLink
