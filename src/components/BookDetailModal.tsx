@@ -178,9 +178,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
               {/* RIGHT COLUMN — book info + avis + citations + passages */}
               <div className="flex-1 flex flex-col gap-3">
-                <div className="flex items-baseline gap-3">
+                <div className="flex items-baseline">
                   <p className="text-xl font-bold italic" style={{ fontFamily: "var(--font-display)" }}>{eb.title}</p>
-                  <p className="text-base text-muted-foreground">{eb.author}</p>
+                  <span className="text-base text-muted-foreground">,&nbsp;{eb.author}</span>
                   {eb.matureContent && <span className="text-lg ml-auto" title="Public averti">🔞</span>}
                 </div>
 
