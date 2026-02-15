@@ -26,7 +26,7 @@ export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
       onClick={handleClick}
     >
       <div
-        className="relative w-full h-full transition-transform duration-[800ms]"
+        className="relative w-full h-full transition-transform duration-[1200ms]"
         style={{ transformStyle: "preserve-3d" }}
       >
         {/* Hover flip via group */}
@@ -44,12 +44,7 @@ export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
           }}
         >
           {book.coverUrl ? (
-            <img
-              src={book.coverUrl}
-              alt={book.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
+            <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
           ) : (
             <div className="w-full h-full bg-muted" />
           )}
@@ -66,25 +61,16 @@ export function FlipBookCard({ book, onMarkPAL }: FlipBookCardProps) {
           }}
         >
           {/* Coup de cœur */}
-          {book.coupDeCoeur && (
-            <Heart className="absolute top-2.5 right-2.5 h-4 w-4 fill-current" />
-          )}
+          {book.coupDeCoeur && <Heart className="absolute top-2.5 right-2.5 h-4 w-4 fill-current" />}
 
-          <span className="text-sm font-bold text-center leading-tight">
-            {book.title}
-          </span>
-          <span className="text-xs mt-1 opacity-80 text-center">
-            {book.author}
-          </span>
+          <span className="text-sm font-bold text-center leading-tight">{book.title}</span>
+          <span className="text-xs mt-1 opacity-80 text-center">{book.author}</span>
 
           {/* Stars */}
           {book.rating && (
             <div className="flex gap-0.5 mt-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3.5 w-3.5 ${i < book.rating! ? "fill-current" : "opacity-30"}`}
-                />
+                <Star key={i} className={`h-3.5 w-3.5 ${i < book.rating! ? "fill-current" : "opacity-30"}`} />
               ))}
             </div>
           )}
