@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooks } from "@/contexts/BooksContext";
+import { useQuery } from "@tanstack/react-query";
 import { Clock, BookOpen, Bookmark } from "lucide-react";
 
 interface ReadingSession {
@@ -16,20 +16,21 @@ interface ReadingSession {
 export function LastSessionCard() {
   const { user } = useAuth();
   const { books } = useBooks();
-  const [session, setSession] = useState<ReadingSession | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("reading_sessions")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("session_date", { ascending: false })
-      .limit(1)
-      .then(({ data }) => {
-        if (data?.length) setSession(data[0] as ReadingSession);
-      });
-  }, [user?.id]);
+  const { data: session } = useQuery({
+    queryKey: ["last-reading-session", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reading_sessions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("session_date", { ascending: false })
+        .limit(1);
+      return (data?.length ? data[0] : null) as ReadingSession | null;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const book = session ? books.find((b) => b.id === session.book_id) : null;
 
@@ -50,7 +51,6 @@ export function LastSessionCard() {
 
       {session && book ? (
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          {/* Cover */}
           <div className="w-16 h-[88px] shrink-0 rounded overflow-hidden bg-secondary flex items-center justify-center">
             {book.coverUrl ? (
               <img src={book.coverUrl} alt={book.title} className="h-full w-full object-cover" />
@@ -58,13 +58,9 @@ export function LastSessionCard() {
               <BookOpen className="h-6 w-6 text-muted-foreground" />
             )}
           </div>
-
-          {/* Title */}
           <p className="font-medium text-sm text-foreground line-clamp-2 leading-tight min-w-0 flex-1">
             {book.title}
           </p>
-
-          {/* Duration */}
           <div className="flex flex-col items-center gap-0.5 shrink-0">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <Clock className="h-3 w-3" /> Durée
@@ -73,8 +69,6 @@ export function LastSessionCard() {
               {formatDuration(session.duration_minutes)}
             </span>
           </div>
-
-          {/* Last page */}
           {session.last_page_reached != null && (
             <div className="flex flex-col items-center gap-0.5 shrink-0">
               <span className="text-xs text-muted-foreground flex items-center gap-1">

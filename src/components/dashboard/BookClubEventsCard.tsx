@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import { Users, MapPin } from "lucide-react";
 
 interface BookClubEvent {
@@ -20,21 +20,22 @@ function formatDate(dateStr: string) {
 
 export function BookClubEventsCard() {
   const { user } = useAuth();
-  const [events, setEvents] = useState<BookClubEvent[]>([]);
 
-  useEffect(() => {
-    if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
-    supabase
-      .from("book_club_events")
-      .select("*")
-      .eq("user_id", user.id)
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
-      .then(({ data }) => {
-        if (data) setEvents(data as BookClubEvent[]);
-      });
-  }, [user?.id]);
+  const { data: events = [] } = useQuery({
+    queryKey: ["book-club-events", user?.id],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data } = await supabase
+        .from("book_club_events")
+        .select("*")
+        .eq("user_id", user!.id)
+        .gte("event_date", today)
+        .order("event_date", { ascending: true });
+      return (data ?? []) as BookClubEvent[];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
     <Card className="rounded-lg border border-border bg-card p-4 flex flex-col min-h-[200px] max-h-[300px]">

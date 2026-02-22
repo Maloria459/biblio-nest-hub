@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import { BookOpen, MapPin } from "lucide-react";
 
 interface LiteraryEvent {
@@ -20,21 +20,22 @@ function formatDate(dateStr: string) {
 
 export function LiteraryEventsCard() {
   const { user } = useAuth();
-  const [events, setEvents] = useState<LiteraryEvent[]>([]);
 
-  useEffect(() => {
-    if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
-    supabase
-      .from("literary_events")
-      .select("*")
-      .eq("user_id", user.id)
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
-      .then(({ data }) => {
-        if (data) setEvents(data as LiteraryEvent[]);
-      });
-  }, [user?.id]);
+  const { data: events = [] } = useQuery({
+    queryKey: ["literary-events", user?.id],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data } = await supabase
+        .from("literary_events")
+        .select("*")
+        .eq("user_id", user!.id)
+        .gte("event_date", today)
+        .order("event_date", { ascending: true });
+      return (data ?? []) as LiteraryEvent[];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
     <Card className="rounded-lg border border-border bg-card p-4 flex flex-col min-h-[200px] max-h-[300px]">
