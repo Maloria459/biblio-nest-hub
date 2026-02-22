@@ -77,12 +77,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   const handleDeleteCitation = (id: string) => set({ citations: (eb.citations || []).filter(c => c.id !== id) });
 
-  const handleSave = () => { onSave({ ...eb, chapterNotesEnabled }); onOpenChange(false); };
-  const handleDelete = () => { onDelete(eb.id); setDeleteConfirm(false); onOpenChange(false); };
+  const handleSave = () => { onSave({ ...eb, chapterNotesEnabled }); setEditBook(null); onOpenChange(false); };
+  const handleDelete = () => { onDelete(eb.id); setDeleteConfirm(false); setEditBook(null); onOpenChange(false); };
   const setChapterNote = (n: number, text: string) => set({ chapterNotes: { ...(eb.chapterNotes || {}), [n]: text } });
   const allSeries = [...new Set(allBooks.map(b => b.series).filter(Boolean) as string[])].sort();
 
-  const handleClose = () => onOpenChange(false);
+  const handleClose = () => { setEditBook(null); onOpenChange(false); };
 
   return (
     <>
