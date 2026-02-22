@@ -1,6 +1,4 @@
 import { useMemo, useState, useEffect } from "react";
-import { TopBar } from "@/components/TopBar";
-import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { useBooks } from "@/contexts/BooksContext";
 import { useAvatar } from "@/contexts/AvatarContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,19 +38,6 @@ const Dashboard = () => {
       });
   }, [user?.id]);
 
-  // TopBar label
-  useEffect(() => {
-    const el = document.getElementById(TOPBAR_RIGHT_ID);
-    if (el) {
-      el.textContent = "Mon tableau de bord";
-      el.className =
-        "ml-auto inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
-    }
-    return () => {
-      const el = document.getElementById(TOPBAR_RIGHT_ID);
-      if (el) { el.textContent = ""; el.className = "ml-auto"; }
-    };
-  }, []);
 
   /* ── derived book data ── */
   const currentlyReading = useMemo(() => {
@@ -96,7 +81,6 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col flex-1">
-      <TopBar />
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* ── Profile Banner ── */}
         <div className="flex items-center gap-5 rounded-lg border border-border bg-card p-5">
