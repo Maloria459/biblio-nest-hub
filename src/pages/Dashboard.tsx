@@ -7,8 +7,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { BookDetailModal } from "@/components/BookDetailModal";
-import { User, Gem, BookOpen, Star, Heart, CheckCircle2 } from "lucide-react";
+import { User, BookOpen, Star, Heart, CheckCircle2 } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
+import eclatEncreImg from "@/assets/eclat-encre.png";
 
 /* ─── helpers ─── */
 function currentMonth() {
@@ -112,9 +113,7 @@ const Dashboard = () => {
 
           {/* Virtual currency */}
           <div className="flex items-center gap-2 shrink-0">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-secondary">
-              <Gem className="h-5 w-5 text-foreground" />
-            </div>
+            <img src={eclatEncreImg} alt="Éclat d'Encre" className="h-10 w-10 object-contain" />
             <span className="text-sm font-medium text-foreground whitespace-nowrap">
               0 Éclat d'Encre
             </span>
