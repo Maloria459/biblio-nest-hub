@@ -7,7 +7,9 @@ import {
   Users,
   User,
   Settings,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAvatar } from "@/contexts/AvatarContext";
 
@@ -17,11 +19,13 @@ const mainMenuItems = [
   { title: "Mon coin lecture", path: "/lecture", icon: Library },
   { title: "Ma wishlist", path: "/wishlist", icon: Heart },
   { title: "Communauté", path: "/communaute", icon: Users },
+  { title: "Paramètres", path: "/parametres", icon: Settings },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const { avatarUrl } = useAvatar();
+  const { signOut } = useAuth();
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -82,17 +86,13 @@ export function AppSidebar() {
             </Avatar>
             <span>Mon profil</span>
           </RouterNavLink>
-          <RouterNavLink
-            to="/parametres"
-            className={`flex items-center justify-center rounded-md h-9 w-9 transition-colors ${
-              isActive("/parametres")
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            }`}
-            title="Paramètres"
+          <button
+            onClick={signOut}
+            className="flex items-center justify-center rounded-md h-9 w-9 transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            title="Déconnexion"
           >
-            <Settings className="h-4 w-4" />
-          </RouterNavLink>
+            <LogOut className="h-4 w-4" />
+          </button>
       </div>
     </aside>
   );
