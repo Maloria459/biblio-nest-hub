@@ -11,6 +11,8 @@ import { User, BookOpen, Star, Heart, CheckCircle2 } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
 import eclatEncreImg from "@/assets/eclat-encre.png";
 import { LastSessionCard } from "@/components/dashboard/LastSessionCard";
+import { PersonalObjectivesCard } from "@/components/dashboard/PersonalObjectivesCard";
+import { BookChallengesCard } from "@/components/dashboard/BookChallengesCard";
 import { UpcomingReleasesCard } from "@/components/dashboard/UpcomingReleasesCard";
 import { LiteraryEventsCard } from "@/components/dashboard/LiteraryEventsCard";
 import { BookClubEventsCard } from "@/components/dashboard/BookClubEventsCard";
@@ -172,6 +174,12 @@ const Dashboard = () => {
 
         {/* ── Last reading session ── */}
         <LastSessionCard />
+
+        {/* ── Objectives & Challenges ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <PersonalObjectivesCard />
+          <BookChallengesCard />
+        </div>
 
         {/* ── Three info cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
