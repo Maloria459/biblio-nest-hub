@@ -10,6 +10,10 @@ import { BookDetailModal } from "@/components/BookDetailModal";
 import { User, BookOpen, Star, Heart, CheckCircle2 } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
 import eclatEncreImg from "@/assets/eclat-encre.png";
+import { LastSessionCard } from "@/components/dashboard/LastSessionCard";
+import { UpcomingReleasesCard } from "@/components/dashboard/UpcomingReleasesCard";
+import { LiteraryEventsCard } from "@/components/dashboard/LiteraryEventsCard";
+import { BookClubEventsCard } from "@/components/dashboard/BookClubEventsCard";
 
 /* ─── helpers ─── */
 function currentMonth() {
@@ -164,6 +168,16 @@ const Dashboard = () => {
             onClick={setSelectedBook}
             renderExtra={(book) => <RatingDisplay rating={book.rating} />}
           />
+        </div>
+
+        {/* ── Last reading session ── */}
+        <LastSessionCard />
+
+        {/* ── Three info cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <UpcomingReleasesCard />
+          <LiteraryEventsCard />
+          <BookClubEventsCard />
         </div>
       </div>
 
