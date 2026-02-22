@@ -14,6 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
+      books: {
+        Row: {
+          author: string
+          avis: string | null
+          chapter_notes: Json | null
+          chapter_notes_enabled: boolean | null
+          chapters: number | null
+          citations: Json | null
+          coup_de_coeur: boolean | null
+          cover_url: string | null
+          created_at: string
+          end_date: string | null
+          format: string | null
+          genre: string | null
+          id: string
+          mature_content: boolean | null
+          pages: number | null
+          pages_read: number | null
+          passages_preferes: string | null
+          personnages_preferes: string | null
+          price: number | null
+          publication_date: string | null
+          publisher: string | null
+          rating: number | null
+          recommandation_du_mois: boolean | null
+          recommandation_month: string | null
+          series: string | null
+          sort_order: number | null
+          spicy_level: number | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author: string
+          avis?: string | null
+          chapter_notes?: Json | null
+          chapter_notes_enabled?: boolean | null
+          chapters?: number | null
+          citations?: Json | null
+          coup_de_coeur?: boolean | null
+          cover_url?: string | null
+          created_at?: string
+          end_date?: string | null
+          format?: string | null
+          genre?: string | null
+          id?: string
+          mature_content?: boolean | null
+          pages?: number | null
+          pages_read?: number | null
+          passages_preferes?: string | null
+          personnages_preferes?: string | null
+          price?: number | null
+          publication_date?: string | null
+          publisher?: string | null
+          rating?: number | null
+          recommandation_du_mois?: boolean | null
+          recommandation_month?: string | null
+          series?: string | null
+          sort_order?: number | null
+          spicy_level?: number | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author?: string
+          avis?: string | null
+          chapter_notes?: Json | null
+          chapter_notes_enabled?: boolean | null
+          chapters?: number | null
+          citations?: Json | null
+          coup_de_coeur?: boolean | null
+          cover_url?: string | null
+          created_at?: string
+          end_date?: string | null
+          format?: string | null
+          genre?: string | null
+          id?: string
+          mature_content?: boolean | null
+          pages?: number | null
+          pages_read?: number | null
+          passages_preferes?: string | null
+          personnages_preferes?: string | null
+          price?: number | null
+          publication_date?: string | null
+          publisher?: string | null
+          rating?: number | null
+          recommandation_du_mois?: boolean | null
+          recommandation_month?: string | null
+          series?: string | null
+          sort_order?: number | null
+          spicy_level?: number | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
