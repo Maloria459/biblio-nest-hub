@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,8 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const pseudoTimer = useRef<ReturnType<typeof setTimeout>>();
+  const emailTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const allCriteriaMet = useMemo(
     () => passwordCriteria.every((c) => c.test(password)),
@@ -36,6 +38,50 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   );
 
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
+
+  // Real-time pseudo uniqueness check (debounced)
+  useEffect(() => {
+    if (!pseudo.trim()) {
+      setFieldErrors((p) => ({ ...p, pseudo: "" }));
+      return;
+    }
+    clearTimeout(pseudoTimer.current);
+    pseudoTimer.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .ilike("pseudo", pseudo.trim())
+        .maybeSingle();
+      if (data) {
+        setFieldErrors((p) => ({ ...p, pseudo: "Ce pseudonyme est déjà utilisé" }));
+      } else {
+        setFieldErrors((p) => ({ ...p, pseudo: "" }));
+      }
+    }, 500);
+    return () => clearTimeout(pseudoTimer.current);
+  }, [pseudo]);
+
+  // Real-time email uniqueness check (debounced)
+  useEffect(() => {
+    if (!email.trim() || !email.includes("@")) {
+      setFieldErrors((p) => ({ ...p, email: "" }));
+      return;
+    }
+    clearTimeout(emailTimer.current);
+    emailTimer.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .ilike("email", email.trim())
+        .maybeSingle();
+      if (data) {
+        setFieldErrors((p) => ({ ...p, email: "Cette adresse e-mail est déjà utilisée" }));
+      } else {
+        setFieldErrors((p) => ({ ...p, email: "" }));
+      }
+    }, 500);
+    return () => clearTimeout(emailTimer.current);
+  }, [email]);
 
   const allFieldsFilled =
     firstName.trim() &&
@@ -46,7 +92,9 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     password &&
     confirmPassword;
 
-  const canSubmit = allFieldsFilled && allCriteriaMet && passwordsMatch;
+  const hasFieldErrors = !!(fieldErrors.pseudo || fieldErrors.email);
+
+  const canSubmit = allFieldsFilled && allCriteriaMet && passwordsMatch && !hasFieldErrors;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,15 +105,28 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
     setLoading(true);
 
-    // Check pseudo uniqueness
+    // Check pseudo uniqueness (case-insensitive)
     const { data: existingPseudo } = await supabase
       .from("profiles")
       .select("id")
-      .eq("pseudo", pseudo.trim())
+      .ilike("pseudo", pseudo.trim())
       .maybeSingle();
 
     if (existingPseudo) {
-      setFieldErrors((prev) => ({ ...prev, pseudo: "Ce pseudonyme est déjà pris." }));
+      setFieldErrors((prev) => ({ ...prev, pseudo: "Ce pseudonyme est déjà utilisé" }));
+      setLoading(false);
+      return;
+    }
+
+    // Check email uniqueness (case-insensitive)
+    const { data: existingEmail } = await supabase
+      .from("profiles")
+      .select("id")
+      .ilike("email", email.trim())
+      .maybeSingle();
+
+    if (existingEmail) {
+      setFieldErrors((prev) => ({ ...prev, email: "Cette adresse e-mail est déjà utilisée" }));
       setLoading(false);
       return;
     }

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { mockBooks, type Book } from "@/data/mockBooks";
+import { type Book } from "@/data/mockBooks";
 import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librarySettings";
 
 interface BooksContextType {
@@ -19,7 +19,7 @@ interface BooksContextType {
 const BooksContext = createContext<BooksContextType | null>(null);
 
 export function BooksProvider({ children }: { children: ReactNode }) {
-  const [books, setBooks] = useState<Book[]>(mockBooks);
+  const [books, setBooks] = useState<Book[]>([]);
   const [genres, setGenres] = useState<string[]>(DEFAULT_GENRES);
   const [formats, setFormats] = useState<string[]>(DEFAULT_FORMATS);
   const [statuses, setStatuses] = useState<string[]>(DEFAULT_STATUSES);
