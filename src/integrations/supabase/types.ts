@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_club_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_name: string
+          id: string
+          location: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          event_name: string
+          id?: string
+          location?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_name?: string
+          id?: string
+          location?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       books: {
         Row: {
           author: string
@@ -119,6 +146,33 @@ export type Database = {
         }
         Relationships: []
       }
+      literary_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_name: string
+          id: string
+          location: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          event_name: string
+          id?: string
+          location?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_name?: string
+          id?: string
+          location?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -154,6 +208,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      reading_sessions: {
+        Row: {
+          book_id: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          last_page_reached: number | null
+          session_date: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          last_page_reached?: number | null
+          session_date?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          last_page_reached?: number | null
+          session_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_sessions_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
