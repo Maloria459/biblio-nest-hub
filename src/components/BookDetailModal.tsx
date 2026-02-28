@@ -84,7 +84,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const setChapterNote = (n: number, text: string) => set({ chapterNotes: { ...(eb.chapterNotes || {}), [n]: text } });
   const allSeries = [...new Set(allBooks.map(b => b.series).filter(Boolean) as string[])].sort();
 
-  const handleClose = () => { setEditBook(null); onOpenChange(false); };
+  const handleClose = () => { onSave({ ...eb, chapterNotesEnabled }); setEditBook(null); onOpenChange(false); };
 
   return (
     <>
