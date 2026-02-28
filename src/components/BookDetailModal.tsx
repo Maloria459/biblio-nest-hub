@@ -183,57 +183,33 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 {eb.series && (
                   <div className="space-y-1">
                     <Label className="text-xs">Série</Label>
-                    <Select value={eb.series || "__none__"} onValueChange={v => set({ series: v === "__none__" ? "" : v })}>
-                      <SelectTrigger><SelectValue placeholder="Aucune série" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">Aucune</SelectItem>
-                        {allSeries.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <p className="text-sm">{eb.series}</p>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs">Éditeur</Label>
-                    <Input value={eb.publisher || ""} onChange={e => set({ publisher: e.target.value })} />
+                    <p className="text-sm">{eb.publisher || "—"}</p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Date de publication</Label>
-                    <Input value={eb.publicationDate || ""} onChange={e => set({ publicationDate: e.target.value })} placeholder="JJ/MM/AAAA ou AAAA" />
+                    <p className="text-sm">{eb.publicationDate || "—"}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs">Genre</Label>
-                    <Select value={eb.genre || "__none__"} onValueChange={v => set({ genre: v === "__none__" ? "" : v })}>
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">—</SelectItem>
-                        {genres.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <p className="text-sm">{eb.genre || "—"}</p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Format</Label>
-                    <Select value={eb.format || "__none__"} onValueChange={v => set({ format: v === "__none__" ? "" : v })}>
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">—</SelectItem>
-                        {formats.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <p className="text-sm">{eb.format || "—"}</p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Statut</Label>
-                    <Select value={eb.status || "__none__"} onValueChange={v => set({ status: v === "__none__" ? "" : v })}>
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">—</SelectItem>
-                        {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <p className="text-sm">{eb.status || "—"}</p>
                   </div>
                 </div>
 
@@ -243,7 +219,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                     <div className="flex items-center gap-1">
                       <Input className="w-16 text-center" value={pagesRead} onChange={e => set({ pagesRead: parseInt(e.target.value) || 0 })} />
                       <span className="text-sm text-muted-foreground">/</span>
-                      <Input className="w-16 text-center" value={totalPages} onChange={e => set({ pages: parseInt(e.target.value) || 0 })} />
+                      <span className="text-sm w-16 text-center">{totalPages}</span>
                     </div>
                     <Progress value={progressPct} className="flex-1 h-3" />
                     <span className="text-sm font-medium min-w-[3rem] text-right">{progressPct}%</span>
