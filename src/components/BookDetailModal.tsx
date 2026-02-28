@@ -86,14 +86,14 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   return (
     <>
-      <div className="absolute inset-0 z-50 flex items-start justify-center pt-[5%]">
+      <div className="absolute inset-0 z-50 flex items-center justify-center py-[3%]">
         {/* Backdrop */}
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
         {/* Modal */}
-        <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "70%", maxHeight: "88%" }}>
+        <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "70%", maxHeight: "100%" }}>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
             {/* TWO-COLUMN LAYOUT for entire modal content */}
             <div className="flex gap-6">
               {/* LEFT COLUMN — cover + metadata */}
