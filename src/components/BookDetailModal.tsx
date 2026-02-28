@@ -175,7 +175,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 <div className="flex items-baseline">
                   <p className="text-xl font-bold italic" style={{ fontFamily: "var(--font-display)" }}>{eb.title}</p>
                   <span className="text-xl text-muted-foreground font-normal not-italic">,&nbsp;{eb.author}</span>
-                  {eb.matureContent && <span className="ml-auto self-center text-xl leading-none" title="Destiné à un public averti">🔞</span>}
+                  {eb.matureContent && <span className="ml-auto self-center leading-none" style={{ fontSize: "1.25rem", lineHeight: "1.75rem" }} title="Destiné à un public averti">🔞</span>}
                 </div>
 
                 {eb.series && (
