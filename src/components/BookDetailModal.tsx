@@ -300,6 +300,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
             {/* Bottom buttons — full width, centered */}
             <div className="flex justify-center gap-4 mt-6 pt-4 border-t">
+              {eb.status === "Lecture en cours" && (
+                <Button variant="outline" onClick={() => {}}>Commencer une session de lecture</Button>
+              )}
               <Button onClick={() => setEditModalOpen(true)}>Modifier le livre</Button>
               <Button variant="outline" onClick={() => setDeleteConfirm(true)}>Supprimer le livre</Button>
             </div>
