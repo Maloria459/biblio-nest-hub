@@ -104,7 +104,7 @@ export function WishlistContent() {
   const cls = `wl-${uniqueId.replace(/:/g, "")}`;
 
   return (
-    <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
+    <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto overflow-x-hidden">
       <style>{`
         .${cls}-card {
           background-color: transparent;
@@ -201,7 +201,7 @@ export function WishlistContent() {
               {...provided.droppableProps}
               className="grid"
               style={{
-                gridTemplateColumns: "repeat(8, 190px)",
+                gridTemplateColumns: "repeat(auto-fill, 190px)",
                 justifyContent: "start",
                 gap: "40px 20px",
               }}
