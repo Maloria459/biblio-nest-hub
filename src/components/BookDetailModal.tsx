@@ -91,12 +91,6 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
         {/* Modal */}
         <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "70%", maxHeight: "90%" }}>
-          {/* Close button */}
-          <div className="flex justify-end px-4 pt-3 shrink-0">
-            <button onClick={handleClose} className="p-1 rounded-md hover:bg-accent transition-colors">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
 
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto px-6 pb-6">
