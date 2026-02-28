@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import { EditBookModal } from "@/components/EditBookModal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ interface BookDetailModalProps {
 export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, allBooks, genres, formats, statuses }: BookDetailModalProps) {
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [recommConfirm, setRecommConfirm] = useState(false);
   const [recommOtherBook, setRecommOtherBook] = useState<Book | null>(null);
   const [citationPopup, setCitationPopup] = useState(false);
@@ -322,7 +324,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
             {/* Bottom buttons — full width, centered */}
             <div className="flex justify-center gap-4 mt-6 pt-4 border-t">
-              <Button onClick={handleSave}>Enregistrer les modifications</Button>
+              <Button onClick={() => setEditModalOpen(true)}>Modifier le livre</Button>
               <Button variant="outline" onClick={() => setDeleteConfirm(true)}>Supprimer le livre</Button>
             </div>
           </div>
@@ -358,6 +360,21 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit book modal */}
+      <EditBookModal
+        book={eb}
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        genres={genres}
+        formats={formats}
+        statuses={statuses}
+        onSave={(updatedBook) => {
+          onSave({ ...eb, ...updatedBook, chapterNotesEnabled });
+          setEditBook(null);
+          onOpenChange(false);
+        }}
+      />
     </>
   );
 }
