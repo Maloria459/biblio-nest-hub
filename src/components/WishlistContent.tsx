@@ -42,23 +42,19 @@ export function WishlistContent() {
 
   useEffect(() => {
     const el = document.getElementById(TOPBAR_RIGHT_ID);
-    if (el) {
-      el.innerHTML = "";
-      el.className = "ml-auto flex items-center gap-2 mr-4";
+    if (!el) return;
 
-      const countBox = document.createElement("span");
-      countBox.className =
-        "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
-      countBox.textContent = `${bookCount} ${bookCount <= 1 ? "livre" : "livres"}`;
+    el.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
+          ${bookCount} ${bookCount <= 1 ? "livre" : "livres"}
+        </span>
+        <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
+          ${totalPrice.toFixed(2)} €
+        </span>
+      </div>
+    `;
 
-      const priceBox = document.createElement("span");
-      priceBox.className =
-        "inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap";
-      priceBox.textContent = `${totalPrice.toFixed(2)} €`;
-
-      el.appendChild(countBox);
-      el.appendChild(priceBox);
-    }
     return () => {
       const el = document.getElementById(TOPBAR_RIGHT_ID);
       if (el) {
