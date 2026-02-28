@@ -65,7 +65,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const handleSubmit = () => {
     if (!title.trim()) return;
     const book: Book = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title: title.trim(),
       author: author.trim(),
       coverUrl: resolvedCover,

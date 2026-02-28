@@ -3,6 +3,7 @@ import { type Book, type Citation } from "@/data/mockBooks";
 import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librarySettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface BooksContextType {
   books: Book[];
@@ -112,7 +113,13 @@ export function BooksProvider({ children }: { children: ReactNode }) {
   const addBook = useCallback((book: Book) => {
     if (!user) return;
     setBooks((prev) => [...prev, book]);
-    supabase.from("books").insert(bookToRow(book, user.id)).then();
+    supabase.from("books").insert(bookToRow(book, user.id)).then(({ error }) => {
+      if (error) {
+        console.error("addBook error:", error);
+        toast.error("Erreur lors de l'enregistrement du livre");
+        setBooks((prev) => prev.filter((b) => b.id !== book.id));
+      }
+    });
   }, [user]);
 
   const updateBook = useCallback((updated: Book) => {
@@ -133,19 +140,34 @@ export function BooksProvider({ children }: { children: ReactNode }) {
         return b;
       })
     );
-    supabase.from("books").update(bookToRow(updated, user.id)).eq("id", updated.id).then();
+    supabase.from("books").update(bookToRow(updated, user.id)).eq("id", updated.id).then(({ error }) => {
+      if (error) {
+        console.error("updateBook error:", error);
+        toast.error("Erreur lors de la mise à jour du livre");
+      }
+    });
   }, [user]);
 
   const deleteBook = useCallback((id: string) => {
     setBooks((prev) => prev.filter((b) => b.id !== id));
-    supabase.from("books").delete().eq("id", id).then();
+    supabase.from("books").delete().eq("id", id).then(({ error }) => {
+      if (error) {
+        console.error("deleteBook error:", error);
+        toast.error("Erreur lors de la suppression du livre");
+      }
+    });
   }, []);
 
   const markPAL = useCallback((id: string) => {
     setBooks((prev) =>
       prev.map((b) => (b.id === id ? { ...b, status: "Dans ma PAL" } : b))
     );
-    supabase.from("books").update({ status: "Dans ma PAL" }).eq("id", id).then();
+    supabase.from("books").update({ status: "Dans ma PAL" }).eq("id", id).then(({ error }) => {
+      if (error) {
+        console.error("markPAL error:", error);
+        toast.error("Erreur lors de la mise à jour du statut");
+      }
+    });
   }, []);
 
   return (
