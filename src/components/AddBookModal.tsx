@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Flame, X } from "lucide-react";
+import { Flame, X, Loader2 } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
+import { uploadCover } from "@/lib/uploadCover";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface AddBookModalProps {
   open: boolean;
@@ -19,9 +22,11 @@ interface AddBookModalProps {
 type CoverMode = "upload" | "url";
 
 export function AddBookModal({ open, onOpenChange, genres, formats, statuses, onAdd }: AddBookModalProps) {
+  const { user } = useAuth();
   const [coverMode, setCoverMode] = useState<CoverMode>("upload");
   const [coverUrl, setCoverUrl] = useState("");
-  const [coverFile, setCoverFile] = useState<string>("");
+  const [coverPreview, setCoverPreview] = useState<string>("");
+  const [coverFileObj, setCoverFileObj] = useState<File | null>(null);
   const [coverFileName, setCoverFileName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
@@ -37,9 +42,10 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const [chapters, setChapters] = useState("");
   const [spicy, setSpicy] = useState(0);
   const [mature, setMature] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const reset = () => {
-    setCoverMode("upload"); setCoverUrl(""); setCoverFile(""); setCoverFileName("");
+    setCoverMode("upload"); setCoverUrl(""); setCoverPreview(""); setCoverFileObj(null); setCoverFileName("");
     setTitle(""); setAuthor(""); setSeries(""); setPublisher(""); setPubDate("");
     setPrice(""); setGenre(""); setFormat(""); setStatus(""); setPages("");
     setChapters(""); setSpicy(0); setMature(false);
@@ -48,7 +54,8 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setCoverFile(URL.createObjectURL(file));
+      setCoverPreview(URL.createObjectURL(file));
+      setCoverFileObj(file);
       setCoverFileName(file.name);
     }
   };
@@ -56,19 +63,37 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const handleSwitchMode = (mode: CoverMode) => {
     setCoverMode(mode);
     setCoverUrl("");
-    setCoverFile("");
+    setCoverPreview("");
+    setCoverFileObj(null);
     setCoverFileName("");
   };
 
-  const resolvedCover = coverMode === "upload" ? coverFile : coverUrl || undefined;
+  const resolvedCover = coverMode === "upload" ? coverPreview : coverUrl || undefined;
 
-  const handleSubmit = () => {
-    if (!title.trim()) return;
+  const handleSubmit = async () => {
+    if (!title.trim() || !user) return;
+
+    let finalCoverUrl: string | undefined = undefined;
+
+    if (coverMode === "upload" && coverFileObj) {
+      setUploading(true);
+      try {
+        finalCoverUrl = await uploadCover(coverFileObj, user.id);
+      } catch (err: any) {
+        toast.error(err.message || "Erreur lors de l'upload de la couverture");
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    } else if (coverMode === "url" && coverUrl) {
+      finalCoverUrl = coverUrl;
+    }
+
     const book: Book = {
       id: crypto.randomUUID(),
       title: title.trim(),
       author: author.trim(),
-      coverUrl: resolvedCover,
+      coverUrl: finalCoverUrl,
       status: status || "Acheté",
       genre: genre || undefined,
       format: format || undefined,
@@ -95,11 +120,8 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
-      {/* Modal */}
       <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "50%", maxHeight: "90%" }}>
-        {/* Fixed title bar */}
         <div className="flex items-center justify-between h-14 px-6 border-b border-border shrink-0">
           <h2 className="text-base font-semibold" style={{ fontFamily: "var(--font-display)" }}>Ajouter un livre</h2>
           <button onClick={handleClose} className="p-1 rounded-md hover:bg-accent transition-colors">
@@ -107,12 +129,10 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
           </button>
         </div>
 
-        {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="flex flex-col gap-4">
             {/* Cover */}
             <div className="flex flex-col items-center gap-3">
-              {/* Toggle switch */}
               <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
                 <button
                   onClick={() => handleSwitchMode("upload")}
@@ -241,7 +261,9 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
             </div>
 
             {/* Submit */}
-            <Button className="w-full mt-2" onClick={handleSubmit}>Ajouter le livre</Button>
+            <Button className="w-full mt-2" onClick={handleSubmit} disabled={uploading}>
+              {uploading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Upload en cours...</> : "Ajouter le livre"}
+            </Button>
           </div>
         </div>
       </div>
