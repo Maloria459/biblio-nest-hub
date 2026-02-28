@@ -146,6 +146,36 @@ export type Database = {
         }
         Relationships: []
       }
+      library_settings: {
+        Row: {
+          created_at: string
+          formats: string[]
+          genres: string[]
+          id: string
+          statuses: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          formats?: string[]
+          genres?: string[]
+          id?: string
+          statuses?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          formats?: string[]
+          genres?: string[]
+          id?: string
+          statuses?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       literary_events: {
         Row: {
           created_at: string

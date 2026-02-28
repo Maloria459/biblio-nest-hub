@@ -13,6 +13,7 @@ interface BooksContextType {
   setGenres: (g: string[]) => void;
   setFormats: (f: string[]) => void;
   setStatuses: (s: string[]) => void;
+  saveSettings: (genres: string[], formats: string[], statuses: string[]) => void;
   addBook: (book: Book) => void;
   updateBook: (updated: Book) => void;
   deleteBook: (id: string) => void;
@@ -97,18 +98,48 @@ export function BooksProvider({ children }: { children: ReactNode }) {
   const [formats, setFormats] = useState<string[]>(DEFAULT_FORMATS);
   const [statuses, setStatuses] = useState<string[]>(DEFAULT_STATUSES);
 
-  // Load books from DB on mount / user change
+  // Load books + library settings from DB on mount / user change
   useEffect(() => {
-    if (!user) { setBooks([]); return; }
+    if (!user) { setBooks([]); setGenres(DEFAULT_GENRES); setFormats(DEFAULT_FORMATS); setStatuses(DEFAULT_STATUSES); return; }
     const load = async () => {
+      // Load books
       const { data, error } = await supabase
         .from("books")
         .select("*")
         .eq("user_id", user.id);
       if (!error && data) setBooks(data.map(rowToBook));
+
+      // Load library settings
+      const { data: settingsData } = await supabase
+        .from("library_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (settingsData) {
+        if (settingsData.genres?.length) setGenres(settingsData.genres as string[]);
+        if (settingsData.formats?.length) setFormats(settingsData.formats as string[]);
+        if (settingsData.statuses?.length) setStatuses(settingsData.statuses as string[]);
+      }
     };
     load();
   }, [user?.id]);
+
+  // Persist library settings to DB whenever they change
+  const saveSettings = useCallback((g: string[], f: string[], s: string[]) => {
+    setGenres(g);
+    setFormats(f);
+    setStatuses(s);
+    if (!user) return;
+    supabase
+      .from("library_settings")
+      .upsert({ user_id: user.id, genres: g, formats: f, statuses: s }, { onConflict: "user_id" })
+      .then(({ error }) => {
+        if (error) {
+          console.error("saveSettings error:", error);
+          toast.error("Erreur lors de la sauvegarde des paramètres");
+        }
+      });
+  }, [user]);
 
   const addBook = useCallback((book: Book) => {
     if (!user) return;
@@ -180,6 +211,7 @@ export function BooksProvider({ children }: { children: ReactNode }) {
         setGenres,
         setFormats,
         setStatuses,
+        saveSettings,
         addBook,
         updateBook,
         deleteBook,

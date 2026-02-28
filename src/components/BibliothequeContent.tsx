@@ -14,7 +14,7 @@ import { useBooks } from "@/contexts/BooksContext";
 export function BibliothequeContent() {
   const {
     books, genres, formats, statuses,
-    setGenres, setFormats, setStatuses,
+    setGenres, setFormats, setStatuses, saveSettings,
     addBook, updateBook, deleteBook, markPAL,
   } = useBooks();
 
@@ -138,7 +138,7 @@ export function BibliothequeContent() {
         genres={genres}
         formats={formats}
         statuses={statuses}
-        onSave={(g, f, s) => { setGenres(g); setFormats(f); setStatuses(s); }}
+        onSave={(g, f, s) => { saveSettings(g, f, s); }}
       />
       <AddBookModal
         open={addOpen}
