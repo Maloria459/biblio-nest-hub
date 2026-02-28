@@ -217,7 +217,17 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <Label className="text-xs">Progression de lecture</Label>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
-                      <Input className="w-16 text-center" value={pagesRead} onChange={e => set({ pagesRead: parseInt(e.target.value) || 0 })} />
+                      <Input className="w-16 text-center" value={pagesRead} onChange={e => {
+                        const newPagesRead = parseInt(e.target.value) || 0;
+                        const updates: Partial<Book> = { pagesRead: newPagesRead };
+                        if (totalPages > 0 && newPagesRead >= totalPages) {
+                          updates.pagesRead = totalPages;
+                          updates.status = "Lecture terminée";
+                          const today = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+                          if (!eb.endDate) updates.endDate = today;
+                        }
+                        set(updates);
+                      }} />
                       <span className="text-sm text-muted-foreground">/</span>
                       <span className="text-sm w-16 text-center">{totalPages}</span>
                     </div>
