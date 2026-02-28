@@ -67,16 +67,29 @@ export function FlipBookCard({ book, onMarkPAL, onClick, renderBack, showLireBut
             boxShadow: "0 8px 14px 0 rgba(0,0,0,0.2)",
           }}
         >
-          {renderBack ? renderBack(book) : (
+          {renderBack ? renderBack(book) : showLireButton ? (
+            /* PAL-specific back: title, author, pages, Lire button */
             <>
               {book.coupDeCoeur && <Heart className="absolute top-2.5 right-2.5 h-4 w-4 fill-current" />}
-
               <span className="text-sm font-bold text-center leading-tight line-clamp-2">{book.title}</span>
               <span className="text-xs mt-1 opacity-80 text-center">{book.author}</span>
-
               {pagesToShow > 0 && (
                 <span className="text-xs mt-2 opacity-70 text-center">{pagesToShow} pages</span>
               )}
+              <button
+                onClick={handleLire}
+                className="absolute bottom-3 left-3 right-3 rounded-md bg-background text-foreground px-3 py-1.5 text-xs font-medium transition-colors hover:bg-background/80"
+              >
+                Lire
+              </button>
+            </>
+          ) : (
+            /* Default library back: title, author, stars, À lire button */
+            <>
+              {book.coupDeCoeur && <Heart className="absolute top-2.5 right-2.5 h-4 w-4 fill-current" />}
+
+              <span className="text-sm font-bold text-center leading-tight">{book.title}</span>
+              <span className="text-xs mt-1 opacity-80 text-center">{book.author}</span>
 
               {(book.rating != null && book.rating > 0) && (
                 <div className="flex gap-0.5 mt-2">
@@ -93,22 +106,13 @@ export function FlipBookCard({ book, onMarkPAL, onClick, renderBack, showLireBut
                 </div>
               )}
 
-              {showLireButton ? (
+              {book.status === "Acheté" && (
                 <button
-                  onClick={handleLire}
-                  className="absolute bottom-3 left-3 right-3 rounded-md bg-background text-foreground px-3 py-1.5 text-xs font-medium transition-colors hover:bg-background/80"
+                  onClick={handlePAL}
+                  className="absolute bottom-3 rounded-md border border-background/40 px-3 py-1 text-xs font-medium transition-colors hover:bg-background/20"
                 >
-                  Lire
+                  À lire
                 </button>
-              ) : (
-                book.status === "Acheté" && (
-                  <button
-                    onClick={handlePAL}
-                    className="absolute bottom-3 rounded-md border border-background/40 px-3 py-1 text-xs font-medium transition-colors hover:bg-background/20"
-                  >
-                    À lire
-                  </button>
-                )
               )}
             </>
           )}
