@@ -120,7 +120,7 @@ export function LoanRegistryContent() {
                     <td className="px-3 py-2">
                       <div className="w-8 h-11 rounded overflow-hidden bg-muted flex-shrink-0">
                         {book.coverUrl ? (
-                          <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
+                          <img src={book.coverUrl} alt="" className="w-full h-full object-cover object-center" />
                         ) : (
                           <div className="w-full h-full bg-muted" />
                         )}
@@ -171,7 +171,7 @@ export function LoanRegistryContent() {
                       <td className="px-3 py-2">
                         <div className="w-8 h-11 rounded overflow-hidden bg-muted flex-shrink-0">
                           {book.coverUrl ? (
-                            <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
+                            <img src={book.coverUrl} alt="" className="w-full h-full object-cover object-center" />
                           ) : (
                             <div className="w-full h-full bg-muted" />
                           )}
