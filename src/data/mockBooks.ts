@@ -14,6 +14,7 @@ export interface Book {
   rating?: number;
   coupDeCoeur?: boolean;
   status: string;
+  secondaryStatus?: string;
   genre?: string;
   format?: string;
   publisher?: string;

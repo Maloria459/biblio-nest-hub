@@ -53,6 +53,7 @@ function rowToBook(row: any): Book {
     personnagesPreferes: row.personnages_preferes ?? undefined,
     chapterNotes: row.chapter_notes as Record<number, string> ?? undefined,
     chapterNotesEnabled: row.chapter_notes_enabled ?? undefined,
+    secondaryStatus: row.secondary_status ?? undefined,
   };
 }
 
@@ -88,6 +89,7 @@ function bookToRow(book: Book, userId: string) {
     personnages_preferes: book.personnagesPreferes ?? null,
     chapter_notes: (book.chapterNotes ?? {}) as any,
     chapter_notes_enabled: book.chapterNotesEnabled ?? false,
+    secondary_status: book.secondaryStatus ?? null,
   };
 }
 
