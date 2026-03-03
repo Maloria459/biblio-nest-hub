@@ -42,7 +42,21 @@ export function LoanRegistryContent() {
   const [confirmBook, setConfirmBook] = useState<Book | null>(null);
 
   const lentBooks = books.filter((b) => b.secondaryStatus === "Prêté");
-  const borrowedBooks = books.filter((b) => b.secondaryStatus === "Emprunté");
+  const borrowedBooks = books
+    .filter((b) => b.secondaryStatus === "Emprunté")
+    .sort((a, b) => {
+      if (!a.returnDate && !b.returnDate) return 0;
+      if (!a.returnDate) return 1;
+      if (!b.returnDate) return -1;
+      const normalize = (d: string) => {
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
+          const [dd, mm, yy] = d.split("/");
+          return `${yy}-${mm}-${dd}`;
+        }
+        return d;
+      };
+      return normalize(a.returnDate).localeCompare(normalize(b.returnDate));
+    });
 
   // Inject topbar title
   useEffect(() => {
