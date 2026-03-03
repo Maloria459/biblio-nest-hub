@@ -53,7 +53,7 @@ export function LastSessionCard() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="w-16 h-[88px] shrink-0 rounded overflow-hidden bg-secondary flex items-center justify-center">
             {book.coverUrl ? (
-              <img src={book.coverUrl} alt={book.title} className="h-full w-full object-cover" />
+              <img src={book.coverUrl} alt={book.title} className="h-full w-full object-cover object-center" />
             ) : (
               <BookOpen className="h-6 w-6 text-muted-foreground" />
             )}

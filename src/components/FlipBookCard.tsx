@@ -51,7 +51,7 @@ export function FlipBookCard({ book, onMarkPAL, onClick, renderBack, showLireBut
           }}
         >
           {book.coverUrl ? (
-            <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
+            <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover object-center" loading="lazy" />
           ) : (
             <div className="w-full h-full bg-muted" />
           )}

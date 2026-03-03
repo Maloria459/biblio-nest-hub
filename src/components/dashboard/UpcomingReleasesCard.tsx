@@ -36,7 +36,7 @@ export function UpcomingReleasesCard() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-14 shrink-0 rounded overflow-hidden bg-secondary flex items-center justify-center">
                     {book.coverUrl ? (
-                      <img src={book.coverUrl} alt={book.title} className="h-full w-full object-cover" />
+                      <img src={book.coverUrl} alt={book.title} className="h-full w-full object-cover object-center" />
                     ) : (
                       <BookOpen className="h-4 w-4 text-muted-foreground" />
                     )}

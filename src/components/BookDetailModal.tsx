@@ -103,7 +103,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 {/* Cover image — stretches to match book info height */}
                 <div className="rounded-lg border-2 border-foreground overflow-hidden bg-muted" style={{ height: 260 }}>
                   {eb.coverUrl ? (
-                    <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-cover" />
+                    <img src={eb.coverUrl} alt={eb.title} className="w-full h-full object-cover object-center" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="text-xs text-muted-foreground">Pas de couverture</span>
