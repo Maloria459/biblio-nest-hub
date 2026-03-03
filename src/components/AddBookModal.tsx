@@ -10,6 +10,7 @@ import { SECONDARY_STATUSES } from "@/data/librarySettings";
 import { uploadCover } from "@/lib/uploadCover";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { LoanConditionalFields } from "@/components/LoanConditionalFields";
 
 interface AddBookModalProps {
   open: boolean;
@@ -45,12 +46,24 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const [spicy, setSpicy] = useState(0);
   const [mature, setMature] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [loanDate, setLoanDate] = useState("");
+  const [borrowerName, setBorrowerName] = useState("");
+  const [borrowDate, setBorrowDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [lenderName, setLenderName] = useState("");
 
   const reset = () => {
     setCoverMode("upload"); setCoverUrl(""); setCoverPreview(""); setCoverFileObj(null); setCoverFileName("");
     setTitle(""); setAuthor(""); setSeries(""); setPublisher(""); setPubDate("");
     setPrice(""); setGenre(""); setFormat(""); setStatus(""); setSecondaryStatus(""); setPages("");
     setChapters(""); setSpicy(0); setMature(false);
+    setLoanDate(""); setBorrowerName(""); setBorrowDate(""); setReturnDate(""); setLenderName("");
+  };
+
+  const handleSecondaryStatusChange = (val: string) => {
+    setSecondaryStatus(val);
+    if (val !== "Prêté") { setLoanDate(""); setBorrowerName(""); }
+    if (val !== "Emprunté") { setBorrowDate(""); setReturnDate(""); setLenderName(""); }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,6 +121,11 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
       price: price ? parseFloat(price) : undefined,
       spicyLevel: spicy || undefined,
       matureContent: mature || undefined,
+      loanDate: secondaryStatus === "Prêté" ? loanDate || undefined : undefined,
+      borrowerName: secondaryStatus === "Prêté" ? borrowerName || undefined : undefined,
+      borrowDate: secondaryStatus === "Emprunté" ? borrowDate || undefined : undefined,
+      returnDate: secondaryStatus === "Emprunté" ? returnDate || undefined : undefined,
+      lenderName: secondaryStatus === "Emprunté" ? lenderName || undefined : undefined,
     };
     onAdd(book);
     reset();
@@ -237,7 +255,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Prêt / Emprunt</Label>
-                <Select value={secondaryStatus} onValueChange={setSecondaryStatus}>
+                <Select value={secondaryStatus} onValueChange={handleSecondaryStatusChange}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Aucun</SelectItem>
@@ -246,6 +264,16 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
                 </Select>
               </div>
             </div>
+
+            {/* Conditional loan/borrow fields */}
+            <LoanConditionalFields
+              secondaryStatus={secondaryStatus}
+              loanDate={loanDate} setLoanDate={setLoanDate}
+              borrowerName={borrowerName} setBorrowerName={setBorrowerName}
+              borrowDate={borrowDate} setBorrowDate={setBorrowDate}
+              returnDate={returnDate} setReturnDate={setReturnDate}
+              lenderName={lenderName} setLenderName={setLenderName}
+            />
 
             {/* Pages + Chapters */}
             <div className="grid grid-cols-2 gap-3">

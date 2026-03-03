@@ -45,6 +45,8 @@ export type Database = {
         Row: {
           author: string
           avis: string | null
+          borrow_date: string | null
+          borrower_name: string | null
           chapter_notes: Json | null
           chapter_notes_enabled: boolean | null
           chapters: number | null
@@ -56,6 +58,8 @@ export type Database = {
           format: string | null
           genre: string | null
           id: string
+          lender_name: string | null
+          loan_date: string | null
           mature_content: boolean | null
           pages: number | null
           pages_read: number | null
@@ -67,6 +71,7 @@ export type Database = {
           rating: number | null
           recommandation_du_mois: boolean | null
           recommandation_month: string | null
+          return_date: string | null
           secondary_status: string | null
           series: string | null
           sort_order: number | null
@@ -80,6 +85,8 @@ export type Database = {
         Insert: {
           author: string
           avis?: string | null
+          borrow_date?: string | null
+          borrower_name?: string | null
           chapter_notes?: Json | null
           chapter_notes_enabled?: boolean | null
           chapters?: number | null
@@ -91,6 +98,8 @@ export type Database = {
           format?: string | null
           genre?: string | null
           id?: string
+          lender_name?: string | null
+          loan_date?: string | null
           mature_content?: boolean | null
           pages?: number | null
           pages_read?: number | null
@@ -102,6 +111,7 @@ export type Database = {
           rating?: number | null
           recommandation_du_mois?: boolean | null
           recommandation_month?: string | null
+          return_date?: string | null
           secondary_status?: string | null
           series?: string | null
           sort_order?: number | null
@@ -115,6 +125,8 @@ export type Database = {
         Update: {
           author?: string
           avis?: string | null
+          borrow_date?: string | null
+          borrower_name?: string | null
           chapter_notes?: Json | null
           chapter_notes_enabled?: boolean | null
           chapters?: number | null
@@ -126,6 +138,8 @@ export type Database = {
           format?: string | null
           genre?: string | null
           id?: string
+          lender_name?: string | null
+          loan_date?: string | null
           mature_content?: boolean | null
           pages?: number | null
           pages_read?: number | null
@@ -137,6 +151,7 @@ export type Database = {
           rating?: number | null
           recommandation_du_mois?: boolean | null
           recommandation_month?: string | null
+          return_date?: string | null
           secondary_status?: string | null
           series?: string | null
           sort_order?: number | null
