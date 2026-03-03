@@ -244,7 +244,7 @@ function HighlightCard({ icon, label, book, onClick, badge, renderExtra }: Highl
               <img
                 src={book.coverUrl}
                 alt={book.title}
-                className="h-full w-full object-cover object-center"
+                className="h-full w-full object-cover"
               />
             ) : (
               <BookOpen className="h-6 w-6 text-muted-foreground" />

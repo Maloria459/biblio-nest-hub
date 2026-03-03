@@ -204,7 +204,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
 
               <div className="w-[140px] h-[190px] rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden flex items-center justify-center bg-muted">
                 {resolvedCover ? (
-                  <img src={resolvedCover} alt="Couverture" className="w-full h-full object-cover object-center" />
+                  <img src={resolvedCover} alt="Couverture" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-xs text-muted-foreground">Couverture</span>
                 )}
