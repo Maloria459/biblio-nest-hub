@@ -4,6 +4,9 @@ export const MANDATORY_STATUSES = [
   "Wishlist",
   "Lecture en cours",
   "Lecture terminée",
+];
+
+export const SECONDARY_STATUSES = [
   "Prêté",
   "Emprunté",
 ];

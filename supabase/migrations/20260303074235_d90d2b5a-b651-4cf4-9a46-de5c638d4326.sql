@@ -1,0 +1,1 @@
+ALTER TABLE public.books ADD COLUMN secondary_status text DEFAULT NULL;

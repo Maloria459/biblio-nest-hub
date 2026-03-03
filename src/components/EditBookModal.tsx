@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Flame, X, Loader2 } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
+import { SECONDARY_STATUSES } from "@/data/librarySettings";
 import { uploadCover } from "@/lib/uploadCover";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
   const [genre, setGenre] = useState("");
   const [format, setFormat] = useState("");
   const [status, setStatus] = useState("");
+  const [secondaryStatus, setSecondaryStatus] = useState("");
   const [pages, setPages] = useState("");
   const [chapters, setChapters] = useState("");
   const [spicy, setSpicy] = useState(0);
@@ -56,6 +58,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       setGenre(book.genre || "");
       setFormat(book.format || "");
       setStatus(book.status || "");
+      setSecondaryStatus(book.secondaryStatus || "");
       setPages(book.pages != null ? String(book.pages) : "");
       setChapters(book.chapters != null ? String(book.chapters) : "");
       setSpicy(book.spicyLevel || 0);
@@ -121,6 +124,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       author: author.trim(),
       coverUrl: finalCoverUrl,
       status: status || book.status,
+      secondaryStatus: (secondaryStatus && secondaryStatus !== "__none__") ? secondaryStatus : undefined,
       genre: genre || undefined,
       format: format || undefined,
       publisher: publisher || undefined,
@@ -229,8 +233,8 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
               </div>
             </div>
 
-            {/* Genre, Format, Status */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Genre, Format */}
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Genre</Label>
                 <Select value={genre} onValueChange={setGenre}>
@@ -245,11 +249,25 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
                   <SelectContent>{formats.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Status + Secondary Status */}
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Statut</Label>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>{statuses.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  <SelectContent>{statuses.filter(s => !SECONDARY_STATUSES.includes(s)).map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Prêt / Emprunt</Label>
+                <Select value={secondaryStatus} onValueChange={setSecondaryStatus}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Aucun</SelectItem>
+                    {SECONDARY_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
                 </Select>
               </div>
             </div>

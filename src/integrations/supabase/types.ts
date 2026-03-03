@@ -67,6 +67,7 @@ export type Database = {
           rating: number | null
           recommandation_du_mois: boolean | null
           recommandation_month: string | null
+          secondary_status: string | null
           series: string | null
           sort_order: number | null
           spicy_level: number | null
@@ -101,6 +102,7 @@ export type Database = {
           rating?: number | null
           recommandation_du_mois?: boolean | null
           recommandation_month?: string | null
+          secondary_status?: string | null
           series?: string | null
           sort_order?: number | null
           spicy_level?: number | null
@@ -135,6 +137,7 @@ export type Database = {
           rating?: number | null
           recommandation_du_mois?: boolean | null
           recommandation_month?: string | null
+          secondary_status?: string | null
           series?: string | null
           sort_order?: number | null
           spicy_level?: number | null

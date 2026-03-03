@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Flame, X, Loader2 } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
+import { SECONDARY_STATUSES } from "@/data/librarySettings";
 import { uploadCover } from "@/lib/uploadCover";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const [genre, setGenre] = useState("");
   const [format, setFormat] = useState("");
   const [status, setStatus] = useState("");
+  const [secondaryStatus, setSecondaryStatus] = useState("");
   const [pages, setPages] = useState("");
   const [chapters, setChapters] = useState("");
   const [spicy, setSpicy] = useState(0);
@@ -47,7 +49,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const reset = () => {
     setCoverMode("upload"); setCoverUrl(""); setCoverPreview(""); setCoverFileObj(null); setCoverFileName("");
     setTitle(""); setAuthor(""); setSeries(""); setPublisher(""); setPubDate("");
-    setPrice(""); setGenre(""); setFormat(""); setStatus(""); setPages("");
+    setPrice(""); setGenre(""); setFormat(""); setStatus(""); setSecondaryStatus(""); setPages("");
     setChapters(""); setSpicy(0); setMature(false);
   };
 
@@ -95,6 +97,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
       author: author.trim(),
       coverUrl: finalCoverUrl,
       status: status || "Acheté",
+      secondaryStatus: (secondaryStatus && secondaryStatus !== "__none__") ? secondaryStatus : undefined,
       genre: genre || undefined,
       format: format || undefined,
       publisher: publisher || undefined,
@@ -205,8 +208,8 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               </div>
             </div>
 
-            {/* Genre, Format, Status */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Genre, Format */}
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Genre</Label>
                 <Select value={genre} onValueChange={setGenre}>
@@ -221,11 +224,25 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
                   <SelectContent>{formats.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Status + Secondary Status */}
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Statut</Label>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>{statuses.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  <SelectContent>{statuses.filter(s => !SECONDARY_STATUSES.includes(s)).map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Prêt / Emprunt</Label>
+                <Select value={secondaryStatus} onValueChange={setSecondaryStatus}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Aucun</SelectItem>
+                    {SECONDARY_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
                 </Select>
               </div>
             </div>
