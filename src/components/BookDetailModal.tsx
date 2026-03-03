@@ -209,9 +209,59 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Statut</Label>
-                    <p className="text-sm">{eb.status || "—"}</p>
+                    <p className="text-sm">{eb.status || "—"}{eb.secondaryStatus ? ` · ${eb.secondaryStatus}` : ""}</p>
                   </div>
                 </div>
+
+                {/* Loan/borrow info in reading sheet */}
+                {eb.secondaryStatus === "Prêté" && (
+                  <div className="grid grid-cols-2 gap-3 animate-fade-in">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Date de prêt</Label>
+                      <p className="text-sm">{eb.loanDate || "—"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Prêté à</Label>
+                      <p className="text-sm">{eb.borrowerName || "—"}</p>
+                    </div>
+                  </div>
+                )}
+                {eb.secondaryStatus === "Emprunté" && (
+                  <div className="grid grid-cols-3 gap-3 animate-fade-in">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Date d'emprunt</Label>
+                      <p className="text-sm">{eb.borrowDate || "—"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Date de restitution</Label>
+                      <p className="text-sm">
+                        {(() => {
+                          if (!eb.returnDate) return "—";
+                          let dateObj: Date | null = null;
+                          if (/^\d{4}-\d{2}-\d{2}$/.test(eb.returnDate)) dateObj = new Date(eb.returnDate);
+                          else if (/^\d{2}\/\d{2}\/\d{4}$/.test(eb.returnDate)) {
+                            const [d, m, y] = eb.returnDate.split("/");
+                            dateObj = new Date(`${y}-${m}-${d}`);
+                          }
+                          const today = new Date(); today.setHours(0,0,0,0);
+                          if (dateObj) dateObj.setHours(0,0,0,0);
+                          const diff = dateObj ? (dateObj.getTime() - today.getTime()) / (1000*60*60*24) : null;
+                          const isOverdue = diff !== null && diff < 0;
+                          const isSoon = diff !== null && diff >= 0 && diff <= 7;
+                          return (
+                            <span className={isOverdue ? "text-red-500 font-medium" : isSoon ? "text-amber-600 font-medium" : ""}>
+                              {isOverdue && "⚠️ "}{eb.returnDate}
+                            </span>
+                          );
+                        })()}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Emprunté à</Label>
+                      <p className="text-sm">{eb.lenderName || "—"}</p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-1">
                   <Label className="text-xs">Progression de lecture</Label>

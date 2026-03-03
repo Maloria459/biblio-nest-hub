@@ -3,6 +3,7 @@ import { BookOpen, Layers, FolderOpen, Handshake } from "lucide-react";
 import type { TabItem } from "@/components/BottomTabBar";
 import { BibliothequeContent } from "@/components/BibliothequeContent";
 import { PileALireContent } from "@/components/PileALireContent";
+import { LoanRegistryContent } from "@/components/LoanRegistryContent";
 
 const tabs: TabItem[] = [
   { label: "Ma bibliothèque", icon: BookOpen },
@@ -18,6 +19,7 @@ const Lecture = () => (
     tabContent={{
       "Ma bibliothèque": <BibliothequeContent />,
       "Ma pile à lire": <PileALireContent />,
+      "Registre des prêts": <LoanRegistryContent />,
     }}
   />
 );

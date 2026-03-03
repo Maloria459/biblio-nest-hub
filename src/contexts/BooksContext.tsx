@@ -54,6 +54,11 @@ function rowToBook(row: any): Book {
     chapterNotes: row.chapter_notes as Record<number, string> ?? undefined,
     chapterNotesEnabled: row.chapter_notes_enabled ?? undefined,
     secondaryStatus: row.secondary_status ?? undefined,
+    loanDate: row.loan_date ?? undefined,
+    borrowerName: row.borrower_name ?? undefined,
+    borrowDate: row.borrow_date ?? undefined,
+    returnDate: row.return_date ?? undefined,
+    lenderName: row.lender_name ?? undefined,
   };
 }
 
@@ -90,6 +95,11 @@ function bookToRow(book: Book, userId: string) {
     chapter_notes: (book.chapterNotes ?? {}) as any,
     chapter_notes_enabled: book.chapterNotesEnabled ?? false,
     secondary_status: book.secondaryStatus ?? null,
+    loan_date: book.loanDate ?? null,
+    borrower_name: book.borrowerName ?? null,
+    borrow_date: book.borrowDate ?? null,
+    return_date: book.returnDate ?? null,
+    lender_name: book.lenderName ?? null,
   };
 }
 

@@ -36,6 +36,11 @@ export interface Book {
   personnagesPreferes?: string;
   chapterNotes?: Record<number, string>;
   chapterNotesEnabled?: boolean;
+  loanDate?: string;
+  borrowerName?: string;
+  borrowDate?: string;
+  returnDate?: string;
+  lenderName?: string;
 }
 
 export const mockBooks: Book[] = [

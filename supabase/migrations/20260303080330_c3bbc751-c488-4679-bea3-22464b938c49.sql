@@ -1,0 +1,6 @@
+
+ALTER TABLE public.books ADD COLUMN IF NOT EXISTS loan_date text DEFAULT NULL;
+ALTER TABLE public.books ADD COLUMN IF NOT EXISTS borrower_name text DEFAULT NULL;
+ALTER TABLE public.books ADD COLUMN IF NOT EXISTS borrow_date text DEFAULT NULL;
+ALTER TABLE public.books ADD COLUMN IF NOT EXISTS return_date text DEFAULT NULL;
+ALTER TABLE public.books ADD COLUMN IF NOT EXISTS lender_name text DEFAULT NULL;
