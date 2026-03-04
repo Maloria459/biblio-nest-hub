@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Star, Heart, Flame, Plus, Trash2, ChevronDown, X } from "lucide-react";
 import type { Book, Citation } from "@/data/mockBooks";
+import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
+import { useReadingSessions, formatTotalReadingTime } from "@/hooks/useReadingSessions";
 
 interface BookDetailModalProps {
   book: Book | null;
@@ -34,6 +36,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const [newCitationText, setNewCitationText] = useState("");
   const [newCitationPage, setNewCitationPage] = useState("");
   const [chapterNotesEnabled, setChapterNotesEnabled] = useState(false);
+  const [timerOpen, setTimerOpen] = useState(false);
+
+  const { data: allSessions = [] } = useReadingSessions();
 
   const handleOpenChange = (o: boolean) => {
     if (o && book) {
@@ -286,6 +291,26 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 </div>
 
+                {/* Total reading time & days — only for "Lecture terminée" with sessions */}
+                {(() => {
+                  const bookSessions = allSessions.filter(s => s.book_id === eb.id);
+                  if (eb.status !== "Lecture terminée" || bookSessions.length === 0) return null;
+                  const totalMinutes = bookSessions.reduce((sum, s) => sum + s.duration_minutes, 0);
+                  const uniqueDays = new Set(bookSessions.map(s => new Date(s.session_date).toDateString())).size;
+                  return (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Temps total de lecture</Label>
+                        <p className="text-sm font-medium">{formatTotalReadingTime(totalMinutes)}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Nombre de jours de lecture</Label>
+                        <p className="text-sm font-medium">{uniqueDays} jour{uniqueDays > 1 ? "s" : ""}</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Avis */}
                 <div className="space-y-1 mt-3">
                   <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
@@ -361,7 +386,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
             {/* Bottom buttons — full width, centered */}
             <div className="flex justify-center gap-4 mt-6 pt-4 border-t">
               {eb.status === "Lecture en cours" && (
-                <Button variant="outline" onClick={() => {}}>Commencer une session de lecture</Button>
+                <Button variant="outline" onClick={() => setTimerOpen(true)}>Commencer une session de lecture</Button>
               )}
               <Button onClick={() => setEditModalOpen(true)}>Modifier le livre</Button>
               <Button variant="outline" onClick={() => setDeleteConfirm(true)}>Supprimer le livre</Button>
@@ -413,6 +438,13 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
           setEditBook(null);
           onOpenChange(false);
         }}
+      />
+
+      {/* Reading session timer */}
+      <ReadingSessionTimer
+        book={eb}
+        open={timerOpen}
+        onClose={() => setTimerOpen(false)}
       />
     </>
   );

@@ -1,46 +1,14 @@
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { useBooks } from "@/contexts/BooksContext";
-import { useQuery } from "@tanstack/react-query";
+import { useReadingSessions, formatDurationShort } from "@/hooks/useReadingSessions";
 import { Clock, BookOpen, Bookmark } from "lucide-react";
 
-interface ReadingSession {
-  id: string;
-  book_id: string;
-  session_date: string;
-  duration_minutes: number;
-  last_page_reached: number | null;
-}
-
 export function LastSessionCard() {
-  const { user } = useAuth();
   const { books } = useBooks();
+  const { data: sessions = [] } = useReadingSessions();
 
-  const { data: session } = useQuery({
-    queryKey: ["last-reading-session", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("reading_sessions")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("session_date", { ascending: false })
-        .limit(1);
-      return (data?.length ? data[0] : null) as ReadingSession | null;
-    },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-  });
-
+  const session = sessions.length > 0 ? sessions[0] : null;
   const book = session ? books.find((b) => b.id === session.book_id) : null;
-
-  const formatDuration = (mins: number) => {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}min`;
-    if (h > 0) return `${h}h`;
-    return `${m}min`;
-  };
 
   return (
     <Card className="rounded-lg border border-border bg-card p-4">
@@ -66,7 +34,7 @@ export function LastSessionCard() {
               <Clock className="h-3 w-3" /> Durée
             </span>
             <span className="text-sm font-medium text-foreground">
-              {formatDuration(session.duration_minutes)}
+              {formatDurationShort(Math.round(session.duration_minutes))}
             </span>
           </div>
           {session.last_page_reached != null && (
