@@ -37,31 +37,38 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const [newCitationPage, setNewCitationPage] = useState("");
   const [chapterNotesEnabled, setChapterNotesEnabled] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const { data: allSessions = [] } = useReadingSessions();
 
+  // Always derive the canonical book from allBooks to avoid stale snapshots
+  const canonicalBook = allBooks.find(b => b.id === book.id) ?? book;
+
   const handleOpenChange = (o: boolean) => {
-    if (o && book) {
-      setEditBook({ ...book, citations: book.citations ? [...book.citations] : [], chapterNotes: book.chapterNotes ? { ...book.chapterNotes } : {} });
-      setChapterNotesEnabled(book.chapterNotesEnabled || false);
+    if (o && canonicalBook) {
+      setEditBook({ ...canonicalBook, citations: canonicalBook.citations ? [...canonicalBook.citations] : [], chapterNotes: canonicalBook.chapterNotes ? { ...canonicalBook.chapterNotes } : {} });
+      setChapterNotesEnabled(canonicalBook.chapterNotesEnabled || false);
+      setDirty(false);
     } else if (!o) {
       setEditBook(null);
+      setDirty(false);
     }
     onOpenChange(o);
   };
 
-  if (!open || !book) return null;
+  if (!open || !canonicalBook) return null;
 
-  // Initialize editBook on first render or when book prop changes
-  if (!editBook || editBook.id !== book.id || book.pagesRead !== editBook.pagesRead || book.status !== editBook.status || book.endDate !== editBook.endDate) {
-    const initialized = { ...book, citations: book.citations ? [...book.citations] : [], chapterNotes: book.chapterNotes ? { ...book.chapterNotes } : {} };
+  // Initialize editBook on first render or when canonical book changes
+  if (!editBook || editBook.id !== canonicalBook.id) {
+    const initialized = { ...canonicalBook, citations: canonicalBook.citations ? [...canonicalBook.citations] : [], chapterNotes: canonicalBook.chapterNotes ? { ...canonicalBook.chapterNotes } : {} };
     setEditBook(initialized);
-    setChapterNotesEnabled(book.chapterNotesEnabled || false);
+    setChapterNotesEnabled(canonicalBook.chapterNotesEnabled || false);
+    setDirty(false);
     return null;
   }
 
   const eb = editBook;
-  const set = (partial: Partial<Book>) => setEditBook({ ...eb, ...partial });
+  const set = (partial: Partial<Book>) => { setEditBook({ ...eb, ...partial }); setDirty(true); };
 
   const pagesRead = eb.pagesRead || 0;
   const totalPages = eb.pages || 0;
@@ -84,12 +91,26 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   const handleDeleteCitation = (id: string) => set({ citations: (eb.citations || []).filter(c => c.id !== id) });
 
-  const handleSave = () => { onSave({ ...eb, chapterNotesEnabled }); setEditBook(null); onOpenChange(false); };
-  const handleDelete = () => { onDelete(eb.id); setDeleteConfirm(false); setEditBook(null); onOpenChange(false); };
+  const handleSave = () => { onSave({ ...eb, chapterNotesEnabled }); setEditBook(null); setDirty(false); onOpenChange(false); };
+  const handleDelete = () => { onDelete(eb.id); setDeleteConfirm(false); setEditBook(null); setDirty(false); onOpenChange(false); };
   const setChapterNote = (n: number, text: string) => set({ chapterNotes: { ...(eb.chapterNotes || {}), [n]: text } });
   const allSeries = [...new Set(allBooks.map(b => b.series).filter(Boolean) as string[])].sort();
 
-  const handleClose = () => { onSave({ ...eb, chapterNotesEnabled }); setEditBook(null); onOpenChange(false); };
+  // Only auto-save on close when user made manual edits (dirty). Otherwise just close.
+  const handleClose = () => {
+    if (dirty) {
+      onSave({ ...eb, chapterNotesEnabled });
+    }
+    setEditBook(null);
+    setDirty(false);
+    onOpenChange(false);
+  };
+
+  // Callback from ReadingSessionTimer: patch local editBook with session updates
+  const handleSessionSaved = (updates: Partial<Book>) => {
+    setEditBook(prev => prev ? { ...prev, ...updates } : prev);
+    // Don't set dirty — these updates already went to BooksContext/DB via timer
+  };
 
   return (
     <>
@@ -445,6 +466,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
         book={eb}
         open={timerOpen}
         onClose={() => setTimerOpen(false)}
+        onSessionSaved={handleSessionSaved}
       />
     </>
   );
