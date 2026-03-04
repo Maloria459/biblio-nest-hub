@@ -11,7 +11,7 @@ export function LastSessionCard() {
   const book = session ? books.find((b) => b.id === session.book_id) : null;
 
   return (
-    <Card className="rounded-lg border border-border bg-card p-4">
+    <Card className="rounded-lg border border-border bg-card p-4 flex flex-col min-h-[180px]">
       <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-3">
         <Clock className="h-4 w-4" />
         <span>Dernière session de lecture</span>
