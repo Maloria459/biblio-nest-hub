@@ -257,7 +257,9 @@ function BookGroupView({ groups, sessions, onDelete, onStartSession }: {
       {groups.map(({ book, sessions: bookSessions }) => {
         const totalPages = book.pages ?? 0;
         const latestPage = Math.max(...bookSessions.map(s => s.last_page_reached ?? 0));
-        const progressPct = totalPages > 0 ? Math.round((latestPage / totalPages) * 100) : 0;
+        // Use book.pagesRead as canonical progress; fall back to latest session page
+        const canonicalProgress = book.pagesRead != null && book.pagesRead > 0 ? book.pagesRead : latestPage;
+        const progressPct = totalPages > 0 ? Math.round((canonicalProgress / totalPages) * 100) : 0;
         const totalMinutes = bookSessions.reduce((sum, s) => sum + s.duration_minutes, 0);
         const uniqueDays = new Set(bookSessions.map(s => new Date(s.session_date).toDateString())).size;
         const avgMinutes = totalMinutes / bookSessions.length;
@@ -291,7 +293,7 @@ function BookGroupView({ groups, sessions, onDelete, onStartSession }: {
                 <div className="space-y-1">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">📖 Progression</span>
-                    <span className="font-medium">Page {latestPage} / {totalPages} · {progressPct}%</span>
+                    <span className="font-medium">Page {canonicalProgress} / {totalPages} · {progressPct}%</span>
                   </div>
                   <Progress value={progressPct} className="h-2" />
                 </div>

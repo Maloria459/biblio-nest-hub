@@ -15,9 +15,10 @@ interface ReadingSessionTimerProps {
   book: Book;
   open: boolean;
   onClose: () => void;
+  onSessionSaved?: (updates: Partial<Book>) => void;
 }
 
-export function ReadingSessionTimer({ book, open, onClose }: ReadingSessionTimerProps) {
+export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: ReadingSessionTimerProps) {
   const { user } = useAuth();
   const { updateBook } = useBooks();
   const invalidate = useInvalidateSessions();
@@ -118,6 +119,9 @@ export function ReadingSessionTimer({ book, open, onClose }: ReadingSessionTimer
       updates.endDate = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
     }
     updateBook({ ...book, ...updates } as Book);
+
+    // Notify parent (e.g. BookDetailModal) so it can patch its local state
+    onSessionSaved?.(updates);
 
     invalidate();
     toast.success("Session enregistrée ✓");
