@@ -53,7 +53,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   if (!open || !book) return null;
 
   // Initialize editBook on first render or when book prop changes
-  if (!editBook || editBook.id !== book.id) {
+  if (!editBook || editBook.id !== book.id || book.pagesRead !== editBook.pagesRead || book.status !== editBook.status || book.endDate !== editBook.endDate) {
     const initialized = { ...book, citations: book.citations ? [...book.citations] : [], chapterNotes: book.chapterNotes ? { ...book.chapterNotes } : {} };
     setEditBook(initialized);
     setChapterNotesEnabled(book.chapterNotesEnabled || false);
