@@ -1,20 +1,15 @@
 
 
 ## Problem
-The cover image in the reading sheet (BookDetailModal) has `minHeight: 260` but no fixed/max height, so taller images stretch the container differently per book.
+
+The `reading_sessions` table has `duration_minutes` as an **integer** column, but the code sends a fractional value (e.g., `0.18`) via `Math.round(durationMinutes * 100) / 100`. This causes a Postgres error: `invalid input syntax for type integer: "0.18"`.
 
 ## Fix
-In `BookDetailModal.tsx`, change the cover container from `minHeight: 260` to a fixed `height: 260px` (matching the "Où est la vraie vie ?" reference). The image already uses `object-cover` so it will crop/fill uniformly regardless of the source image's aspect ratio.
 
-### Change (single line edit)
-In the cover `<div>` around line 103, replace:
-```tsx
-style={{ minHeight: 260 }}
-```
-with:
-```tsx
-style={{ height: 260 }}
-```
+In `src/components/ReadingSessionTimer.tsx`, change the `duration_minutes` value to use `Math.round(durationMinutes)` instead of `Math.round(durationMinutes * 100) / 100`, so it always sends a whole integer to the database.
 
-This ensures every book's cover occupies exactly the same space in the reading sheet.
+**File**: `src/components/ReadingSessionTimer.tsx`  
+**Line ~97**: Change `Math.round(durationMinutes * 100) / 100` to `Math.round(durationMinutes)`
+
+This is a one-line fix.
 
