@@ -29,7 +29,7 @@ export function FlipBookCard({ book, onMarkPAL, onClick, renderBack, showLireBut
   return (
     <div
       className="group cursor-pointer"
-      style={{ perspective: "1000px", width: 180, height: 244 }}
+      style={{ perspective: "1000px", width: 180, aspectRatio: "2/3" }}
       onClick={onClick}
     >
       <div
