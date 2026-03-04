@@ -41,13 +41,11 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   const { data: allSessions = [] } = useReadingSessions();
 
-  // Always derive the canonical book from allBooks to avoid stale snapshots
-  const canonicalBook = allBooks.find(b => b.id === book.id) ?? book;
-
   const handleOpenChange = (o: boolean) => {
-    if (o && canonicalBook) {
-      setEditBook({ ...canonicalBook, citations: canonicalBook.citations ? [...canonicalBook.citations] : [], chapterNotes: canonicalBook.chapterNotes ? { ...canonicalBook.chapterNotes } : {} });
-      setChapterNotesEnabled(canonicalBook.chapterNotesEnabled || false);
+    if (o && book) {
+      const src = allBooks.find(b => b.id === book.id) ?? book;
+      setEditBook({ ...src, citations: src.citations ? [...src.citations] : [], chapterNotes: src.chapterNotes ? { ...src.chapterNotes } : {} });
+      setChapterNotesEnabled(src.chapterNotesEnabled || false);
       setDirty(false);
     } else if (!o) {
       setEditBook(null);
@@ -56,7 +54,10 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
     onOpenChange(o);
   };
 
-  if (!open || !canonicalBook) return null;
+  if (!open || !book) return null;
+
+  // Always derive the canonical book from allBooks to avoid stale snapshots
+  const canonicalBook = allBooks.find(b => b.id === book.id) ?? book;
 
   // Initialize editBook on first render or when canonical book changes
   if (!editBook || editBook.id !== canonicalBook.id) {
