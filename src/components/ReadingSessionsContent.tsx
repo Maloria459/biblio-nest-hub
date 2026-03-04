@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useReadingSessions, formatDurationFull, formatTotalReadingTime, type ReadingSession } from "@/hooks/useReadingSessions";
 import { useBooks } from "@/contexts/BooksContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Trash2, BookOpen, ChevronDown, List, Library, Play } from "lucide-react";
 import { toast } from "sonner";
 import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
+import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import type { Book } from "@/data/mockBooks";
 
 function formatDateFR(dateStr: string) {
@@ -87,32 +89,42 @@ export function ReadingSessionsContent() {
     });
   }, [sessions, books]);
 
+  const [slotEl, setSlotEl] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = document.getElementById(TOPBAR_RIGHT_ID);
+    setSlotEl(el);
+    return () => {
+      if (el) el.innerHTML = "";
+    };
+  }, []);
+
   if (isLoading) {
     return <div className="flex-1 flex items-center justify-center"><div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" /></div>;
   }
 
+  const viewToggle = (
+    <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1 mr-4">
+      <button
+        onClick={() => setView("list")}
+        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "list" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+      >
+        <List className="h-3.5 w-3.5" />
+        <span>Par session</span>
+      </button>
+      <button
+        onClick={() => setView("book")}
+        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "book" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+      >
+        <Library className="h-3.5 w-3.5" />
+        <span>Par livre</span>
+      </button>
+    </div>
+  );
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-card">
-        <h1 className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>Mes sessions de lecture</h1>
-        <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1">
-          <button
-            onClick={() => setView("list")}
-            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "list" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-          >
-            <List className="h-3.5 w-3.5" />
-            <span>Par session</span>
-          </button>
-          <button
-            onClick={() => setView("book")}
-            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "book" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-          >
-            <Library className="h-3.5 w-3.5" />
-            <span>Par livre</span>
-          </button>
-        </div>
-      </div>
+      {slotEl && createPortal(viewToggle, slotEl)}
 
       <div className="flex-1 overflow-y-auto px-6 py-4">
         {sessions.length === 0 ? (
