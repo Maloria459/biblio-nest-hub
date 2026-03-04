@@ -191,6 +191,26 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 </div>
 
+                {/* Total reading time & days — under end date, for "Lecture terminée" with sessions */}
+                {(() => {
+                  const bookSessions = allSessions.filter(s => s.book_id === eb.id);
+                  if (eb.status !== "Lecture terminée" || bookSessions.length === 0) return null;
+                  const totalMinutes = bookSessions.reduce((sum, s) => sum + s.duration_minutes, 0);
+                  const uniqueDays = new Set(bookSessions.map(s => new Date(s.session_date).toDateString())).size;
+                  return (
+                    <div className="space-y-2 w-full">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Temps total de lecture</Label>
+                        <p className="text-sm font-medium">{formatTotalReadingTime(totalMinutes)}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Nombre de jours de lecture</Label>
+                        <p className="text-sm font-medium">{uniqueDays} jour{uniqueDays > 1 ? "s" : ""}</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Chapter notes toggle — only if chapters were entered */}
                 {(eb.chapters && eb.chapters > 0) && (
                   <Button variant={chapterNotesEnabled ? "default" : "outline"} className="w-full text-xs" onClick={() => setChapterNotesEnabled(!chapterNotesEnabled)}>
@@ -313,25 +333,6 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 </div>
 
-                {/* Total reading time & days — only for "Lecture terminée" with sessions */}
-                {(() => {
-                  const bookSessions = allSessions.filter(s => s.book_id === eb.id);
-                  if (eb.status !== "Lecture terminée" || bookSessions.length === 0) return null;
-                  const totalMinutes = bookSessions.reduce((sum, s) => sum + s.duration_minutes, 0);
-                  const uniqueDays = new Set(bookSessions.map(s => new Date(s.session_date).toDateString())).size;
-                  return (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Temps total de lecture</Label>
-                        <p className="text-sm font-medium">{formatTotalReadingTime(totalMinutes)}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Nombre de jours de lecture</Label>
-                        <p className="text-sm font-medium">{uniqueDays} jour{uniqueDays > 1 ? "s" : ""}</p>
-                      </div>
-                    </div>
-                  );
-                })()}
 
                 {/* Avis */}
                 <div className="space-y-1 mt-3">
