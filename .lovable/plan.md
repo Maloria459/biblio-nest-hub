@@ -2,14 +2,27 @@
 
 ## Problem
 
-The `reading_sessions` table has `duration_minutes` as an **integer** column, but the code sends a fractional value (e.g., `0.18`) via `Math.round(durationMinutes * 100) / 100`. This causes a Postgres error: `invalid input syntax for type integer: "0.18"`.
+In `BookDetailModal.tsx`, the local `editBook` state is only re-initialized when the book ID changes (line 56: `editBook.id !== book.id`). After the timer saves and calls `updateBook` in BooksContext, the `book` prop updates from context with the new `pagesRead`, but since the ID is the same, `editBook` retains the stale value. The UI therefore shows the old page count.
 
 ## Fix
 
-In `src/components/ReadingSessionTimer.tsx`, change the `duration_minutes` value to use `Math.round(durationMinutes)` instead of `Math.round(durationMinutes * 100) / 100`, so it always sends a whole integer to the database.
+Add a sync effect: when `book.pagesRead` (or other key fields like `status`, `endDate`) changes on the prop but `editBook` still has the old value, update `editBook` accordingly. This can be done by comparing specific fields from `book` prop against `editBook` and patching when they differ — specifically after a session save.
 
-**File**: `src/components/ReadingSessionTimer.tsx`  
-**Line ~97**: Change `Math.round(durationMinutes * 100) / 100` to `Math.round(durationMinutes)`
+**File**: `src/components/BookDetailModal.tsx`
 
-This is a one-line fix.
+Add a condition inside the existing `if (!editBook || editBook.id !== book.id)` block to also trigger when certain session-related fields on the `book` prop have changed compared to `editBook`. Specifically, expand it to also sync when `book.pagesRead !== editBook.pagesRead` or `book.status !== editBook.status` or `book.endDate !== editBook.endDate`:
+
+```tsx
+if (!editBook || editBook.id !== book.id 
+    || book.pagesRead !== editBook.pagesRead 
+    || book.status !== editBook.status 
+    || book.endDate !== editBook.endDate) {
+  const initialized = { ...book, citations: book.citations ? [...book.citations] : [], chapterNotes: book.chapterNotes ? { ...book.chapterNotes } : {} };
+  setEditBook(initialized);
+  setChapterNotesEnabled(book.chapterNotesEnabled || false);
+  return null;
+}
+```
+
+This ensures that after the timer updates the book via context, the reading sheet immediately reflects the new pages read, progression, and status.
 
