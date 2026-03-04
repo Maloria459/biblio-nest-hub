@@ -287,7 +287,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
           onClick={onSwitchToLogin}
           className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
         >
-          Déjà lecteur ? Continuer mon aventure littéraire
+          Déjà lecteur ? Continuer ma quête littéraire
         </button>
       </div>
     </form>

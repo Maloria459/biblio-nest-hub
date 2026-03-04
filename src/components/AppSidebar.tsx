@@ -15,7 +15,7 @@ import { useAvatar } from "@/contexts/AvatarContext";
 
 const mainMenuItems = [
   { title: "Mon tableau de bord", path: "/", icon: LayoutDashboard },
-  { title: "Mon aventure littéraire", path: "/aventure", icon: BookOpen },
+  { title: "Ma quête littéraire", path: "/aventure", icon: BookOpen },
   { title: "Mon coin lecture", path: "/lecture", icon: Library },
   { title: "Ma wishlist", path: "/wishlist", icon: Heart },
   { title: "Communauté", path: "/communaute", icon: Users },
