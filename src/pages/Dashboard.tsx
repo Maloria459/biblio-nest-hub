@@ -126,8 +126,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* ── Currently reading + Last session (same row) ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-4">
+        {/* ── Currently reading + Last session (same row, equal size) ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <HighlightCard
             icon={<BookOpen className="h-4 w-4" />}
             label="En cours de lecture"
