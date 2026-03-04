@@ -137,7 +137,7 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
 
   return (
     <>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center">
+      <div className="absolute inset-0 z-[60] flex items-center justify-center">
         <div className="absolute inset-0 bg-black/60" onClick={phase === "timer" ? handleAbandonAttempt : undefined} />
         <div className="relative z-10 w-full max-w-md mx-4 bg-card border border-border rounded-xl shadow-2xl p-6">
           {phase === "timer" ? (

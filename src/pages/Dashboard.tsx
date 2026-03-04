@@ -126,8 +126,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* ── Four highlight cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* ── Currently reading + Last session (same row) ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-4">
           <HighlightCard
             icon={<BookOpen className="h-4 w-4" />}
             label="En cours de lecture"
@@ -148,6 +148,11 @@ const Dashboard = () => {
               );
             }}
           />
+          <LastSessionCard />
+        </div>
+
+        {/* ── Three highlight cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <HighlightCard
             icon={<CheckCircle2 className="h-4 w-4" />}
             label="Dernier livre lu"
@@ -171,9 +176,6 @@ const Dashboard = () => {
             renderExtra={(book) => <RatingDisplay rating={book.rating} />}
           />
         </div>
-
-        {/* ── Last reading session ── */}
-        <LastSessionCard />
 
         {/* ── Objectives & Challenges ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
