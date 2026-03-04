@@ -101,7 +101,7 @@ export function ReadingSessionTimer({ book, open, onClose }: ReadingSessionTimer
       book_id: book.id,
       user_id: user.id,
       session_date: today,
-      duration_minutes: Math.round(durationMinutes * 100) / 100,
+      duration_minutes: Math.round(durationMinutes),
       last_page_reached: pageNum,
     });
 
