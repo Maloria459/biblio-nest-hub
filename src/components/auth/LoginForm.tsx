@@ -95,7 +95,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         disabled={loading}
         className="w-full bg-foreground text-background hover:bg-foreground/90"
       >
-        {loading ? "Connexion…" : "Continuer mon aventure littéraire"}
+        {loading ? "Connexion…" : "Continuer ma quête littéraire"}
       </Button>
 
       <div className="text-center">
@@ -104,7 +104,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           onClick={onSwitchToRegister}
           className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
         >
-          Nouveau lecteur ? Commencer mon aventure littéraire
+          Nouveau lecteur ? Commencer ma quête littéraire
         </button>
       </div>
     </form>

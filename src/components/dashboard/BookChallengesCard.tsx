@@ -11,7 +11,7 @@ interface BookChallenge {
   targetValue: number;
 }
 
-// Placeholder: will be replaced with real data from "Mon aventure littéraire → Défis livresques"
+// Placeholder: will be replaced with real data from "Ma quête littéraire → Défis livresques"
 const activeChallenges: BookChallenge[] = [];
 
 export function BookChallengesCard() {
@@ -26,7 +26,7 @@ export function BookChallengesCard() {
         <div className="flex flex-col items-center justify-center flex-1 gap-1">
           <p className="text-sm text-muted-foreground text-center">Aucun défi livresque en cours</p>
           <p className="text-xs text-muted-foreground text-center">
-            Découvrez vos défis dans Mon aventure littéraire → Défis livresques
+            Découvrez vos défis dans Ma quête littéraire → Défis livresques
           </p>
         </div>
       ) : (
