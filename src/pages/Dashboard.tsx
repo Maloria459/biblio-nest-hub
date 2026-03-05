@@ -88,7 +88,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-6">
         {/* ── Profile Banner ── */}
         <div className="flex items-center gap-5 rounded-lg border border-border bg-card p-5">
           {/* Avatar */}

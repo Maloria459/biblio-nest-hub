@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { FlipBookCard } from "@/components/FlipBookCard";
@@ -40,30 +39,6 @@ export function WishlistContent() {
   const totalPrice = wishlistBooks.reduce((sum, b) => sum + (b.price ?? 0), 0);
   const bookCount = wishlistBooks.length;
 
-  useEffect(() => {
-    const el = document.getElementById(TOPBAR_RIGHT_ID);
-    if (!el) return;
-
-    el.innerHTML = `
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          ${bookCount} ${bookCount <= 1 ? "livre" : "livres"}
-        </span>
-        <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          ${totalPrice.toFixed(2)} €
-        </span>
-      </div>
-    `;
-
-    return () => {
-      const el = document.getElementById(TOPBAR_RIGHT_ID);
-      if (el) {
-        el.innerHTML = "";
-        el.textContent = "";
-        el.className = "ml-auto";
-      }
-    };
-  }, [bookCount, totalPrice]);
 
   const handleMarkAchete = useCallback(
     (id: string) => {

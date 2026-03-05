@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Book } from "@/data/mockBooks";
-import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { FlipBookCard } from "@/components/FlipBookCard";
 import { BookDetailModal } from "@/components/BookDetailModal";
 import { useBooks } from "@/contexts/BooksContext";
@@ -31,30 +30,6 @@ export function PileALireContent() {
     deleteBook(id);
     setSelectedBook(null);
   };
-
-  // Inject top bar counters
-  useEffect(() => {
-    const el = document.getElementById(TOPBAR_RIGHT_ID);
-    if (!el) return;
-
-    const formattedPages = totalPagesToRead.toLocaleString("fr-FR");
-
-    el.innerHTML = `
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          ${formattedPages} pages
-        </span>
-        <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-          ${palBooks.length} ${palBooks.length <= 1 ? "livre" : "livres"}
-        </span>
-      </div>
-    `;
-
-    return () => {
-      const el = document.getElementById(TOPBAR_RIGHT_ID);
-      if (el) { el.textContent = ""; el.className = "ml-auto"; }
-    };
-  }, [totalPagesToRead, palBooks.length]);
 
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
