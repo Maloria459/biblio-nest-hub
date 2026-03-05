@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from "react";
-import { TopBar } from "@/components/TopBar";
 import { BottomTabBar, type TabItem } from "@/components/BottomTabBar";
 
 interface TabbedPageProps {
@@ -13,7 +12,6 @@ export function TabbedPage({ tabs, defaultTab, tabContent }: TabbedPageProps) {
 
   return (
     <div className="flex flex-col flex-1">
-      <TopBar />
       <div className="flex-1 flex flex-col">
         {tabContent?.[activeTab] ?? null}
       </div>

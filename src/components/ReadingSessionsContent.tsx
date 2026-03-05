@@ -1,5 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useState, useMemo } from "react";
 import { useReadingSessions, formatDurationFull, formatTotalReadingTime, type ReadingSession } from "@/hooks/useReadingSessions";
 import { useBooks } from "@/contexts/BooksContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,7 +12,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Trash2, BookOpen, ChevronDown, List, Library, Play } from "lucide-react";
 import { toast } from "sonner";
 import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
-import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import type { Book } from "@/data/mockBooks";
 
 function formatDateFR(dateStr: string) {
@@ -89,16 +87,6 @@ export function ReadingSessionsContent() {
     });
   }, [sessions, books]);
 
-  const [slotEl, setSlotEl] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const el = document.getElementById(TOPBAR_RIGHT_ID);
-    setSlotEl(el);
-    return () => {
-      if (el) el.innerHTML = "";
-    };
-  }, []);
-
   if (isLoading) {
     return <div className="flex-1 flex items-center justify-center"><div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" /></div>;
   }
@@ -124,7 +112,9 @@ export function ReadingSessionsContent() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {slotEl && createPortal(viewToggle, slotEl)}
+      <div className="flex justify-center py-3">
+        {viewToggle}
+      </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4">
         {sessions.length === 0 ? (

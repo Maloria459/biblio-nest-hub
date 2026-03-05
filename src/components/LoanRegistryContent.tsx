@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useBooks } from "@/contexts/BooksContext";
-import { TOPBAR_RIGHT_ID } from "@/components/TopBar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Book } from "@/data/mockBooks";
@@ -58,23 +57,6 @@ export function LoanRegistryContent() {
       return normalize(a.returnDate).localeCompare(normalize(b.returnDate));
     });
 
-  // Inject topbar title
-  useEffect(() => {
-    const el = document.getElementById(TOPBAR_RIGHT_ID);
-    if (el) {
-      el.innerHTML = `
-        <div style="display:flex;gap:8px;align-items:center;">
-          <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-            ${lentBooks.length} prêté${lentBooks.length > 1 ? "s" : ""}
-          </span>
-          <span class="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
-            ${borrowedBooks.length} emprunté${borrowedBooks.length > 1 ? "s" : ""}
-          </span>
-        </div>
-      `;
-    }
-    return () => { if (el) el.innerHTML = ""; };
-  }, [lentBooks.length, borrowedBooks.length]);
 
   const handleReturn = () => {
     if (!confirmBook) return;
@@ -94,8 +76,11 @@ export function LoanRegistryContent() {
     <div className="flex flex-col lg:flex-row gap-4 p-4 h-full">
       {/* LEFT — Livres prêtés */}
       <div className="flex-1 border border-border rounded-xl bg-card flex flex-col min-h-[300px]">
-        <div className="px-4 py-3 border-b border-border">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
           <h3 className="text-sm font-semibold">📤 Livres prêtés</h3>
+          <span className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs text-muted-foreground whitespace-nowrap">
+            {lentBooks.length} prêté{lentBooks.length > 1 ? "s" : ""}
+          </span>
         </div>
         {lentBooks.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
@@ -142,8 +127,11 @@ export function LoanRegistryContent() {
 
       {/* RIGHT — Livres empruntés */}
       <div className="flex-1 border border-border rounded-xl bg-card flex flex-col min-h-[300px]">
-        <div className="px-4 py-3 border-b border-border">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
           <h3 className="text-sm font-semibold">📥 Livres empruntés</h3>
+          <span className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs text-muted-foreground whitespace-nowrap">
+            {borrowedBooks.length} emprunté{borrowedBooks.length > 1 ? "s" : ""}
+          </span>
         </div>
         {borrowedBooks.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6">

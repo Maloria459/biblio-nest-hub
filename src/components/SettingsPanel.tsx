@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { useState, useEffect, useRef } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,12 +30,24 @@ export function SettingsPanel({ open, onOpenChange, genres, formats, statuses, o
       setLocalFormats(formats);
       setLocalStatuses(statuses);
       setNewItem("");
+      isInitialMount.current = true;
     }
     onOpenChange(o);
   };
 
   const currentList = tab === "genres" ? localGenres : tab === "formats" ? localFormats : localStatuses;
   const setCurrentList = tab === "genres" ? setLocalGenres : tab === "formats" ? setLocalFormats : setLocalStatuses;
+
+  // Auto-save on changes
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (!open) return;
+    onSave(localGenres, localFormats, localStatuses);
+  }, [localGenres, localFormats, localStatuses]);
 
   const handleAdd = () => {
     const trimmed = newItem.trim();
@@ -109,17 +121,6 @@ export function SettingsPanel({ open, onOpenChange, genres, formats, statuses, o
           </div>
         </div>
 
-        <SheetFooter className="pt-4 border-t px-6 pb-4">
-          <Button
-            className="w-full"
-            onClick={() => {
-              onSave(localGenres, localFormats, localStatuses);
-              onOpenChange(false);
-            }}
-          >
-            Enregistrer les paramètres
-          </Button>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
