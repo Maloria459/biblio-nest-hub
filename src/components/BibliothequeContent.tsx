@@ -64,7 +64,7 @@ export function BibliothequeContent() {
             className="pl-9"
           />
         </div>
-        <span className="inline-flex items-center rounded-md border border-border px-3 py-1 text-sm text-muted-foreground whitespace-nowrap">
+        <span className="inline-flex items-center rounded-md border border-border px-3 h-9 text-sm text-muted-foreground whitespace-nowrap">
           {libraryCount} {libraryCount <= 1 ? "livre" : "livres"}
         </span>
         <Button variant="outline" size="default" onClick={() => setFiltersOpen(true)}>
