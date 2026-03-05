@@ -64,9 +64,9 @@ export function BibliothequeContent() {
             className="pl-9"
           />
         </div>
-        <span className="inline-flex items-center rounded-md border border-border px-3 h-9 text-sm text-muted-foreground whitespace-nowrap">
+        <div className="inline-flex items-center justify-center rounded-md border border-border px-3 h-10 text-sm text-muted-foreground whitespace-nowrap select-none pointer-events-none">
           {libraryCount} {libraryCount <= 1 ? "livre" : "livres"}
-        </span>
+        </div>
         <Button variant="outline" size="default" onClick={() => setFiltersOpen(true)}>
           <SlidersHorizontal className="h-4 w-4 mr-1.5" />
           Filtres
