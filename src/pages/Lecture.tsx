@@ -4,7 +4,6 @@ import type { TabItem } from "@/components/BottomTabBar";
 import { BibliothequeContent } from "@/components/BibliothequeContent";
 import { PileALireContent } from "@/components/PileALireContent";
 import { LoanRegistryContent } from "@/components/LoanRegistryContent";
-import { CollectionsContent } from "@/components/CollectionsContent";
 
 const tabs: TabItem[] = [
   { label: "Ma bibliothèque", icon: BookOpen },
@@ -20,7 +19,6 @@ const Lecture = () => (
     tabContent={{
       "Ma bibliothèque": <BibliothequeContent />,
       "Ma pile à lire": <PileALireContent />,
-      "Mes collections": <CollectionsContent />,
       "Registre des prêts": <LoanRegistryContent />,
     }}
   />
