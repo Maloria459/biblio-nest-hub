@@ -19,23 +19,26 @@ interface ProfileData {
 
 function ProfileBookCard({ book }: { book: any }) {
   return (
-    <div className="group cursor-pointer rounded-xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="group cursor-pointer rounded-xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow max-w-[180px] mx-auto w-full">
       <div className="aspect-[2/3] w-full bg-muted overflow-hidden">
         {book.coverUrl ? (
           <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <FileText className="h-10 w-10" />
+            <FileText className="h-8 w-8" />
           </div>
         )}
       </div>
-      <div className="p-3 space-y-1">
-        <p className="text-sm font-bold leading-tight line-clamp-2">{book.title}</p>
-        <p className="text-xs text-muted-foreground">{book.author}</p>
+      <div className="p-2 space-y-0.5">
+        <p className="text-xs font-bold leading-tight line-clamp-2">{book.title}</p>
+        <p className="text-[11px] text-muted-foreground">{book.author}</p>
         {book.rating != null && book.rating > 0 && (
           <div className="flex gap-0.5">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className={`h-3 w-3 ${book.rating! >= s ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
+              <Star
+                key={s}
+                className={`h-2.5 w-2.5 ${book.rating! >= s ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`}
+              />
             ))}
           </div>
         )}
@@ -91,143 +94,142 @@ export function ProfileContent() {
     supabase
       .from("profiles")
       .select("pseudo, created_at, avatar_url, banner_url")
-      .eq("user_id", user.id)
-      .maybeSingle()
+      .eq("id", user.id)
+      .single()
       .then(({ data }) => {
         if (data) {
           setProfile(data as ProfileData);
-          if (data.avatar_url) setAvatarUrl(data.avatar_url as string);
-          if (data.banner_url) setBannerUrl(data.banner_url as string);
+          if (data.avatar_url) setAvatarUrl(data.avatar_url);
+          if (data.banner_url) setBannerUrl(data.banner_url);
         }
       });
-  }, [user?.id]);
+  }, [user, setAvatarUrl]);
 
   const uploadImage = useCallback(
-    async (file: File, bucket: string, maxMB: number) => {
-      if (!user) return null;
-      if (file.size > maxMB * 1024 * 1024) {
-        toast.error(`Le fichier dépasse ${maxMB} Mo`);
-        return null;
+    async (file: File, bucket: string, field: "avatar_url" | "banner_url") => {
+      if (!user) return;
+      setUploading(true);
+      try {
+        const ext = file.name.split(".").pop();
+        const path = `${user.id}/${field}_${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+        const publicUrl = urlData.publicUrl;
+        await supabase
+          .from("profiles")
+          .update({ [field]: publicUrl })
+          .eq("id", user.id);
+        if (field === "avatar_url") setAvatarUrl(publicUrl);
+        else setBannerUrl(publicUrl);
+        toast.success(field === "avatar_url" ? "Photo de profil mise à jour !" : "Bannière mise à jour !");
+      } catch (err: any) {
+        toast.error(err.message || "Erreur lors de l'upload");
+      } finally {
+        setUploading(false);
       }
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
-      if (error || !data) {
-        toast.error("Erreur lors de l'upload");
-        return null;
-      }
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
-      return urlData.publicUrl;
     },
-    [user]
+    [user, setAvatarUrl],
   );
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-    setUploading(true);
-    const url = await uploadImage(file, "avatars", 2);
-    if (url) {
-      setAvatarUrl(url);
-      await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
-      toast.success("Avatar mis à jour");
-    }
-    setUploading(false);
-    e.target.value = "";
+    if (file) uploadImage(file, "avatars", "avatar_url");
   };
 
-  const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-    setUploading(true);
-    const url = await uploadImage(file, "profile-banners", 5);
-    if (url) {
-      setBannerUrl(url);
-      await supabase.from("profiles").update({ banner_url: url } as any).eq("user_id", user.id);
-      toast.success("Bannière mise à jour");
-    }
-    setUploading(false);
-    e.target.value = "";
+    if (file) uploadImage(file, "banners", "banner_url");
   };
 
-  const recommandations = books.filter((b) => b.recommandationDuMois);
-  const coupsDeCoeur = books.filter((b) => b.coupDeCoeur && !b.recommandationDuMois);
-  const registrationDate = profile?.created_at
-    ? format(new Date(profile.created_at), "dd/MM/yyyy", { locale: fr })
-    : "—";
+  if (!user) return null;
 
-  const rankTitle = "Lecteur Débutant";
-  const points = 0;
-  const progressPercent = 0;
+  const recommandations = books.filter((b) => b.isRecommended);
+  const coupsDeCoeur = books.filter((b) => b.isFavorite);
   const publicationCount = 0;
   const followingCount = 0;
   const followerCount = 0;
+
+  const points = books.length * 10;
+  const rankTitle =
+    points < 50
+      ? "Lecteur curieux"
+      : points < 150
+        ? "Lecteur assidu"
+        : points < 300
+          ? "Bibliophile"
+          : "Rat de bibliothèque";
+  const progressPercent = Math.min((points / 300) * 100, 100);
+
+  const registrationDate = profile?.created_at
+    ? format(new Date(profile.created_at), "d MMMM yyyy", { locale: fr })
+    : "—";
 
   const isOwnProfile = true;
   const visibleTabs = isOwnProfile ? ALL_TABS : ALL_TABS.filter((t) => !t.isPrivate);
 
   return (
-    <div className="flex flex-col flex-1 overflow-y-auto">
-      {/* BANNER */}
-      <div
-        className="relative w-full min-h-[220px] md:min-h-[250px] flex flex-col md:flex-row items-center md:items-center px-6 md:px-10 py-8 gap-6"
-        style={{
-          background: bannerUrl
-            ? `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${bannerUrl}) center/cover no-repeat`
-            : "linear-gradient(135deg, hsl(0 0% 30%), hsl(0 0% 15%))",
-        }}
-      >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => bannerInputRef.current?.click()}
-              className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white h-8 w-8 transition-colors"
-              disabled={uploading}
-            >
-              <ImageIcon className="h-4 w-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Modifier la bannière</TooltipContent>
-        </Tooltip>
-        <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleBannerChange} />
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* BANNER + PROFILE HEADER */}
+      <div className="relative w-full">
+        {/* Banner */}
+        <div className="relative w-full h-44 md:h-56 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
+          {bannerUrl && <img src={bannerUrl} alt="Bannière" className="w-full h-full object-cover absolute inset-0" />}
+          <button
+            onClick={() => bannerInputRef.current?.click()}
+            disabled={uploading}
+            className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
+          >
+            <ImageIcon className="h-4 w-4" />
+          </button>
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleBannerChange}
+          />
+        </div>
+      </div>
 
-        {/* LEFT ZONE */}
-        <div className="flex flex-col md:flex-row items-center gap-5 flex-shrink-0">
-          <div className="relative">
-            <Avatar className="h-24 w-24 md:h-28 md:w-28 border-[3px] border-white shadow-lg">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt="Avatar" /> : null}
-              <AvatarFallback className="bg-muted text-muted-foreground">
-                <User className="h-10 w-10" />
-              </AvatarFallback>
-            </Avatar>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => avatarInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white h-7 w-7 transition-colors border-2 border-white"
-                  disabled={uploading}
-                >
-                  <Pencil className="h-3 w-3" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Modifier l'avatar</TooltipContent>
-            </Tooltip>
-            <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
-          </div>
+      {/* PROFILE INFO BAR */}
+      <div className="relative flex flex-col md:flex-row items-center md:items-end gap-4 px-4 md:px-8 py-4 bg-gradient-to-b from-black/60 to-black/30 -mt-20 z-10">
+        {/* Avatar */}
+        <div className="relative group">
+          <Avatar className="h-24 w-24 md:h-28 md:w-28 border-4 border-background shadow-lg">
+            <AvatarImage src={avatarUrl || undefined} alt="Avatar" />
+            <AvatarFallback>
+              <User className="h-10 w-10 text-muted-foreground" />
+            </AvatarFallback>
+          </Avatar>
+          <button
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={uploading}
+            className="absolute bottom-0 right-0 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-colors"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+        </div>
 
-          <div className="flex flex-col items-center md:items-start gap-1">
-            <h1 className="text-xl md:text-2xl font-bold text-white drop-shadow truncate max-w-[260px]">
-              {profile?.pseudo || "—"}
-            </h1>
-            <span className="text-sm text-white/80">📖 {rankTitle}</span>
-            <div className="flex items-center gap-3 mt-1">
-              <div className="w-[180px] md:w-[200px] h-2 rounded-full bg-white/30 overflow-hidden">
-                <div className="h-full bg-white rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
-              </div>
-              <span className="text-xs font-bold text-white">{points} pts</span>
+        <div className="flex flex-col items-center md:items-start gap-1">
+          <h1 className="text-xl md:text-2xl font-bold text-white drop-shadow truncate max-w-[260px]">
+            {profile?.pseudo || "—"}
+          </h1>
+          <span className="text-sm text-white/80">📖 {rankTitle}</span>
+          <div className="flex items-center gap-3 mt-1">
+            <div className="w-[180px] md:w-[200px] h-2 rounded-full bg-white/30 overflow-hidden">
+              <div className="h-full bg-white rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
             </div>
-            <span className="text-xs text-white/60 mt-0.5">Membre depuis le {registrationDate}</span>
+            <span className="text-xs font-bold text-white">{points} pts</span>
           </div>
+          <span className="text-xs text-white/60 mt-0.5">Membre depuis le {registrationDate}</span>
         </div>
 
         {/* RIGHT ZONE */}
@@ -264,31 +266,53 @@ export function ProfileContent() {
       {/* TAB CONTENT */}
       <div className="flex-1 p-4 md:p-6">
         {activeTab === "publications" && (
-          <EmptyState icon="📝" title="Aucune publication pour le moment" subtitle="Vos publications dans le fil d'actualité apparaîtront ici." />
+          <EmptyState
+            icon="📝"
+            title="Aucune publication pour le moment"
+            subtitle="Vos publications dans le fil d'actualité apparaîtront ici."
+          />
         )}
-        {activeTab === "recommandations" && (
-          recommandations.length === 0 ? (
-            <EmptyState icon="⭐" title="Aucune recommandation pour le moment" subtitle="Marquez un livre comme 'Recommandation du mois' dans sa fiche de lecture pour qu'il apparaisse ici." />
+        {activeTab === "recommandations" &&
+          (recommandations.length === 0 ? (
+            <EmptyState
+              icon="⭐"
+              title="Aucune recommandation pour le moment"
+              subtitle="Marquez un livre comme 'Recommandation du mois' dans sa fiche de lecture pour qu'il apparaisse ici."
+            />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {recommandations.map((book) => <ProfileBookCard key={book.id} book={book} />)}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {recommandations.map((book) => (
+                <ProfileBookCard key={book.id} book={book} />
+              ))}
             </div>
-          )
-        )}
-        {activeTab === "coups" && (
-          coupsDeCoeur.length === 0 ? (
-            <EmptyState icon="❤️" title="Aucun coup de cœur pour le moment" subtitle="Marquez un livre comme 'Coup de cœur' dans sa fiche de lecture pour qu'il apparaisse ici." />
+          ))}
+        {activeTab === "coups" &&
+          (coupsDeCoeur.length === 0 ? (
+            <EmptyState
+              icon="❤️"
+              title="Aucun coup de cœur pour le moment"
+              subtitle="Marquez un livre comme 'Coup de cœur' dans sa fiche de lecture pour qu'il apparaisse ici."
+            />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {coupsDeCoeur.map((book) => <ProfileBookCard key={book.id} book={book} />)}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {coupsDeCoeur.map((book) => (
+                <ProfileBookCard key={book.id} book={book} />
+              ))}
             </div>
-          )
-        )}
+          ))}
         {activeTab === "saved" && (
-          <EmptyState icon="🔖" title="Aucune publication enregistrée" subtitle="Enregistrez des publications depuis le fil d'actualité pour les retrouver ici." />
+          <EmptyState
+            icon="🔖"
+            title="Aucune publication enregistrée"
+            subtitle="Enregistrez des publications depuis le fil d'actualité pour les retrouver ici."
+          />
         )}
         {activeTab === "liked" && (
-          <EmptyState icon="👍" title="Aucune publication aimée" subtitle="Aimez des publications depuis le fil d'actualité pour les retrouver ici." />
+          <EmptyState
+            icon="👍"
+            title="Aucune publication aimée"
+            subtitle="Aimez des publications depuis le fil d'actualité pour les retrouver ici."
+          />
         )}
       </div>
     </div>
