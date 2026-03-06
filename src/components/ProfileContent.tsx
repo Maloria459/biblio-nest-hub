@@ -144,8 +144,8 @@ export function ProfileContent() {
 
   if (!user) return null;
 
-  const recommandations = books.filter((b) => b.isRecommended);
-  const coupsDeCoeur = books.filter((b) => b.isFavorite);
+  const recommandations = books.filter((b) => b.recommandationDuMois);
+  const coupsDeCoeur = books.filter((b) => b.coupDeCoeur && !b.recommandationDuMois);
   const publicationCount = 0;
   const followingCount = 0;
   const followerCount = 0;
