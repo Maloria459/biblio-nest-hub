@@ -270,7 +270,7 @@ export function ProfileContent() {
           recommandations.length === 0 ? (
             <EmptyState icon="⭐" title="Aucune recommandation pour le moment" subtitle="Marquez un livre comme 'Recommandation du mois' dans sa fiche de lecture pour qu'il apparaisse ici." />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
               {recommandations.map((book) => <ProfileBookCard key={book.id} book={book} />)}
             </div>
           )
