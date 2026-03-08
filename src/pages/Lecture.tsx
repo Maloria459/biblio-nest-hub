@@ -20,6 +20,7 @@ const Lecture = () => (
     tabContent={{
       "Ma bibliothèque": <BibliothequeContent />,
       "Ma pile à lire": <PileALireContent />,
+      "Mes collections": <CollectionsContent />,
       "Registre des prêts": <LoanRegistryContent />,
     }}
   />
