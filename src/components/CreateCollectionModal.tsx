@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,13 +12,28 @@ interface CreateCollectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (name: string, bookIds: string[]) => void;
+  initialName?: string;
+  initialBookIds?: string[];
+  editMode?: boolean;
 }
 
-export function CreateCollectionModal({ open, onOpenChange, onCreated }: CreateCollectionModalProps) {
+export function CreateCollectionModal({
+  open, onOpenChange, onCreated,
+  initialName = "", initialBookIds = [], editMode = false,
+}: CreateCollectionModalProps) {
   const { books } = useBooks();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialName);
   const [search, setSearch] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(initialBookIds));
+
+  // Sync when opening in edit mode
+  useEffect(() => {
+    if (open) {
+      setName(initialName);
+      setSelectedIds(new Set(initialBookIds));
+      setSearch("");
+    }
+  }, [open, initialName, initialBookIds]);
 
   const libraryBooks = useMemo(
     () => books.filter((b) => b.status !== "Wishlist"),
@@ -42,7 +57,7 @@ export function CreateCollectionModal({ open, onOpenChange, onCreated }: CreateC
       return next;
     });
 
-  const handleCreate = () => {
+  const handleSubmit = () => {
     if (!name.trim()) return;
     onCreated(name.trim(), Array.from(selectedIds));
     setName("");
@@ -60,7 +75,7 @@ export function CreateCollectionModal({ open, onOpenChange, onCreated }: CreateC
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Créer une nouvelle collection</DialogTitle>
+          <DialogTitle>{editMode ? "Modifier la collection" : "Créer une nouvelle collection"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -118,8 +133,8 @@ export function CreateCollectionModal({ open, onOpenChange, onCreated }: CreateC
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Annuler
           </Button>
-          <Button onClick={handleCreate} disabled={!name.trim()}>
-            Créer ({selectedIds.size} livre{selectedIds.size > 1 ? "s" : ""})
+          <Button onClick={handleSubmit} disabled={!name.trim()}>
+            {editMode ? "Enregistrer" : `Créer (${selectedIds.size} livre${selectedIds.size > 1 ? "s" : ""})`}
           </Button>
         </DialogFooter>
       </DialogContent>
