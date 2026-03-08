@@ -131,6 +131,14 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* ── Quick stats ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <StatCard icon={<Library className="h-5 w-5" />} label="Bibliothèque" value={libraryCount} />
+          <StatCard icon={<BookMarked className="h-5 w-5" />} label="Pile à lire" value={palCount} />
+          <StatCard icon={<Gift className="h-5 w-5" />} label="Wishlist" value={wishlistCount} />
+          <StatCard icon={<CheckCircle2 className="h-5 w-5" />} label="Lectures terminées" value={finishedCount} />
+        </div>
+
         {/* ── Currently reading + Last session (same row, equal size) ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <HighlightCard
