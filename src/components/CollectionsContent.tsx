@@ -143,15 +143,15 @@ export function CollectionsContent() {
       {collections.map((col) => (
         <div key={col.id} className="space-y-2 inline-block">
           {/* Collection header */}
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">{col.name}</h3>
+          <div className="flex items-center gap-1">
+            <h3 className="font-semibold text-foreground text-sm">{col.name}</h3>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              className="h-6 w-6 text-muted-foreground hover:text-destructive"
               onClick={() => handleDelete(col.id)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
 
