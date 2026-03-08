@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { BookDetailModal } from "@/components/BookDetailModal";
-import { User, BookOpen, Star, Heart, CheckCircle2 } from "lucide-react";
+import { User, BookOpen, Star, Heart, CheckCircle2, Library, BookMarked, Gift } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
 import eclatEncreImg from "@/assets/eclat-encre.png";
 import { LastSessionCard } from "@/components/dashboard/LastSessionCard";
