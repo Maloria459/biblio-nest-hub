@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBooks } from "@/contexts/BooksContext";
 import { toast } from "sonner";
 import { CreateCollectionModal } from "@/components/CreateCollectionModal";
+import { BookDetailModal } from "@/components/BookDetailModal";
 import type { Book } from "@/data/mockBooks";
 
 interface Collection {
@@ -64,7 +65,7 @@ function spineHeight(title: string): number {
 }
 
 // Component for a single book spine that extracts dominant cover color
-function BookSpine({ book }: { book: Book }) {
+function BookSpine({ book, onClick }: { book: Book; onClick?: () => void }) {
   const fallback = fallbackGradient(book.title + book.author);
   const [gradient, setGradient] = useState<[string, string]>(fallback);
   const height = spineHeight(book.title);
@@ -78,7 +79,9 @@ function BookSpine({ book }: { book: Book }) {
   }, [book.coverUrl, book.title, book.author]);
 
   return (
-    <div className="relative flex-shrink-0 flex items-center justify-center rounded-t-sm cursor-default select-none transition-transform hover:-translate-y-1"
+    <div
+      className="relative flex-shrink-0 flex items-center justify-center rounded-t-sm cursor-pointer select-none transition-transform hover:-translate-y-1"
+      onClick={onClick}
       style={{
         width: 38,
         height,
@@ -127,10 +130,11 @@ function BookSpine({ book }: { book: Book }) {
 
 export function CollectionsContent() {
   const { user } = useAuth();
-  const { books } = useBooks();
+  const { books, genres, formats, statuses, updateBook, deleteBook } = useBooks();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadCollections = useCallback(async () => {
@@ -296,7 +300,7 @@ export function CollectionsContent() {
                             </p>
                           )}
                           {col.books.map((book) => (
-                            <BookSpine key={book.id} book={book} />
+                            <BookSpine key={book.id} book={book} onClick={() => setSelectedBook(book)} />
                           ))}
                         </div>
                         <div
@@ -359,6 +363,18 @@ export function CollectionsContent() {
           editMode
         />
       )}
+      {/* Book detail modal */}
+      <BookDetailModal
+        book={selectedBook}
+        open={!!selectedBook}
+        onOpenChange={(o) => { if (!o) setSelectedBook(null); }}
+        onSave={(updated) => { updateBook(updated); setSelectedBook(null); loadCollections(); }}
+        onDelete={(id) => { deleteBook(id); setSelectedBook(null); loadCollections(); }}
+        allBooks={books}
+        genres={genres}
+        formats={formats}
+        statuses={statuses}
+      />
     </div>
   );
 }
