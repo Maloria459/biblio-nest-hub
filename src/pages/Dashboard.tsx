@@ -32,6 +32,16 @@ const Dashboard = () => {
   const [pseudo, setPseudo] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [pseudoLoaded, setPseudoLoaded] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  // Preload eclat d'encre image
+  useEffect(() => {
+    const img = new Image();
+    img.src = eclatEncreImg;
+    img.onload = () => setImgLoaded(true);
+    img.onerror = () => setImgLoaded(true);
+    if (img.complete) setImgLoaded(true);
+  }, []);
 
   // Fetch pseudo from profiles
   useEffect(() => {
@@ -94,7 +104,7 @@ const Dashboard = () => {
     setSelectedBook(null);
   };
 
-  if (!pseudoLoaded) {
+  if (!pseudoLoaded || !imgLoaded) {
     return (
       <div className="flex flex-col flex-1 items-center justify-center">
         <div className="h-6 w-6 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
