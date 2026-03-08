@@ -17,9 +17,11 @@ interface CreateCollectionModalProps {
   editMode?: boolean;
 }
 
+const EMPTY_BOOK_IDS: string[] = [];
+
 export function CreateCollectionModal({
   open, onOpenChange, onCreated,
-  initialName = "", initialBookIds = [], editMode = false,
+  initialName = "", initialBookIds = EMPTY_BOOK_IDS, editMode = false,
 }: CreateCollectionModalProps) {
   const { books } = useBooks();
   const [name, setName] = useState(initialName);
