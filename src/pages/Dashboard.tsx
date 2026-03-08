@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { BookDetailModal } from "@/components/BookDetailModal";
-import { User, BookOpen, Star, Heart, CheckCircle2 } from "lucide-react";
+import { User, BookOpen, Star, Heart, CheckCircle2, Library, BookMarked, Gift } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
 import eclatEncreImg from "@/assets/eclat-encre.png";
 import { LastSessionCard } from "@/components/dashboard/LastSessionCard";
@@ -45,6 +45,11 @@ const Dashboard = () => {
       });
   }, [user?.id]);
 
+  /* ── stat counts ── */
+  const libraryCount = useMemo(() => books.length, [books]);
+  const palCount = useMemo(() => books.filter((b) => b.status === "Dans ma PAL").length, [books]);
+  const wishlistCount = useMemo(() => books.filter((b) => b.status === "Wishlist").length, [books]);
+  const finishedCount = useMemo(() => books.filter((b) => b.status === "Lecture terminée" || b.status === "Lu").length, [books]);
 
   /* ── derived book data ── */
   const currentlyReading = useMemo(() => {
@@ -124,6 +129,14 @@ const Dashboard = () => {
               0 Éclat d'Encre
             </span>
           </div>
+        </div>
+
+        {/* ── Quick stats ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <StatCard icon={<Library className="h-5 w-5" />} label="Bibliothèque" value={libraryCount} />
+          <StatCard icon={<BookMarked className="h-5 w-5" />} label="Pile à lire" value={palCount} />
+          <StatCard icon={<Gift className="h-5 w-5" />} label="Wishlist" value={wishlistCount} />
+          <StatCard icon={<CheckCircle2 className="h-5 w-5" />} label="Lectures terminées" value={finishedCount} />
         </div>
 
         {/* ── Currently reading + Last session (same row, equal size) ── */}
@@ -294,6 +307,21 @@ function RatingDisplay({ rating }: { rating?: number }) {
         />
       ))}
     </div>
+  );
+}
+
+/* ─── Stat Card ─── */
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <Card className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center justify-center h-10 w-10 rounded-md bg-muted text-muted-foreground shrink-0">
+        {icon}
+      </div>
+      <div className="flex flex-col min-w-0">
+        <span className="text-xl font-bold text-foreground leading-tight">{value}</span>
+        <span className="text-xs text-muted-foreground truncate">{label}</span>
+      </div>
+    </Card>
   );
 }
 

@@ -164,6 +164,66 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_books: {
+        Row: {
+          added_at: string
+          book_id: string
+          collection_id: string
+          id: string
+        }
+        Insert: {
+          added_at?: string
+          book_id: string
+          collection_id: string
+          id?: string
+        }
+        Update: {
+          added_at?: string
+          book_id?: string
+          collection_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_books_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_books_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       library_settings: {
         Row: {
           created_at: string
