@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Book } from "@/data/mockBooks";
 import { FlipBookCard } from "@/components/FlipBookCard";
 import { BookDetailModal } from "@/components/BookDetailModal";
 import { useBooks } from "@/contexts/BooksContext";
