@@ -114,8 +114,9 @@ export function CollectionsContent() {
     setLoading(true);
     const { data: cols, error } = await supabase
       .from("collections")
-      .select("id, name")
+      .select("id, name, sort_order")
       .eq("user_id", user.id)
+      .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true });
 
     if (error || !cols) {
