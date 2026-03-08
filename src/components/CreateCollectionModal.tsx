@@ -62,7 +62,10 @@ export function CreateCollectionModal({
   }, []);
 
   const handleSubmit = () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast.error("Veuillez saisir un nom de collection");
+      return;
+    }
     onCreated(name.trim(), Array.from(selectedIds));
     setName("");
     setSearch("");
