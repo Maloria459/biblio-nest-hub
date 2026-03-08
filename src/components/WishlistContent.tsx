@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import type { Book } from "@/data/mockBooks";
 import { FlipBookCard } from "@/components/FlipBookCard";
 import { BookDetailModal } from "@/components/BookDetailModal";
 import { useBooks } from "@/contexts/BooksContext";
