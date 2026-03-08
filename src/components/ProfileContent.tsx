@@ -279,7 +279,7 @@ export function ProfileContent() {
           coupsDeCoeur.length === 0 ? (
             <EmptyState icon="❤️" title="Aucun coup de cœur pour le moment" subtitle="Marquez un livre comme 'Coup de cœur' dans sa fiche de lecture pour qu'il apparaisse ici." />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
               {coupsDeCoeur.map((book) => <ProfileBookCard key={book.id} book={book} />)}
             </div>
           )
