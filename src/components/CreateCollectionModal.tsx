@@ -148,7 +148,7 @@ export function CreateCollectionModal({
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Annuler
           </Button>
-          <Button type="button" onClick={handleSubmit} disabled={!name.trim()}>
+          <Button type="button" onClick={handleSubmit}>
             {editMode ? "Enregistrer" : `Créer (${selectedIds.size} livre${selectedIds.size > 1 ? "s" : ""})`}
           </Button>
         </div>
