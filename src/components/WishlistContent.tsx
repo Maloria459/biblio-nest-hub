@@ -82,7 +82,11 @@ export function WishlistContent() {
         </div>
       </div>
 
-      {/* Card grid — same layout as BibliothequeContent */}
+      {wishlistBooks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground text-sm">
+          Aucun livre dans votre wishlist
+        </div>
+      ) : (
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="wishlist" direction="horizontal">
           {(provided) => (
