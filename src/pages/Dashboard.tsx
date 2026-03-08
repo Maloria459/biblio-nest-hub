@@ -123,9 +123,9 @@ const Dashboard = () => {
           </div>
 
           {/* Virtual currency */}
-          <div className="flex items-center gap-2 shrink-0">
-            <img src={eclatEncreImg} alt="Éclat d'Encre" className="h-10 w-10 object-contain" />
-            <span className="text-sm font-medium text-foreground whitespace-nowrap">
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            <img src={eclatEncreImg} alt="Éclat d'Encre" className="h-14 w-14 object-contain" />
+            <span className="text-xs font-medium text-foreground whitespace-nowrap">
               0 Éclat d'Encre
             </span>
           </div>
