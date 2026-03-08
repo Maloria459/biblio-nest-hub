@@ -300,7 +300,7 @@ export function CollectionsContent() {
                             </p>
                           )}
                           {col.books.map((book) => (
-                            <BookSpine key={book.id} book={book} />
+                            <BookSpine key={book.id} book={book} onClick={() => setSelectedBook(book)} />
                           ))}
                         </div>
                         <div
