@@ -80,12 +80,12 @@ function BookSpine({ book }: { book: Book }) {
       style={{
         width: 38,
         height,
-        background: `linear-gradient(135deg, ${gradient[0]} 0%, ${gradient[1]} 60%, rgba(0,0,0,0.25) 100%)`,
-        borderLeft: "1.5px solid rgba(255,255,255,0.18)",
-        borderRight: "1.5px solid rgba(0,0,0,0.3)",
-        borderTop: "1px solid rgba(255,255,255,0.12)",
+        background: `linear-gradient(135deg, ${gradient[0]} 0%, ${gradient[1]} 60%, rgba(0,0,0,0.2) 100%)`,
+        borderLeft: "1px solid rgba(255,255,255,0.12)",
+        borderRight: "1px solid rgba(0,0,0,0.2)",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
         boxShadow:
-          "inset 2px 0 4px rgba(255,255,255,0.10), inset -2px 0 6px rgba(0,0,0,0.25), 2px 2px 6px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.15)",
+          "inset 1px 0 3px rgba(255,255,255,0.08), inset -1px 0 4px rgba(0,0,0,0.18), 1px 2px 4px rgba(0,0,0,0.2)",
       }}
       title={`${book.title} — ${book.author}`}
     >
@@ -93,19 +93,22 @@ function BookSpine({ book }: { book: Book }) {
       <div
         className="absolute left-0 top-0 bottom-0 rounded-tl-sm pointer-events-none"
         style={{
-          width: 3,
-          background: "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%)",
+          width: 2,
+          background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.03) 100%)",
         }}
       />
       <span
-        className="text-white font-medium text-[10px] leading-tight px-0.5 overflow-hidden drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+        className="text-white font-medium text-[10px] leading-tight px-0.5 overflow-hidden drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
         style={{
           writingMode: "vertical-rl",
           textOrientation: "mixed",
           transform: "rotate(180deg)",
-          maxHeight: height - 16,
+          maxHeight: height - 8,
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         {book.title}
