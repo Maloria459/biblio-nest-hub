@@ -310,4 +310,19 @@ function RatingDisplay({ rating }: { rating?: number }) {
   );
 }
 
+/* ─── Stat Card ─── */
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <Card className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center justify-center h-10 w-10 rounded-md bg-muted text-muted-foreground shrink-0">
+        {icon}
+      </div>
+      <div className="flex flex-col min-w-0">
+        <span className="text-xl font-bold text-foreground leading-tight">{value}</span>
+        <span className="text-xs text-muted-foreground truncate">{label}</span>
+      </div>
+    </Card>
+  );
+}
+
 export default Dashboard;
