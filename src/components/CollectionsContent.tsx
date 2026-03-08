@@ -16,37 +16,36 @@ interface Collection {
   books: Book[];
 }
 
-// Extract two dominant colors from an image for a gradient
-function extractGradientColors(url: string): Promise<[string, string]> {
+// Extract the dominant color from an image, then derive a subtle gradient
+function extractDominantColor(url: string): Promise<[number, number, number]> {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      if (!ctx) { resolve(["hsl(0 0% 30%)", "hsl(0 0% 20%)"]); return; }
+      if (!ctx) { resolve([80, 80, 80]); return; }
       canvas.width = 16;
       canvas.height = 16;
       ctx.drawImage(img, 0, 0, 16, 16);
       const data = ctx.getImageData(0, 0, 16, 16).data;
-      // Top half for color 1, bottom half for color 2
-      let r1 = 0, g1 = 0, b1 = 0, c1 = 0;
-      let r2 = 0, g2 = 0, b2 = 0, c2 = 0;
-      for (let y = 0; y < 16; y++) {
-        for (let x = 0; x < 16; x++) {
-          const i = (y * 16 + x) * 4;
-          if (y < 8) { r1 += data[i]; g1 += data[i+1]; b1 += data[i+2]; c1++; }
-          else { r2 += data[i]; g2 += data[i+1]; b2 += data[i+2]; c2++; }
-        }
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
       }
-      const darken = (v: number) => Math.round(v * 0.75);
-      const col1 = `rgb(${darken(r1/c1)},${darken(g1/c1)},${darken(b1/c1)})`;
-      const col2 = `rgb(${darken(r2/c2)},${darken(g2/c2)},${darken(b2/c2)})`;
-      resolve([col1, col2]);
+      resolve([Math.round(r / count), Math.round(g / count), Math.round(b / count)]);
     };
-    img.onerror = () => resolve(["hsl(0 0% 30%)", "hsl(0 0% 20%)"]);
+    img.onerror = () => resolve([80, 80, 80]);
     img.src = url;
   });
+}
+
+// From a dominant RGB, create a soft gradient: slightly lighter on top, slightly darker on bottom
+function deriveGradient(r: number, g: number, b: number): [string, string] {
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+  const light = `rgb(${clamp(r * 1.15)},${clamp(g * 1.15)},${clamp(b * 1.15)})`;
+  const dark = `rgb(${clamp(r * 0.7)},${clamp(g * 0.7)},${clamp(b * 0.7)})`;
+  return [light, dark];
 }
 
 // Fallback gradient from string hash
