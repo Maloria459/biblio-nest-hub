@@ -157,9 +157,10 @@ export function CollectionsContent() {
 
   const handleCreate = async (name: string, bookIds: string[]) => {
     if (!user) return;
+    const nextOrder = collections.length;
     const { data, error } = await supabase
       .from("collections")
-      .insert({ name, user_id: user.id })
+      .insert({ name, user_id: user.id, sort_order: nextOrder })
       .select("id")
       .single();
 
@@ -177,6 +178,20 @@ export function CollectionsContent() {
 
     toast.success("Collection créée !");
     loadCollections();
+  };
+
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination || result.source.index === result.destination.index) return;
+    const reordered = Array.from(collections);
+    const [moved] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, moved);
+    setCollections(reordered);
+
+    // Persist new order
+    const updates = reordered.map((col, i) =>
+      supabase.from("collections").update({ sort_order: i }).eq("id", col.id)
+    );
+    await Promise.all(updates);
   };
 
   const handleEdit = async (name: string, bookIds: string[]) => {
