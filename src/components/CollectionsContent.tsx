@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBooks } from "@/contexts/BooksContext";
 import { toast } from "sonner";
 import { CreateCollectionModal } from "@/components/CreateCollectionModal";
+import { BookDetailModal } from "@/components/BookDetailModal";
 import type { Book } from "@/data/mockBooks";
 
 interface Collection {
