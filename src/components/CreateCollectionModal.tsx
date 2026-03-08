@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBooks } from "@/contexts/BooksContext";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
 
 interface CreateCollectionModalProps {
   open: boolean;
