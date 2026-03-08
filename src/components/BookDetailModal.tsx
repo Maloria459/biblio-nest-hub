@@ -115,7 +115,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center py-[3%]">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center py-[3%]">
         {/* Backdrop */}
         <div className="fixed inset-0 bg-black/30" onClick={handleClose} />
         {/* Modal */}
