@@ -307,7 +307,7 @@ function HighlightCard({ icon, label, book, onClick, badge, renderExtra }: Highl
         </div>
       ) : (
         <div className="flex items-center gap-3 flex-1">
-          <div className="w-16 h-[88px] shrink-0 rounded bg-secondary flex items-center justify-center">
+          <div className="w-16 aspect-[2/3] shrink-0 rounded bg-secondary flex items-center justify-center">
             <BookOpen className="h-6 w-6 text-muted-foreground/40" />
           </div>
           <p className="text-sm text-muted-foreground">
