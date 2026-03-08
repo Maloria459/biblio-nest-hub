@@ -66,12 +66,12 @@ function spineHeight(str: string): number {
 
 // Component for a single book spine that extracts dominant cover color
 function BookSpine({ book }: { book: Book }) {
-  const [color, setColor] = useState<string>(fallbackColor(book.title + book.author));
+  const [gradient, setGradient] = useState<[string, string]>(fallbackGradient(book.title + book.author));
   const height = spineHeight(book.title);
 
   useEffect(() => {
     if (book.coverUrl) {
-      extractDominantColor(book.coverUrl).then(setColor);
+      extractGradientColors(book.coverUrl).then(setGradient);
     }
   }, [book.coverUrl, book.title, book.author]);
 
@@ -81,7 +81,7 @@ function BookSpine({ book }: { book: Book }) {
       style={{
         width: 36,
         height,
-        backgroundColor: color,
+        background: `linear-gradient(180deg, ${gradient[0]} 0%, ${gradient[1]} 100%)`,
         borderLeft: "1px solid rgba(255,255,255,0.1)",
         borderRight: "1px solid rgba(0,0,0,0.15)",
       }}
