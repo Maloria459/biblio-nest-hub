@@ -16,43 +16,46 @@ interface Collection {
   books: Book[];
 }
 
-// Extract dominant color from an image URL via a small canvas sample
-function extractDominantColor(url: string): Promise<string> {
+// Extract two dominant colors from an image for a gradient
+function extractGradientColors(url: string): Promise<[string, string]> {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      if (!ctx) { resolve("hsl(0 0% 30%)"); return; }
+      if (!ctx) { resolve(["hsl(0 0% 30%)", "hsl(0 0% 20%)"]); return; }
       canvas.width = 16;
       canvas.height = 16;
       ctx.drawImage(img, 0, 0, 16, 16);
       const data = ctx.getImageData(0, 0, 16, 16).data;
-      let r = 0, g = 0, b = 0, count = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+      // Top half for color 1, bottom half for color 2
+      let r1 = 0, g1 = 0, b1 = 0, c1 = 0;
+      let r2 = 0, g2 = 0, b2 = 0, c2 = 0;
+      for (let y = 0; y < 16; y++) {
+        for (let x = 0; x < 16; x++) {
+          const i = (y * 16 + x) * 4;
+          if (y < 8) { r1 += data[i]; g1 += data[i+1]; b1 += data[i+2]; c1++; }
+          else { r2 += data[i]; g2 += data[i+1]; b2 += data[i+2]; c2++; }
+        }
       }
-      r = Math.round(r / count);
-      g = Math.round(g / count);
-      b = Math.round(b / count);
-      // Darken slightly for readability
-      r = Math.round(r * 0.7);
-      g = Math.round(g * 0.7);
-      b = Math.round(b * 0.7);
-      resolve(`rgb(${r},${g},${b})`);
+      const darken = (v: number) => Math.round(v * 0.75);
+      const col1 = `rgb(${darken(r1/c1)},${darken(g1/c1)},${darken(b1/c1)})`;
+      const col2 = `rgb(${darken(r2/c2)},${darken(g2/c2)},${darken(b2/c2)})`;
+      resolve([col1, col2]);
     };
-    img.onerror = () => resolve("hsl(0 0% 30%)");
+    img.onerror = () => resolve(["hsl(0 0% 30%)", "hsl(0 0% 20%)"]);
     img.src = url;
   });
 }
 
-// Fallback color from string hash (monochrome)
-function fallbackColor(str: string): string {
+// Fallback gradient from string hash
+function fallbackGradient(str: string): [string, string] {
   let h = 0;
   for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
-  const lightness = 25 + (((h % 20) + 20) % 20); // 25-45%
-  return `hsl(0 0% ${lightness}%)`;
+  const l1 = 25 + (((h % 15) + 15) % 15);
+  const l2 = l1 + 10;
+  return [`hsl(0 0% ${l1}%)`, `hsl(0 0% ${l2}%)`];
 }
 
 function spineHeight(str: string): number {
@@ -63,12 +66,12 @@ function spineHeight(str: string): number {
 
 // Component for a single book spine that extracts dominant cover color
 function BookSpine({ book }: { book: Book }) {
-  const [color, setColor] = useState<string>(fallbackColor(book.title + book.author));
+  const [gradient, setGradient] = useState<[string, string]>(fallbackGradient(book.title + book.author));
   const height = spineHeight(book.title);
 
   useEffect(() => {
     if (book.coverUrl) {
-      extractDominantColor(book.coverUrl).then(setColor);
+      extractGradientColors(book.coverUrl).then(setGradient);
     }
   }, [book.coverUrl, book.title, book.author]);
 
@@ -78,7 +81,7 @@ function BookSpine({ book }: { book: Book }) {
       style={{
         width: 36,
         height,
-        backgroundColor: color,
+        background: `linear-gradient(180deg, ${gradient[0]} 0%, ${gradient[1]} 100%)`,
         borderLeft: "1px solid rgba(255,255,255,0.1)",
         borderRight: "1px solid rgba(0,0,0,0.15)",
       }}
