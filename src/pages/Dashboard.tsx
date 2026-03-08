@@ -282,12 +282,12 @@ function HighlightCard({ icon, label, book, onClick, badge, renderExtra }: Highl
       {book ? (
         <div className="flex gap-3 flex-1">
           {/* Cover */}
-          <div className="w-16 h-[88px] shrink-0 rounded overflow-hidden bg-secondary flex items-center justify-center">
+          <div className="w-16 aspect-[2/3] shrink-0 rounded overflow-hidden bg-secondary flex items-center justify-center">
             {book.coverUrl ? (
               <img
                 src={book.coverUrl}
                 alt={book.title}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-center"
               />
             ) : (
               <BookOpen className="h-6 w-6 text-muted-foreground" />
@@ -307,7 +307,7 @@ function HighlightCard({ icon, label, book, onClick, badge, renderExtra }: Highl
         </div>
       ) : (
         <div className="flex items-center gap-3 flex-1">
-          <div className="w-16 h-[88px] shrink-0 rounded bg-secondary flex items-center justify-center">
+          <div className="w-16 aspect-[2/3] shrink-0 rounded bg-secondary flex items-center justify-center">
             <BookOpen className="h-6 w-6 text-muted-foreground/40" />
           </div>
           <p className="text-sm text-muted-foreground">
