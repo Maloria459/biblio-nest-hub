@@ -33,6 +33,14 @@ export function PileALireContent() {
 
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto">
+      {/* Stats row */}
+      <div className="flex justify-end">
+        <div className="inline-flex items-center gap-4 rounded-md border border-border bg-card px-4 h-10 text-sm text-muted-foreground select-none">
+          <span><strong className="text-foreground">{palBooks.length}</strong> {palBooks.length <= 1 ? "livre" : "livres"}</span>
+          <span className="text-border">|</span>
+          <span><strong className="text-foreground">{totalPagesToRead.toLocaleString("fr-FR")}</strong> pages à lire</span>
+        </div>
+      </div>
       {palBooks.length === 0 ? (
         <div className="flex flex-col items-center justify-center flex-1 gap-2 text-center">
           <p className="text-lg font-medium text-foreground">Votre pile à lire est vide</p>
