@@ -145,7 +145,7 @@ const Dashboard = () => {
               {/* Fixed placeholder to prevent any layout shift */}
               <div className="absolute inset-0 rounded-full bg-muted" />
               <img
-                src={eclatEncreImg}
+                src={eclatEncreSrc}
                 alt="Éclat d'Encre"
                 className="relative h-14 w-14 object-contain"
                 loading="eager"
