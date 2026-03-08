@@ -110,9 +110,10 @@ export function CreateCollectionModal({
                   </p>
                 )}
                 {filtered.map((book) => (
-                  <label
+                  <div
                     key={book.id}
                     className="flex items-center gap-2 p-2 rounded hover:bg-accent cursor-pointer"
+                    onClick={() => toggle(book.id)}
                   >
                     <Checkbox
                       checked={selectedIds.has(book.id)}
@@ -122,7 +123,7 @@ export function CreateCollectionModal({
                       <p className="text-sm font-medium truncate">{book.title}</p>
                       <p className="text-xs text-muted-foreground truncate">{book.author}</p>
                     </div>
-                  </label>
+                  </div>
                 ))}
               </div>
             </ScrollArea>
