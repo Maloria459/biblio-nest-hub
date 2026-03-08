@@ -9,8 +9,7 @@ import { Card } from "@/components/ui/card";
 import { BookDetailModal } from "@/components/BookDetailModal";
 import { User, BookOpen, Star, Heart, CheckCircle2, Library, BookMarked, Gift } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
-import eclatEncreImg from "@/assets/eclat-encre.png";
-import { usePreloadReady } from "@/lib/preloadAssets";
+import { eclatEncreSrc, usePreloadReady } from "@/lib/preloadAssets";
 import { LastSessionCard } from "@/components/dashboard/LastSessionCard";
 import { PersonalObjectivesCard } from "@/components/dashboard/PersonalObjectivesCard";
 import { BookChallengesCard } from "@/components/dashboard/BookChallengesCard";
@@ -146,7 +145,7 @@ const Dashboard = () => {
               {/* Fixed placeholder to prevent any layout shift */}
               <div className="absolute inset-0 rounded-full bg-muted" />
               <img
-                src={eclatEncreImg}
+                src={eclatEncreSrc}
                 alt="Éclat d'Encre"
                 className="relative h-14 w-14 object-contain"
                 loading="eager"
