@@ -140,14 +140,14 @@ export function CreateCollectionModal({
           </div>
         </div>
 
-        <DialogFooter>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!name.trim()}>
+          <Button type="button" onClick={handleSubmit} disabled={!name.trim()}>
             {editMode ? "Enregistrer" : `Créer (${selectedIds.size} livre${selectedIds.size > 1 ? "s" : ""})`}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
