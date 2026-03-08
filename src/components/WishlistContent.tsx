@@ -78,7 +78,7 @@ export function WishlistContent() {
         <div className="inline-flex items-center gap-4 rounded-md border border-border bg-card px-4 h-10 text-sm text-muted-foreground select-none">
           <span><strong className="text-foreground">{bookCount}</strong> {bookCount <= 1 ? "livre" : "livres"}</span>
           <span className="text-border">|</span>
-          <span><strong className="text-foreground">{totalPrice.toFixed(2).replace(".", ",")} €</strong> prix total</span>
+          <span><strong className="text-foreground">{totalPrice.toFixed(2).replace(".", ",")} €</strong></span>
         </div>
       </div>
 
