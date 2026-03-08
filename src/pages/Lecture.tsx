@@ -3,6 +3,7 @@ import { BookOpen, Layers, FolderOpen, Handshake } from "lucide-react";
 import type { TabItem } from "@/components/BottomTabBar";
 import { BibliothequeContent } from "@/components/BibliothequeContent";
 import { PileALireContent } from "@/components/PileALireContent";
+import { CollectionsContent } from "@/components/CollectionsContent";
 import { LoanRegistryContent } from "@/components/LoanRegistryContent";
 
 const tabs: TabItem[] = [
