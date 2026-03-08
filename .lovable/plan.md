@@ -1,54 +1,63 @@
 
+Goal: when a reading session is saved, the corresponding book’s reading record (fiche de lecture) must immediately show the new pages read, and session views must stay consistent with that record.
 
-## Plan : Composant "Mes collections"
+What I found
+- The session insert works, but the book progress gets overwritten afterward.
+- Confirmed mismatch in database: latest session had `last_page_reached = 10` while same book had `pages_read = 0`.
+- Root cause is stale local modal state:
+  1) `ReadingSessionTimer` updates the book in shared state.
+  2) `BookDetailModal` keeps an old local `editBook`.
+  3) On modal close, it auto-saves stale `editBook`, writing `pagesRead: 0` back to database.
 
-### Contexte
-L'onglet "Mes collections" existe dans la navigation mais n'a pas de contenu. Les tables `collections` et `collection_books` existent deja en base avec les bonnes RLS policies. Pas de migration necessaire.
+Implementation plan
+1) Make timer report the saved progress back to the reading record state
+- File: `src/components/ReadingSessionTimer.tsx`
+- Add optional callback prop, e.g. `onSessionSaved`.
+- After successful session insert and computed updates (`pagesRead`, possible `status`, possible `endDate`), call this callback with those updates.
+- Keep existing book update logic in shared store.
 
-### Architecture
+2) Patch the reading record local state immediately after timer save
+- File: `src/components/BookDetailModal.tsx`
+- Pass `onSessionSaved` to `ReadingSessionTimer`.
+- In callback, update `editBook` directly (`pagesRead`, `status`, `endDate`) so UI reflects new progress instantly.
+- This prevents the user from seeing “0” after a successful save.
 
-**1. Composant `CollectionsContent.tsx`**
-- Layout principal avec bouton "Creer une nouvelle collection" en haut a droite
-- Charge les collections + leurs livres depuis la base via `collections` et `collection_books` (jointure avec `books`)
-- Affiche chaque collection comme une "etagere" en bois :
-  - Titre de la collection au-dessus
-  - Bandeau horizontal style etagere (fond bois/marron avec ombre, bordure inferieure epaisse)
-  - Les livres affiches comme des tranches verticales (rectangles fins colores, hauteur variable ~120-160px, largeur ~30-40px)
-  - Titre du livre ecrit verticalement (`writing-mode: vertical-rl`) sur chaque tranche
-  - Couleurs de tranche generees a partir du titre/auteur pour varier
-- Actions : supprimer une collection, ajouter/retirer des livres
+3) Prevent stale auto-overwrite on close
+- File: `src/components/BookDetailModal.tsx`
+- Add a `dirty` flag for manual edits in the modal.
+- Only call `onSave(...)` on close when there are actual user edits from this modal.
+- Reset `dirty` when opening/closing and after explicit save.
+- This avoids writing outdated values back when no manual edit happened (the exact failing scenario after timer save).
 
-**2. Composant `CreateCollectionModal.tsx`**
-- Dialog modal avec :
-  - Champ texte pour le nom de la collection
-  - Liste des livres de la bibliotheque (statut != "Wishlist") avec checkbox pour selection
-  - Barre de recherche pour filtrer les livres
-  - Bouton "Creer"
-- A la validation : insert dans `collections` puis insert batch dans `collection_books`
+4) Always sync modal from canonical book source
+- File: `src/components/BookDetailModal.tsx`
+- Derive a fresh source book from `allBooks` by id (`allBooks.find(...) ?? book`) before initializing/syncing `editBook`.
+- This removes dependency on potentially stale `selectedBook` snapshots passed by parent components.
 
-**3. Integration dans `Lecture.tsx`**
-- Ajouter `<CollectionsContent />` dans le `tabContent` pour l'onglet "Mes collections"
+5) Keep reading-session display consistent with reading record
+- File: `src/components/ReadingSessionsContent.tsx`
+- In grouped “Par livre” cards, use `book.pagesRead` as primary displayed progress value (fallback to latest session page only if needed).
+- Per-session rows still show session-specific page checkpoints.
+- This ensures the global progress shown in session views matches the reading record value.
 
-### Visuel etagere (CSS/Tailwind)
-```text
-┌─────────────────────────────────────────┐
-│  Collection "Fantasy"            [edit] │
-├─────────────────────────────────────────┤
-│ ┌──┐┌──┐┌──┐┌──┐┌──┐                   │
-│ │T ││T ││T ││T ││T │  ← tranches       │
-│ │i ││i ││i ││i ││i │    verticales      │
-│ │t ││t ││t ││t ││t │                    │
-│ │r ││r ││r ││r ││r │                    │
-│ │e ││e ││e ││e ││e │                    │
-│ └──┘└──┘└──┘└──┘└──┘                    │
-╞═════════════════════════════════════════╡ ← etagere
-└─────────────────────────────────────────┘
-```
-- Chaque tranche = div avec `writing-mode: vertical-rl`, couleur aleatoire stable (hash du titre), coins arrondis en haut
-- L'etagere = bordure inferieure epaisse avec gradient/ombre simulating du bois
+Validation plan
+1) Reproduce flow:
+   - Open reading record for a book at 0 pages.
+   - Save a session at page 10.
+   - Verify immediately in modal: progress = 10.
+2) Verify persistence:
+   - Close and reopen reading record.
+   - Confirm progress still = 10.
+3) Verify consistency in session screens:
+   - “Par session” and “Par livre” views show values aligned with the reading record.
+4) Regression checks:
+   - Manual edits in reading record still save correctly.
+   - Session deletion still recalculates book progress/status correctly.
 
-### Fichiers modifies/crees
-- **Creer** `src/components/CollectionsContent.tsx`
-- **Creer** `src/components/CreateCollectionModal.tsx`
-- **Modifier** `src/pages/Lecture.tsx` — brancher le composant
-
+Technical details
+- No database schema change required.
+- RLS/data access model remains unchanged.
+- Files to update:
+  - `src/components/ReadingSessionTimer.tsx`
+  - `src/components/BookDetailModal.tsx`
+  - `src/components/ReadingSessionsContent.tsx`
