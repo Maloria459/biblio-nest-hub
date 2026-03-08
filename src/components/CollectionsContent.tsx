@@ -215,6 +215,7 @@ export function CollectionsContent() {
           </div>
         </div>
       ))}
+      </div>
 
       <CreateCollectionModal
         open={modalOpen}
