@@ -130,10 +130,11 @@ function BookSpine({ book, onClick }: { book: Book; onClick?: () => void }) {
 
 export function CollectionsContent() {
   const { user } = useAuth();
-  const { books } = useBooks();
+  const { books, genres, formats, statuses, updateBook, deleteBook } = useBooks();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadCollections = useCallback(async () => {
