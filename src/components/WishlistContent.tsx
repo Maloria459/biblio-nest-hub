@@ -61,14 +61,6 @@ export function WishlistContent() {
     setSelectedBook(null);
   };
 
-  if (wishlistBooks.length === 0) {
-    return (
-      <div className="flex flex-col flex-1 items-center justify-center text-muted-foreground text-sm">
-        Aucun livre dans votre wishlist
-      </div>
-    );
-  }
-
   const renderWishlistBack = (book: Book) => (
     <>
       <span className="text-sm font-bold text-center leading-tight">{book.title}</span>
