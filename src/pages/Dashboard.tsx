@@ -37,9 +37,7 @@ const Dashboard = () => {
 
   // Wait for globally preloaded assets (started in main.tsx)
   useEffect(() => {
-    import("@/lib/preloadAssets").then(({ usePreloadReady }) =>
-      usePreloadReady().then(() => setImgLoaded(true))
-    );
+    usePreloadReady().then(() => setImgLoaded(true));
   }, []);
 
   // Fetch pseudo from profiles
