@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBooks } from "@/contexts/BooksContext";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
 
 interface CreateCollectionModalProps {
   open: boolean;
@@ -61,7 +62,10 @@ export function CreateCollectionModal({
   }, []);
 
   const handleSubmit = () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast.error("Veuillez saisir un nom de collection");
+      return;
+    }
     onCreated(name.trim(), Array.from(selectedIds));
     setName("");
     setSearch("");
@@ -144,7 +148,7 @@ export function CreateCollectionModal({
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Annuler
           </Button>
-          <Button type="button" onClick={handleSubmit} disabled={!name.trim()}>
+          <Button type="button" onClick={handleSubmit}>
             {editMode ? "Enregistrer" : `Créer (${selectedIds.size} livre${selectedIds.size > 1 ? "s" : ""})`}
           </Button>
         </div>
