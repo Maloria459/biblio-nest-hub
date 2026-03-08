@@ -1,63 +1,48 @@
 
-Goal: when a reading session is saved, the corresponding book’s reading record (fiche de lecture) must immediately show the new pages read, and session views must stay consistent with that record.
+Objectif
+- Corriger définitivement la sélection des livres dans “Créer une nouvelle collection” tout en conservant la possibilité d’ajouter un même livre dans plusieurs collections.
 
-What I found
-- The session insert works, but the book progress gets overwritten afterward.
-- Confirmed mismatch in database: latest session had `last_page_reached = 10` while same book had `pages_read = 0`.
-- Root cause is stale local modal state:
-  1) `ReadingSessionTimer` updates the book in shared state.
-  2) `BookDetailModal` keeps an old local `editBook`.
-  3) On modal close, it auto-saves stale `editBook`, writing `pagesRead: 0` back to database.
+Diagnostic confirmé
+- Le bug vient d’un double déclenchement dans `CreateCollectionModal` :
+  - clic sur la ligne (`onClick` du conteneur) + clic/état du `Checkbox` (`onCheckedChange`)
+  - résultat : l’état passe à “sélectionné” puis “désélectionné” immédiatement (visible dans la session replay).
+- Côté base de données, la contrainte est correcte (`UNIQUE(collection_id, book_id)`), donc un livre peut bien exister dans plusieurs collections différentes.
 
-Implementation plan
-1) Make timer report the saved progress back to the reading record state
-- File: `src/components/ReadingSessionTimer.tsx`
-- Add optional callback prop, e.g. `onSessionSaved`.
-- After successful session insert and computed updates (`pagesRead`, possible `status`, possible `endDate`), call this callback with those updates.
-- Keep existing book update logic in shared store.
+Plan d’implémentation
+1) Stabiliser la logique de sélection dans `src/components/CreateCollectionModal.tsx`
+- Remplacer la logique “toggle partout” par une logique explicite :
+  - `setBookSelection(bookId, checked: boolean)` pour forcer l’état (ajout/suppression dans `Set`).
+- Garder le clic sur la ligne pour l’ergonomie, mais empêcher le conflit :
+  - `onClick` de la ligne = toggle une seule fois
+  - sur le `Checkbox`, stopper la propagation du clic (`event.stopPropagation`) pour éviter le second toggle.
+- Utiliser `onCheckedChange` avec la valeur `checked` Radix au lieu d’un toggle aveugle.
 
-2) Patch the reading record local state immediately after timer save
-- File: `src/components/BookDetailModal.tsx`
-- Pass `onSessionSaved` to `ReadingSessionTimer`.
-- In callback, update `editBook` directly (`pagesRead`, `status`, `endDate`) so UI reflects new progress instantly.
-- This prevents the user from seeing “0” after a successful save.
+2) Vérifier le flux création/édition sans régression
+- Créer : sélectionner plusieurs livres, désélectionner, puis créer.
+- Éditer : ouvrir une collection existante avec pré-sélection, modifier puis enregistrer.
+- Confirmer que les compteurs (`Créer (X livre[s])`) restent cohérents.
 
-3) Prevent stale auto-overwrite on close
-- File: `src/components/BookDetailModal.tsx`
-- Add a `dirty` flag for manual edits in the modal.
-- Only call `onSave(...)` on close when there are actual user edits from this modal.
-- Reset `dirty` when opening/closing and after explicit save.
-- This avoids writing outdated values back when no manual edit happened (the exact failing scenario after timer save).
+3) Renforcer le feedback utilisateur sur la sauvegarde
+- Quand l’insertion des liens `collection_books` échoue, afficher un toast d’erreur (pas seulement `console.error`) pour respecter la règle de notification en cas d’échec de sauvegarde backend.
 
-4) Always sync modal from canonical book source
-- File: `src/components/BookDetailModal.tsx`
-- Derive a fresh source book from `allBooks` by id (`allBooks.find(...) ?? book`) before initializing/syncing `editBook`.
-- This removes dependency on potentially stale `selectedBook` snapshots passed by parent components.
+4) Correction accessibilité secondaire (warning console)
+- Ajouter une `DialogDescription` dans le modal pour supprimer l’avertissement Radix “Missing Description”.
+- Vérifier que cela n’impacte pas le comportement fonctionnel.
 
-5) Keep reading-session display consistent with reading record
-- File: `src/components/ReadingSessionsContent.tsx`
-- In grouped “Par livre” cards, use `book.pagesRead` as primary displayed progress value (fallback to latest session page only if needed).
-- Per-session rows still show session-specific page checkpoints.
-- This ensures the global progress shown in session views matches the reading record value.
+Détails techniques
+- Fichier principal : `src/components/CreateCollectionModal.tsx`
+- Ajustements ciblés :
+  - Introduire une fonction utilitaire de mise à jour du `Set<string>` par état explicite.
+  - Modifier le rendu de chaque item livre :
+    - conteneur cliquable (sélection ligne)
+    - `Checkbox` contrôlé + `onClick` avec stopPropagation
+    - `onCheckedChange` piloté par la valeur reçue.
+- Aucun changement de schéma base de données requis.
 
-Validation plan
-1) Reproduce flow:
-   - Open reading record for a book at 0 pages.
-   - Save a session at page 10.
-   - Verify immediately in modal: progress = 10.
-2) Verify persistence:
-   - Close and reopen reading record.
-   - Confirm progress still = 10.
-3) Verify consistency in session screens:
-   - “Par session” and “Par livre” views show values aligned with the reading record.
-4) Regression checks:
-   - Manual edits in reading record still save correctly.
-   - Session deletion still recalculates book progress/status correctly.
-
-Technical details
-- No database schema change required.
-- RLS/data access model remains unchanged.
-- Files to update:
-  - `src/components/ReadingSessionTimer.tsx`
-  - `src/components/BookDetailModal.tsx`
-  - `src/components/ReadingSessionsContent.tsx`
+Plan de validation (E2E)
+1. Ouvrir “Créer une nouvelle collection”.
+2. Cliquer sur la checkbox d’un livre : elle doit rester cochée.
+3. Cliquer sur la ligne (titre/auteur) du même livre : alternance propre (1 seul changement par clic).
+4. Créer deux collections différentes avec le même livre : succès dans les deux cas.
+5. Recharger la page : la présence du livre dans les deux collections est conservée.
+6. Vérifier qu’aucun warning React/Radix critique ne reste en console sur ce flux.
