@@ -119,7 +119,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
         {/* Backdrop */}
         <div className="fixed top-0 right-0 bottom-0 left-[var(--sidebar-width)] bg-black/30" onClick={handleClose} />
         {/* Modal */}
-        <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "70%", maxHeight: "100%" }}>
+        <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "70%", maxHeight: "94%" }}>
 
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
