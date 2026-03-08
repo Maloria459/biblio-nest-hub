@@ -77,18 +77,29 @@ function BookSpine({ book }: { book: Book }) {
 
   return (
     <div
-      className="flex-shrink-0 flex items-center justify-center rounded-t-sm shadow-md cursor-default select-none transition-transform hover:-translate-y-1"
+      className="flex-shrink-0 flex items-center justify-center rounded-t-sm cursor-default select-none transition-transform hover:-translate-y-1"
       style={{
-        width: 36,
+        width: 38,
         height,
-        background: `linear-gradient(180deg, ${gradient[0]} 0%, ${gradient[1]} 100%)`,
-        borderLeft: "1px solid rgba(255,255,255,0.1)",
-        borderRight: "1px solid rgba(0,0,0,0.15)",
+        background: `linear-gradient(135deg, ${gradient[0]} 0%, ${gradient[1]} 60%, rgba(0,0,0,0.25) 100%)`,
+        borderLeft: "1.5px solid rgba(255,255,255,0.18)",
+        borderRight: "1.5px solid rgba(0,0,0,0.3)",
+        borderTop: "1px solid rgba(255,255,255,0.12)",
+        boxShadow:
+          "inset 2px 0 4px rgba(255,255,255,0.10), inset -2px 0 6px rgba(0,0,0,0.25), 2px 2px 6px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.15)",
       }}
       title={`${book.title} — ${book.author}`}
     >
+      {/* Highlight strip on left edge */}
+      <div
+        className="absolute left-0 top-0 bottom-0 rounded-tl-sm pointer-events-none"
+        style={{
+          width: 3,
+          background: "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%)",
+        }}
+      />
       <span
-        className="text-white font-medium text-[10px] leading-tight px-0.5 overflow-hidden"
+        className="text-white font-medium text-[10px] leading-tight px-0.5 overflow-hidden drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
         style={{
           writingMode: "vertical-rl",
           textOrientation: "mixed",
