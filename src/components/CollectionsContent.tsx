@@ -247,56 +247,78 @@ export function CollectionsContent() {
       )}
 
       {/* Collections as shelves - inline, aligned by bottom (shelf plank) */}
-      <div className="flex flex-wrap gap-6 items-end">
-        {collections.map((col) => (
-          <div key={col.id} className="group inline-flex flex-col items-center">
-            {/* Shelf */}
-            <div className="relative">
-              <div className="flex items-end gap-1 px-2 pb-0">
-                {col.books.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic pb-2 px-2">
-                    Aucun livre
-                  </p>
-                )}
-                {col.books.map((book) => (
-                  <BookSpine key={book.id} book={book} />
-                ))}
-              </div>
-              <div
-                className="h-3 rounded-sm"
-                style={{
-                  background: "linear-gradient(180deg, hsl(0 0% 25%) 0%, hsl(0 0% 18%) 100%)",
-                  boxShadow: "0 3px 6px -2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
-                }}
-              />
-            </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="collections" direction="horizontal">
+          {(provided) => (
+            <div
+              className="flex flex-wrap gap-6 items-end"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {collections.map((col, index) => (
+                <Draggable key={col.id} draggableId={col.id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={`group inline-flex flex-col items-center ${snapshot.isDragging ? "opacity-80" : ""}`}
+                    >
+                      {/* Shelf */}
+                      <div className="relative">
+                        <div className="flex items-end gap-1 px-2 pb-0">
+                          {col.books.length === 0 && (
+                            <p className="text-xs text-muted-foreground italic pb-2 px-2">
+                              Aucun livre
+                            </p>
+                          )}
+                          {col.books.map((book) => (
+                            <BookSpine key={book.id} book={book} />
+                          ))}
+                        </div>
+                        <div
+                          className="h-3 rounded-sm"
+                          style={{
+                            background: "linear-gradient(180deg, hsl(0 0% 25%) 0%, hsl(0 0% 18%) 100%)",
+                            boxShadow: "0 3px 6px -2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+                          }}
+                        />
+                      </div>
 
-            {/* Title centered + menu button right-aligned */}
-            <div className="w-full flex items-center mt-1.5">
-              <div className="flex-1 flex justify-center">
-                <h3 className="font-semibold text-foreground text-sm truncate text-center">{col.name}</h3>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground flex-shrink-0">
-                    <EllipsisVertical className="h-3.5 w-3.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setEditingCollection(col)}>
-                    <Pencil className="h-3.5 w-3.5 mr-2" />
-                    Modifier
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(col.id)}>
-                    <Trash2 className="h-3.5 w-3.5 mr-2" />
-                    Supprimer
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      {/* Title centered + grip left + menu right */}
+                      <div className="w-full flex items-center mt-1.5">
+                        <div {...provided.dragHandleProps} className="flex-shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors">
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 flex justify-center min-w-0">
+                          <h3 className="font-semibold text-foreground text-sm truncate text-center">{col.name}</h3>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground flex-shrink-0">
+                              <EllipsisVertical className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditingCollection(col)}>
+                              <Pencil className="h-3.5 w-3.5 mr-2" />
+                              Modifier
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(col.id)}>
+                              <Trash2 className="h-3.5 w-3.5 mr-2" />
+                              Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {/* Create modal */}
       <CreateCollectionModal
