@@ -61,14 +61,6 @@ export function WishlistContent() {
     setSelectedBook(null);
   };
 
-  if (wishlistBooks.length === 0) {
-    return (
-      <div className="flex flex-col flex-1 items-center justify-center text-muted-foreground text-sm">
-        Aucun livre dans votre wishlist
-      </div>
-    );
-  }
-
   const renderWishlistBack = (book: Book) => (
     <>
       <span className="text-sm font-bold text-center leading-tight">{book.title}</span>
@@ -90,73 +82,78 @@ export function WishlistContent() {
         </div>
       </div>
 
-      {/* Card grid — same layout as BibliothequeContent */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="wishlist" direction="horizontal">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="grid gap-y-5"
-              style={{
-                gridTemplateColumns: "repeat(8, 180px)",
-                justifyContent: "space-between",
-              }}
-            >
-              {orderedBooks.map((book, index) => (
-                <Draggable key={book.id} draggableId={book.id} index={index}>
-                  {(dragProvided, snapshot) => (
-                    <div
-                      ref={dragProvided.innerRef}
-                      {...dragProvided.draggableProps}
-                      {...dragProvided.dragHandleProps}
-                      style={{
-                        ...dragProvided.draggableProps.style,
-                        opacity: snapshot.isDragging ? 0.7 : 1,
-                      }}
-                    >
-                      <FlipBookCard
-                        book={book}
-                        onClick={() => setSelectedBook(book)}
-                        renderBack={renderWishlistBack}
-                      />
-
-                      {/* Price + Acheté row */}
-                      <div className="flex items-center justify-between mt-2" style={{ width: 180 }}>
-                        <span className="text-xs text-foreground">
-                          {book.price != null ? `${book.price.toFixed(2)} €` : "— €"}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMarkAchete(book.id);
+      {wishlistBooks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground text-sm">
+          Aucun livre dans votre wishlist
+        </div>
+      ) : (
+        <>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="wishlist" direction="horizontal">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="grid gap-y-5"
+                  style={{
+                    gridTemplateColumns: "repeat(8, 180px)",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  {orderedBooks.map((book, index) => (
+                    <Draggable key={book.id} draggableId={book.id} index={index}>
+                      {(dragProvided, snapshot) => (
+                        <div
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          {...dragProvided.dragHandleProps}
+                          style={{
+                            ...dragProvided.draggableProps.style,
+                            opacity: snapshot.isDragging ? 0.7 : 1,
                           }}
-                          className="rounded-md border border-foreground px-3 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
                         >
-                          Acheté
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+                          <FlipBookCard
+                            book={book}
+                            onClick={() => setSelectedBook(book)}
+                            renderBack={renderWishlistBack}
+                          />
+                          <div className="flex items-center justify-between mt-2" style={{ width: 180 }}>
+                            <span className="text-xs text-foreground">
+                              {book.price != null ? `${book.price.toFixed(2)} €` : "— €"}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMarkAchete(book.id);
+                              }}
+                              className="rounded-md border border-foreground px-3 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+                            >
+                              Acheté
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
 
-      <BookDetailModal
-        book={selectedBook}
-        open={!!selectedBook}
-        onOpenChange={(o) => !o && setSelectedBook(null)}
-        onSave={updateBook}
-        onDelete={handleDeleteBook}
-        allBooks={books}
-        genres={genres}
-        formats={formats}
-        statuses={statuses}
-      />
+          <BookDetailModal
+            book={selectedBook}
+            open={!!selectedBook}
+            onOpenChange={(o) => !o && setSelectedBook(null)}
+            onSave={updateBook}
+            onDelete={handleDeleteBook}
+            allBooks={books}
+            genres={genres}
+            formats={formats}
+            statuses={statuses}
+          />
+        </>
+      )}
     </div>
   );
 }
