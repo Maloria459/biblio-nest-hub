@@ -81,17 +81,8 @@ export function WishlistContent() {
 
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 overflow-y-auto overflow-x-hidden">
-      {/* Stats + Search bar */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher par titre, auteur ou série"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+      {/* Stats */}
+      <div className="flex justify-end">
         <div className="inline-flex items-center gap-4 rounded-md border border-border bg-card px-4 h-10 text-sm text-muted-foreground select-none">
           <span><strong className="text-foreground">{bookCount}</strong> {bookCount <= 1 ? "livre" : "livres"}</span>
           <span className="text-border">|</span>
