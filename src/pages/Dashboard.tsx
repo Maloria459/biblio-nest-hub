@@ -34,13 +34,11 @@ const Dashboard = () => {
   const [pseudoLoaded, setPseudoLoaded] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Preload eclat d'encre image
+  // Wait for globally preloaded assets (started in main.tsx)
   useEffect(() => {
-    const img = new Image();
-    img.src = eclatEncreImg;
-    img.onload = () => setImgLoaded(true);
-    img.onerror = () => setImgLoaded(true);
-    if (img.complete) setImgLoaded(true);
+    import("@/lib/preloadAssets").then(({ usePreloadReady }) =>
+      usePreloadReady().then(() => setImgLoaded(true))
+    );
   }, []);
 
   // Fetch pseudo from profiles
@@ -145,7 +143,7 @@ const Dashboard = () => {
 
           {/* Virtual currency */}
           <div className="flex flex-col items-center gap-1 shrink-0">
-            <img src={eclatEncreImg} alt="Éclat d'Encre" className="h-14 w-14 object-contain" />
+            <img src={eclatEncreImg} alt="Éclat d'Encre" className="h-14 w-14 object-contain" loading="eager" fetchPriority="high" decoding="sync" />
             <span className="text-xs font-medium text-foreground whitespace-nowrap">
               0 Éclat d'Encre
             </span>
