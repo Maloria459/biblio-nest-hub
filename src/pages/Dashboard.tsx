@@ -31,10 +31,12 @@ const Dashboard = () => {
 
   const [pseudo, setPseudo] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [pseudoLoaded, setPseudoLoaded] = useState(false);
 
   // Fetch pseudo from profiles
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setPseudoLoaded(true); return; }
+    setPseudoLoaded(false);
     supabase
       .from("profiles")
       .select("pseudo")
@@ -42,6 +44,7 @@ const Dashboard = () => {
       .single()
       .then(({ data }) => {
         if (data?.pseudo) setPseudo(data.pseudo);
+        setPseudoLoaded(true);
       });
   }, [user?.id]);
 
