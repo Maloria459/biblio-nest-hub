@@ -104,7 +104,7 @@ const Dashboard = () => {
     setSelectedBook(null);
   };
 
-  if (!pseudoLoaded) {
+  if (!pseudoLoaded || !imgLoaded) {
     return (
       <div className="flex flex-col flex-1 items-center justify-center">
         <div className="h-6 w-6 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
