@@ -117,7 +117,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
     <>
       <div className="absolute inset-0 z-50 flex items-center justify-center py-[3%]">
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
+        <div className="absolute inset-0" onClick={handleClose} />
         {/* Modal */}
         <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "70%", maxHeight: "100%" }}>
 
