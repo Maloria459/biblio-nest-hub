@@ -76,8 +76,7 @@ function BookSpine({ book }: { book: Book }) {
   }, [book.coverUrl, book.title, book.author]);
 
   return (
-    <div
-      className="flex-shrink-0 flex items-center justify-center rounded-t-sm cursor-default select-none transition-transform hover:-translate-y-1"
+    <div className="relative flex-shrink-0 flex items-center justify-center rounded-t-sm cursor-default select-none transition-transform hover:-translate-y-1"
       style={{
         width: 38,
         height,
