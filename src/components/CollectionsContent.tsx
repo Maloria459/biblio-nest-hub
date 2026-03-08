@@ -58,10 +58,9 @@ function fallbackGradient(str: string): [string, string] {
 }
 
 function spineHeight(title: string): number {
-  // Base height + extra per character, clamped between 100 and 220
-  const base = 90;
-  const perChar = 4;
-  return Math.min(220, Math.max(100, base + title.length * perChar));
+  const base = 80;
+  const perChar = 3;
+  return Math.min(180, Math.max(90, base + title.length * perChar));
 }
 
 // Component for a single book spine that extracts dominant cover color
