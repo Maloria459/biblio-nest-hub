@@ -139,7 +139,7 @@ export function CollectionsContent() {
       )}
 
       {/* Collections as shelves - inline, wrapping */}
-      <div className="flex flex-wrap gap-6 items-start">
+      <div className="flex flex-wrap gap-6 items-end">
       {collections.map((col) => (
         <div key={col.id} className="space-y-2 inline-block">
           {/* Collection header */}
