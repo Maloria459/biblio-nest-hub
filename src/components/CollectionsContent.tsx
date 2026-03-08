@@ -57,10 +57,11 @@ function fallbackGradient(str: string): [string, string] {
   return [`hsl(0 0% ${l1}%)`, `hsl(0 0% ${l2}%)`];
 }
 
-function spineHeight(str: string): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 3) - h);
-  return 120 + (((h % 50) + 50) % 50);
+function spineHeight(title: string): number {
+  // Base height + extra per character, clamped between 100 and 220
+  const base = 90;
+  const perChar = 4;
+  return Math.min(220, Math.max(100, base + title.length * perChar));
 }
 
 // Component for a single book spine that extracts dominant cover color
