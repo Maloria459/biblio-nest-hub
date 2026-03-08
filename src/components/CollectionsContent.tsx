@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Pencil, BookOpen } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, EllipsisVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooks } from "@/contexts/BooksContext";
@@ -254,27 +255,28 @@ export function CollectionsContent() {
               />
             </div>
 
-            {/* Title + hover actions below shelf, centered */}
-            <div className="flex items-center justify-center gap-1 mt-1.5">
-              <h3 className="font-semibold text-foreground text-sm truncate">{col.name}</h3>
-              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                  onClick={() => setEditingCollection(col)}
-                >
-                  <Pencil className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleDelete(col.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+            {/* Title centered + menu button right-aligned */}
+            <div className="w-full flex items-center mt-1.5">
+              <div className="flex-1 flex justify-center">
+                <h3 className="font-semibold text-foreground text-sm truncate text-center">{col.name}</h3>
               </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground flex-shrink-0">
+                    <EllipsisVertical className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setEditingCollection(col)}>
+                    <Pencil className="h-3.5 w-3.5 mr-2" />
+                    Modifier
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(col.id)}>
+                    <Trash2 className="h-3.5 w-3.5 mr-2" />
+                    Supprimer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         ))}
