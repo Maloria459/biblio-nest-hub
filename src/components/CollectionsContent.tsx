@@ -159,7 +159,7 @@ export function CollectionsContent() {
           <div className="relative">
             {/* Books area */}
             <div
-              className="flex items-end gap-1 px-4 pt-4 pb-0 min-h-[180px]"
+              className="flex items-end gap-1 px-3 pt-3 pb-0"
               style={{
                 background: "linear-gradient(180deg, hsl(var(--muted)/0.3) 0%, hsl(var(--muted)/0.15) 100%)",
                 borderRadius: "8px 8px 0 0",
