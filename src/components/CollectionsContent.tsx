@@ -138,19 +138,20 @@ export function CollectionsContent() {
         </div>
       )}
 
-      {/* Collections as shelves */}
+      {/* Collections as shelves - inline, wrapping */}
+      <div className="flex flex-wrap gap-6 items-start">
       {collections.map((col) => (
-        <div key={col.id} className="space-y-2">
+        <div key={col.id} className="space-y-2 inline-block">
           {/* Collection header */}
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">{col.name}</h3>
+          <div className="flex items-center gap-1">
+            <h3 className="font-semibold text-foreground text-sm">{col.name}</h3>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              className="h-6 w-6 text-muted-foreground hover:text-destructive"
               onClick={() => handleDelete(col.id)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
 
@@ -158,7 +159,7 @@ export function CollectionsContent() {
           <div className="relative">
             {/* Books area */}
             <div
-              className="flex items-end gap-1 px-4 pt-4 pb-0 min-h-[180px]"
+              className="flex items-end gap-1 px-3 pt-3 pb-0"
               style={{
                 background: "linear-gradient(180deg, hsl(var(--muted)/0.3) 0%, hsl(var(--muted)/0.15) 100%)",
                 borderRadius: "8px 8px 0 0",
@@ -214,6 +215,7 @@ export function CollectionsContent() {
           </div>
         </div>
       ))}
+      </div>
 
       <CreateCollectionModal
         open={modalOpen}
