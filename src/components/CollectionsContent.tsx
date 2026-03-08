@@ -285,10 +285,7 @@ export function CollectionsContent() {
                       </div>
 
                       {/* Title centered + grip left + menu right */}
-                      <div className="w-full flex items-center mt-1.5">
-                        <div {...provided.dragHandleProps} className="flex-shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors">
-                          <GripVertical className="h-4 w-4" />
-                        </div>
+                      <div className="w-full flex items-center mt-1.5" {...provided.dragHandleProps} style={{ cursor: "grab" }}>
                         <div className="flex-1 flex justify-center min-w-0">
                           <h3 className="font-semibold text-foreground text-sm truncate text-center">{col.name}</h3>
                         </div>
