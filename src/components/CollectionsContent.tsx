@@ -233,10 +233,9 @@ export function CollectionsContent() {
       <div className="flex flex-wrap gap-6 items-end">
         {collections.map((col) => (
           <div key={col.id} className="group inline-flex flex-col">
-            {/* Collection title row — fixed height so all titles align */}
-            <div className="flex items-center gap-1 h-8 mb-1">
+            {/* Collection title — sits right above books */}
+            <div className="flex items-center gap-1 mb-1">
               <h3 className="font-semibold text-foreground text-sm truncate">{col.name}</h3>
-              {/* Hover-only action buttons */}
               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="ghost"
@@ -259,12 +258,10 @@ export function CollectionsContent() {
 
             {/* Shelf */}
             <div className="relative">
-              {/* Books area */}
-              <div
-                className="flex items-end gap-1 px-3 pt-3 pb-0 rounded-t-md border border-b-0 border-border bg-muted/30"
-              >
+              {/* Books area — no border/background */}
+              <div className="flex items-end gap-1 px-2 pb-0">
                 {col.books.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic pb-4 px-2">
+                  <p className="text-xs text-muted-foreground italic pb-2 px-2">
                     Aucun livre
                   </p>
                 )}
@@ -273,9 +270,9 @@ export function CollectionsContent() {
                 ))}
               </div>
 
-              {/* Shelf plank — monochrome theme */}
+              {/* Shelf plank */}
               <div
-                className="h-3 rounded-b-md border border-t-0 border-border"
+                className="h-3 rounded-sm"
                 style={{
                   background: "linear-gradient(180deg, hsl(0 0% 25%) 0%, hsl(0 0% 18%) 100%)",
                   boxShadow: "0 3px 6px -2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
