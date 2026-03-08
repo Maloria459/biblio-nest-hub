@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,7 +26,6 @@ export function CreateCollectionModal({
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(initialBookIds));
 
-  // Sync when opening in edit mode
   useEffect(() => {
     if (open) {
       setName(initialName);
@@ -50,12 +49,14 @@ export function CreateCollectionModal({
     [libraryBooks, search]
   );
 
-  const toggle = (id: string) =>
+  const setBookSelection = useCallback((id: string, checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (checked) next.add(id);
+      else next.delete(id);
       return next;
     });
+  }, []);
 
   const handleSubmit = () => {
     if (!name.trim()) return;
@@ -76,6 +77,9 @@ export function CreateCollectionModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{editMode ? "Modifier la collection" : "Créer une nouvelle collection"}</DialogTitle>
+          <DialogDescription>
+            {editMode ? "Modifiez le nom et les livres de cette collection." : "Donnez un nom et sélectionnez des livres pour votre collection."}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -109,22 +113,26 @@ export function CreateCollectionModal({
                     Aucun livre trouvé
                   </p>
                 )}
-                {filtered.map((book) => (
-                  <div
-                    key={book.id}
-                    className="flex items-center gap-2 p-2 rounded hover:bg-accent cursor-pointer"
-                    onClick={() => toggle(book.id)}
-                  >
-                    <Checkbox
-                      checked={selectedIds.has(book.id)}
-                      onCheckedChange={() => toggle(book.id)}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{book.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+                {filtered.map((book) => {
+                  const isChecked = selectedIds.has(book.id);
+                  return (
+                    <div
+                      key={book.id}
+                      className="flex items-center gap-2 p-2 rounded hover:bg-accent cursor-pointer"
+                      onClick={() => setBookSelection(book.id, !isChecked)}
+                    >
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={(checked) => setBookSelection(book.id, !!checked)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{book.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
           </div>
