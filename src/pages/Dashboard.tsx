@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { BookDetailModal } from "@/components/BookDetailModal";
 import { User, BookOpen, Star, Heart, CheckCircle2, Library, BookMarked, Gift } from "lucide-react";
 import type { Book } from "@/data/mockBooks";
-import { eclatEncreSrc, usePreloadReady } from "@/lib/preloadAssets";
+import { eclatEncreSrc, eclatEncreSrc as eclatEncreImg, usePreloadReady } from "@/lib/preloadAssets";
 import { LastSessionCard } from "@/components/dashboard/LastSessionCard";
 import { PersonalObjectivesCard } from "@/components/dashboard/PersonalObjectivesCard";
 import { BookChallengesCard } from "@/components/dashboard/BookChallengesCard";
