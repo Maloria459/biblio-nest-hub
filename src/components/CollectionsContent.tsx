@@ -206,8 +206,7 @@ export function CollectionsContent() {
   return (
     <div className="flex-1 p-4 space-y-6 overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Mes collections</h2>
+      <div className="flex justify-end">
         <Button size="sm" onClick={() => setModalOpen(true)}>
           <Plus className="h-4 w-4 mr-1" />
           Créer une nouvelle collection
