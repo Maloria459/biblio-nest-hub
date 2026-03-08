@@ -138,9 +138,10 @@ export function CollectionsContent() {
         </div>
       )}
 
-      {/* Collections as shelves */}
+      {/* Collections as shelves - inline, wrapping */}
+      <div className="flex flex-wrap gap-6 items-start">
       {collections.map((col) => (
-        <div key={col.id} className="space-y-2">
+        <div key={col.id} className="space-y-2 inline-block">
           {/* Collection header */}
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-foreground">{col.name}</h3>
