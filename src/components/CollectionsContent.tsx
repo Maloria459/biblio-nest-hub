@@ -289,10 +289,10 @@ export function CollectionsContent() {
                           ))}
                         </div>
                         <div
-                          className="h-3 rounded-sm"
+                          className="h-4 rounded-sm"
                           style={{
-                            background: "linear-gradient(180deg, hsl(0 0% 25%) 0%, hsl(0 0% 18%) 100%)",
-                            boxShadow: "0 3px 6px -2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+                            background: "linear-gradient(180deg, hsl(0 0% 30%) 0%, hsl(0 0% 20%) 40%, hsl(0 0% 14%) 100%)",
+                            boxShadow: "0 4px 8px -2px rgba(0,0,0,0.4), 0 2px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3)",
                           }}
                         />
                       </div>
