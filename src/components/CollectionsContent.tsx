@@ -277,7 +277,7 @@ export function CollectionsContent() {
               </div>
             </div>
           </div>
-        )))
+        ))}
       </div>
 
       {/* Create modal */}
