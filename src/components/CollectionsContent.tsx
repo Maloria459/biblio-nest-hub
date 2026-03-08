@@ -69,6 +69,7 @@ function BookSpine({ book }: { book: Book }) {
   const [gradient, setGradient] = useState<[string, string]>(fallback);
   const height = spineHeight(book.title);
   const isRelie = book.format === "Relié";
+  const isBroche = book.format === "Broché";
 
   useEffect(() => {
     if (book.coverUrl) {
