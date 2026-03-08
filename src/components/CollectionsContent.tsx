@@ -363,6 +363,18 @@ export function CollectionsContent() {
           editMode
         />
       )}
+      {/* Book detail modal */}
+      <BookDetailModal
+        book={selectedBook}
+        open={!!selectedBook}
+        onOpenChange={(o) => { if (!o) setSelectedBook(null); }}
+        onSave={(updated) => { updateBook(updated); setSelectedBook(null); loadCollections(); }}
+        onDelete={(id) => { deleteBook(id); setSelectedBook(null); loadCollections(); }}
+        allBooks={books}
+        genres={genres}
+        formats={formats}
+        statuses={statuses}
+      />
     </div>
   );
 }
