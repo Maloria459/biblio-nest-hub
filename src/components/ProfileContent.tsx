@@ -19,23 +19,23 @@ interface ProfileData {
 
 function ProfileBookCard({ book }: { book: any }) {
   return (
-    <div className="group cursor-pointer rounded-xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="group cursor-pointer rounded-lg border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="aspect-[2/3] w-full bg-muted overflow-hidden">
         {book.coverUrl ? (
           <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <FileText className="h-10 w-10" />
+            <FileText className="h-6 w-6" />
           </div>
         )}
       </div>
-      <div className="p-3 space-y-1">
-        <p className="text-sm font-bold leading-tight line-clamp-2">{book.title}</p>
-        <p className="text-xs text-muted-foreground">{book.author}</p>
+      <div className="p-1.5 space-y-0.5">
+        <p className="text-xs font-bold leading-tight line-clamp-2">{book.title}</p>
+        <p className="text-[10px] text-muted-foreground">{book.author}</p>
         {book.rating != null && book.rating > 0 && (
           <div className="flex gap-0.5">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className={`h-3 w-3 ${book.rating! >= s ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
+              <Star key={s} className={`h-2.5 w-2.5 ${book.rating! >= s ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
             ))}
           </div>
         )}
