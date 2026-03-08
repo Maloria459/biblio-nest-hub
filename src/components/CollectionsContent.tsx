@@ -69,6 +69,7 @@ function BookSpine({ book }: { book: Book }) {
   const [gradient, setGradient] = useState<[string, string]>(fallback);
   const height = spineHeight(book.title);
   const isRelie = book.format === "Relié";
+  const isBroche = book.format === "Broché";
 
   useEffect(() => {
     if (book.coverUrl) {
@@ -110,9 +111,11 @@ function BookSpine({ book }: { book: Book }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: isRelie ? "#d4af37" : "white",
+          color: isRelie ? "#d4af37" : isBroche ? "#c0c0c0" : "white",
           textShadow: isRelie
             ? "0 1px 2px rgba(0,0,0,0.6), 0 0 4px rgba(212,175,55,0.3)"
+            : isBroche
+            ? "0 1px 2px rgba(0,0,0,0.6), 0 0 4px rgba(192,192,192,0.3)"
             : "0 1px 1px rgba(0,0,0,0.4)",
         }}
       >
