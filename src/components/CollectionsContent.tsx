@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Pencil, BookOpen, EllipsisVertical, GripVertical } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, EllipsisVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import { supabase } from "@/integrations/supabase/client";
@@ -285,10 +285,7 @@ export function CollectionsContent() {
                       </div>
 
                       {/* Title centered + grip left + menu right */}
-                      <div className="w-full flex items-center mt-1.5">
-                        <div {...provided.dragHandleProps} className="flex-shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors">
-                          <GripVertical className="h-4 w-4" />
-                        </div>
+                      <div className="w-full flex items-center mt-1.5" {...provided.dragHandleProps} style={{ cursor: "grab" }}>
                         <div className="flex-1 flex justify-center min-w-0">
                           <h3 className="font-semibold text-foreground text-sm truncate text-center">{col.name}</h3>
                         </div>
