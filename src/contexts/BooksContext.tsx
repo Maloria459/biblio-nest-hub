@@ -4,6 +4,7 @@ import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librar
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useProgression } from "@/hooks/useProgression";
 
 interface BooksContextType {
   books: Book[];
