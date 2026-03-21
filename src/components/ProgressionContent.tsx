@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProgressionMap } from "@/components/ProgressionMap";
 import { ProgressionDetails } from "@/components/ProgressionDetails";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { BookOpen, Map } from "lucide-react";
+import { useAvatar } from "@/contexts/AvatarContext";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { BookOpen, Map as MapIcon, User } from "lucide-react";
 
 interface TierRow {
   id: string;
@@ -67,12 +70,21 @@ interface ProcessedChallenge {
 export function ProgressionContent() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const { avatarUrl } = useAvatar();
+  const [pseudo, setPseudo] = useState<string>("");
   const [challenges, setChallenges] = useState<ProcessedChallenge[]>([]);
   const [allTiers, setAllTiers] = useState<ProcessedTier[]>([]);
   const [currentTierId, setCurrentTierId] = useState<string | null>(null);
   const [highlightedTierId, setHighlightedTierId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"map" | "details">("map");
   const [loading, setLoading] = useState(true);
+
+  // Fetch pseudo
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("pseudo").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data?.pseudo) setPseudo(data.pseudo as string); });
+  }, [user?.id]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -178,7 +190,7 @@ export function ProgressionContent() {
                 mobileView === "map" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
               }`}
             >
-              <Map className="h-3.5 w-3.5" /> Carte
+              <MapIcon className="h-3.5 w-3.5" /> Carte
             </button>
             <button
               onClick={() => setMobileView("details")}
@@ -201,48 +213,49 @@ export function ProgressionContent() {
     );
   }
 
+  const xpPercent = maxXP > 0 ? Math.round((totalXP / maxXP) * 100) : 0;
+
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Header bar with XP */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-card">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
-            <span className="text-lg">📜</span>
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-foreground">Ma Quête Littéraire</h2>
-            <p className="text-[10px] text-muted-foreground">Accomplissez des défis pour progresser dans votre aventure</p>
+    <div className="flex flex-1 overflow-hidden">
+      {/* Left column - Map + Profile card */}
+      <div
+        className="w-1/2 border-r border-border overflow-hidden relative flex flex-col"
+        style={{
+          background: `
+            radial-gradient(ellipse at 20% 80%, hsla(45, 60%, 90%, 0.5) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, hsla(270, 40%, 92%, 0.4) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, hsla(180, 30%, 95%, 0.3) 0%, transparent 60%),
+            linear-gradient(to bottom, hsla(40, 30%, 97%, 1), hsla(220, 15%, 96%, 1))
+          `,
+        }}
+      >
+        {/* Profile card */}
+        <div className="flex justify-center px-4 pt-4 pb-2 shrink-0">
+          <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-border bg-card/90 backdrop-blur-sm shadow-sm max-w-xs w-full">
+            <Avatar className="h-11 w-11 border-2 border-primary/30 shrink-0">
+              {avatarUrl ? <AvatarImage src={avatarUrl} alt="Avatar" /> : null}
+              <AvatarFallback className="bg-muted"><User className="h-5 w-5 text-muted-foreground" /></AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+              <span className="text-sm font-bold text-foreground truncate">{pseudo || "Lecteur"}</span>
+              <div className="flex items-center gap-2">
+                <Progress value={xpPercent} className="h-2 flex-1" />
+                <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{totalXP}/{maxXP} XP</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground italic">En quête d'aventure littéraire</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
-            <span className="text-sm">⭐</span>
-            <span className="text-sm font-bold text-amber-800">{totalXP}</span>
-            <span className="text-[10px] text-amber-600">/ {maxXP} XP</span>
-          </div>
+
+        {/* Scrollable map */}
+        <div className="flex-1 overflow-hidden">
+          <ProgressionMap challenges={mapChallenges} tiers={mapTiers} currentTierId={currentTierId} onTierClick={handleTierClick} />
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left column - Map */}
-        <div
-          className="w-1/2 border-r border-border overflow-hidden relative"
-          style={{
-            background: `
-              radial-gradient(ellipse at 20% 80%, hsla(45, 60%, 90%, 0.5) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 20%, hsla(270, 40%, 92%, 0.4) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 50%, hsla(180, 30%, 95%, 0.3) 0%, transparent 60%),
-              linear-gradient(to bottom, hsla(40, 30%, 97%, 1), hsla(220, 15%, 96%, 1))
-            `,
-          }}
-        >
-          <ProgressionMap challenges={mapChallenges} tiers={mapTiers} currentTierId={currentTierId} onTierClick={handleTierClick} />
-        </div>
-
-        {/* Right column - Details */}
-        <div className="w-1/2 overflow-hidden bg-background">
-          <ProgressionDetails challenges={challenges} currentTierId={currentTierId} highlightedTierId={highlightedTierId} />
-        </div>
+      {/* Right column - Details */}
+      <div className="w-1/2 overflow-hidden bg-background">
+        <ProgressionDetails challenges={challenges} currentTierId={currentTierId} highlightedTierId={highlightedTierId} />
       </div>
     </div>
   );
