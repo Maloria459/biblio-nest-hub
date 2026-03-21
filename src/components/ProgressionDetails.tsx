@@ -166,63 +166,72 @@ export function ProgressionDetails({ challenges, currentTierId, highlightedTierI
                 const emoji = tierEmojis[ti % tierEmojis.length];
 
                 return (
-                  <div
+                  <Collapsible
                     key={tier.id}
-                    id={`tier-${tier.id}`}
-                    className={`p-4 transition-all duration-500 ${
-                      isHighlighted
-                        ? "bg-violet-50 ring-2 ring-inset ring-violet-300 shadow-inner"
-                        : isCurrent
-                          ? "bg-gradient-to-r from-violet-50/50 to-transparent"
-                          : ""
-                    }`}
+                    defaultOpen={isCurrent || tier.completed}
                   >
-                    <div className="flex items-start gap-3.5">
-                      {/* Status icon - book-themed */}
-                      <div className="mt-0.5 shrink-0">
-                        {tier.completed ? (
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-300 to-yellow-500 flex items-center justify-center shadow-sm border border-amber-400">
-                            <span className="text-sm">⭐</span>
-                          </div>
-                        ) : isCurrent ? (
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-400 to-indigo-600 flex items-center justify-center shadow-sm border border-violet-300 animate-pulse">
-                            <span className="text-sm">{emoji}</span>
-                          </div>
-                        ) : (
-                          <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center border border-border">
-                            <Lock className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Chapitre {tier.order}
-                          </span>
-                          <TierStatusBadge
-                            completed={tier.completed}
-                            isCurrent={isCurrent}
-                            completedAt={tier.completed_at}
-                          />
+                    <div
+                      id={`tier-${tier.id}`}
+                      className={`transition-all duration-500 ${
+                        isHighlighted
+                          ? "bg-violet-50 ring-2 ring-inset ring-violet-300 shadow-inner"
+                          : isCurrent
+                            ? "bg-gradient-to-r from-violet-50/50 to-transparent"
+                            : ""
+                      }`}
+                    >
+                      {/* Collapsible trigger - always visible row */}
+                      <CollapsibleTrigger className="w-full text-left p-4 flex items-center gap-3.5 group cursor-pointer hover:bg-muted/30 transition-colors">
+                        {/* Status icon */}
+                        <div className="shrink-0">
+                          {tier.completed ? (
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-300 to-yellow-500 flex items-center justify-center shadow-sm border border-amber-400">
+                              <span className="text-sm">⭐</span>
+                            </div>
+                          ) : isCurrent ? (
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-400 to-indigo-600 flex items-center justify-center shadow-sm border border-violet-300 animate-pulse">
+                              <span className="text-sm">{emoji}</span>
+                            </div>
+                          ) : (
+                            <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center border border-border">
+                              <Lock className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
                         </div>
-                        <h4 className="text-sm font-bold text-foreground mt-1">{tier.name}</h4>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{tier.description}</p>
 
-                        {/* Reward */}
-                        {tier.reward_value && (
-                          <div className="mt-2">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border border-amber-200">
-                              🎁 +{tier.reward_value}
+                        {/* Title + status */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              Chapitre {tier.order}
                             </span>
+                            <TierStatusBadge
+                              completed={tier.completed}
+                              isCurrent={isCurrent}
+                              completedAt={tier.completed_at}
+                            />
                           </div>
+                          <h4 className="text-sm font-bold text-foreground mt-0.5">{tier.name}</h4>
+                        </div>
+
+                        {/* Reward badge inline */}
+                        {tier.reward_value && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border border-amber-200 shrink-0">
+                            🎁 +{tier.reward_value}
+                          </span>
                         )}
+
+                        {/* Chevron */}
+                        <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+
+                      {/* Collapsible content - details */}
+                      <CollapsibleContent className="px-4 pb-4 pl-[4.25rem]">
+                        <p className="text-[11px] text-muted-foreground leading-relaxed">{tier.description}</p>
 
                         {/* Sub-tiers */}
                         {tier.subTiers && tier.subTiers.length > 0 && (
                           <div className="mt-3 ml-1 space-y-2 border-l-2 border-dashed border-amber-200 pl-4">
-                            {/* Mini progress */}
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-medium text-muted-foreground">
                                 Quêtes : {tier.subTiers.filter((s) => s.completed).length}/{tier.subTiers.length}
@@ -265,9 +274,9 @@ export function ProgressionDetails({ challenges, currentTierId, highlightedTierI
                               ))}
                           </div>
                         )}
-                      </div>
+                      </CollapsibleContent>
                     </div>
-                  </div>
+                  </Collapsible>
                 );
               })}
             </div>
