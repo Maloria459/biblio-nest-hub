@@ -73,7 +73,7 @@ export function ProgressionDetails({ challenges, currentTierId, highlightedTierI
   const sortedChallenges = [...challenges].sort((a, b) => b.order - a.order);
 
   return (
-    <div className="flex flex-col gap-6 overflow-y-auto h-full py-5 px-5">
+    <div className="flex flex-col-reverse gap-6 overflow-y-auto h-full py-5 px-5">
       {sortedChallenges.map((challenge) => {
         const topTiers = challenge.tiers
           .filter((t) => !t.parent_tier_id)
