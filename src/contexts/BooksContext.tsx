@@ -163,9 +163,18 @@ export function BooksProvider({ children }: { children: ReactNode }) {
         console.error("addBook error:", error);
         toast.error("Erreur lors de l'enregistrement du livre");
         setBooks((prev) => prev.filter((b) => b.id !== book.id));
+      } else {
+        // Progression checks based on book status
+        if (book.status === "Wishlist") {
+          checkProgression("add_book_to_wishlist");
+        } else if (book.status === "Dans ma PAL") {
+          checkProgression("add_book_to_tbr");
+        } else {
+          checkProgression("add_book_to_library");
+        }
       }
     });
-  }, [user]);
+  }, [user, checkProgression]);
 
   const updateBook = useCallback((updated: Book) => {
     if (!user) return;
