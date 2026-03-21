@@ -226,7 +226,7 @@ export function ProgressionContent() {
       <div className="flex flex-1 overflow-hidden">
         {/* Left column - Map */}
         <div
-          className="w-[42%] border-r border-border overflow-hidden relative"
+          className="w-1/2 border-r border-border overflow-hidden relative"
           style={{
             background: `
               radial-gradient(ellipse at 20% 80%, hsla(45, 60%, 90%, 0.5) 0%, transparent 50%),
@@ -240,7 +240,7 @@ export function ProgressionContent() {
         </div>
 
         {/* Right column - Details */}
-        <div className="w-[58%] overflow-hidden bg-background">
+        <div className="w-1/2 overflow-hidden bg-background">
           <ProgressionDetails challenges={challenges} currentTierId={currentTierId} highlightedTierId={highlightedTierId} />
         </div>
       </div>
