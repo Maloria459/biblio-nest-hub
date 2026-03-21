@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProgressionMap } from "@/components/ProgressionMap";
 import { ProgressionDetails } from "@/components/ProgressionDetails";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { BookOpen, Map } from "lucide-react";
+import { useAvatar } from "@/contexts/AvatarContext";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { BookOpen, Map as MapIcon, User } from "lucide-react";
 
 interface TierRow {
   id: string;
