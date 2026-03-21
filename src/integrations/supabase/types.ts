@@ -164,6 +164,93 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_tiers: {
+        Row: {
+          action_type: string | null
+          challenge_id: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          order: number
+          parent_tier_id: string | null
+          reward_type: string | null
+          reward_value: string | null
+          threshold: number
+        }
+        Insert: {
+          action_type?: string | null
+          challenge_id: string
+          created_at?: string
+          description: string
+          id?: string
+          name: string
+          order?: number
+          parent_tier_id?: string | null
+          reward_type?: string | null
+          reward_value?: string | null
+          threshold?: number
+        }
+        Update: {
+          action_type?: string | null
+          challenge_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          order?: number
+          parent_tier_id?: string | null
+          reward_type?: string | null
+          reward_value?: string | null
+          threshold?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_tiers_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_tiers_parent_tier_id_fkey"
+            columns: ["parent_tier_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          name: string
+          order: number
+          reward_type: string
+          reward_value: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          name: string
+          order?: number
+          reward_type?: string
+          reward_value?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          order?: number
+          reward_type?: string
+          reward_value?: string
+        }
+        Relationships: []
+      }
       collection_books: {
         Row: {
           added_at: string
@@ -360,6 +447,48 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          challenge_id: string
+          completed: boolean
+          completed_at: string | null
+          id: string
+          tier_id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          tier_id: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          tier_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_progress_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_tiers"
             referencedColumns: ["id"]
           },
         ]
