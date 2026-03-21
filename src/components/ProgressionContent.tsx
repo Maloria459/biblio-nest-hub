@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProgressionMap } from "@/components/ProgressionMap";
 import { ProgressionDetails } from "@/components/ProgressionDetails";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BookOpen, Map } from "lucide-react";
 
 interface TierRow {
   id: string;
@@ -79,10 +80,7 @@ export function ProgressionContent() {
     const [challengeRes, tierRes, progressRes] = await Promise.all([
       supabase.from("challenges").select("*").order("order") as any,
       supabase.from("challenge_tiers").select("*").order("order") as any,
-      supabase
-        .from("user_progress")
-        .select("*")
-        .eq("user_id", user.id) as any,
+      supabase.from("user_progress").select("*").eq("user_id", user.id) as any,
     ]);
 
     const challengeRows: ChallengeRow[] = challengeRes.data ?? [];
@@ -92,28 +90,19 @@ export function ProgressionContent() {
     const progressMap = new Map<string, ProgressRow>();
     progressRows.forEach((p) => progressMap.set(p.tier_id, p));
 
-    // Build processed tiers
     const processedTiers: ProcessedTier[] = tierRows.map((t) => {
       const prog = progressMap.get(t.id);
-      return {
-        ...t,
-        completed: prog?.completed ?? false,
-        completed_at: prog?.completed_at ?? null,
-      };
+      return { ...t, completed: prog?.completed ?? false, completed_at: prog?.completed_at ?? null };
     });
 
-    // Attach sub-tiers to parents
     const topLevel = processedTiers.filter((t) => !t.parent_tier_id);
     const subTiers = processedTiers.filter((t) => t.parent_tier_id);
-
     topLevel.forEach((t) => {
       t.subTiers = subTiers.filter((s) => s.parent_tier_id === t.id);
     });
 
-    // Build challenges
     const processed: ProcessedChallenge[] = challengeRows.map((c) => {
       const cTiers = topLevel.filter((t) => {
-        // Match via challenge_id from original tierRows
         const orig = tierRows.find((tr) => tr.id === t.id);
         return orig?.challenge_id === c.id;
       });
@@ -125,7 +114,6 @@ export function ProgressionContent() {
     setChallenges(processed);
     setAllTiers(topLevel);
 
-    // Find current tier (first uncompleted top-level, ordered by challenge then tier order)
     let found = false;
     for (const ch of processed.sort((a, b) => a.order - b.order)) {
       for (const t of ch.tiers.sort((a, b) => a.order - b.order)) {
@@ -138,39 +126,43 @@ export function ProgressionContent() {
       if (found) break;
     }
     if (!found) setCurrentTierId(null);
-
     setLoading(false);
   }, [user]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   const handleTierClick = (tierId: string) => {
     setHighlightedTierId(tierId);
-    // Scroll right column to tier
     const el = document.getElementById(`tier-${tierId}`);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-    // Clear highlight after animation
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
     setTimeout(() => setHighlightedTierId(null), 2000);
   };
 
-  // Map-compatible data
   const mapChallenges = challenges.map((c) => ({ id: c.id, name: c.name, order: c.order }));
   const mapTiers = allTiers.map((t) => ({
-    id: t.id,
-    name: t.name,
-    order: t.order,
-    parent_tier_id: t.parent_tier_id,
-    completed: t.completed,
+    id: t.id, name: t.name, order: t.order, parent_tier_id: t.parent_tier_id, completed: t.completed,
   }));
+
+  // Compute total XP
+  const totalXP = allTiers.reduce((sum, t) => {
+    if (!t.completed || !t.reward_value) return sum;
+    const match = t.reward_value.match(/(\d+)/);
+    return sum + (match ? parseInt(match[1]) : 0);
+  }, 0);
+
+  const maxXP = allTiers.reduce((sum, t) => {
+    if (!t.reward_value) return sum;
+    const match = t.reward_value.match(/(\d+)/);
+    return sum + (match ? parseInt(match[1]) : 0);
+  }, 0);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center flex-1">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-3 border-foreground border-t-transparent" />
+          <span className="text-xs text-muted-foreground">Chargement de votre aventure…</span>
+        </div>
       </div>
     );
   }
@@ -178,46 +170,31 @@ export function ProgressionContent() {
   if (isMobile) {
     return (
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Mobile tab toggle */}
         <div className="flex items-center justify-center p-2 border-b border-border bg-card">
           <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1">
             <button
               onClick={() => setMobileView("map")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                mobileView === "map"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                mobileView === "map" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
               }`}
             >
-              Carte
+              <Map className="h-3.5 w-3.5" /> Carte
             </button>
             <button
               onClick={() => setMobileView("details")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                mobileView === "details"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                mobileView === "details" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
               }`}
             >
-              Détails
+              <BookOpen className="h-3.5 w-3.5" /> Détails
             </button>
           </div>
         </div>
-
         <div className="flex-1 overflow-hidden">
           {mobileView === "map" ? (
-            <ProgressionMap
-              challenges={mapChallenges}
-              tiers={mapTiers}
-              currentTierId={currentTierId}
-              onTierClick={handleTierClick}
-            />
+            <ProgressionMap challenges={mapChallenges} tiers={mapTiers} currentTierId={currentTierId} onTierClick={handleTierClick} />
           ) : (
-            <ProgressionDetails
-              challenges={challenges}
-              currentTierId={currentTierId}
-              highlightedTierId={highlightedTierId}
-            />
+            <ProgressionDetails challenges={challenges} currentTierId={currentTierId} highlightedTierId={highlightedTierId} />
           )}
         </div>
       </div>
@@ -225,24 +202,47 @@ export function ProgressionContent() {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
-      {/* Left column - Map */}
-      <div className="w-[45%] border-r border-border overflow-hidden bg-gradient-to-b from-amber-50/30 via-violet-50/20 to-teal-50/30">
-        <ProgressionMap
-          challenges={mapChallenges}
-          tiers={mapTiers}
-          currentTierId={currentTierId}
-          onTierClick={handleTierClick}
-        />
+    <div className="flex flex-col flex-1 overflow-hidden">
+      {/* Header bar with XP */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-card">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+            <span className="text-lg">📜</span>
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-foreground">Ma Quête Littéraire</h2>
+            <p className="text-[10px] text-muted-foreground">Accomplissez des défis pour progresser dans votre aventure</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
+            <span className="text-sm">⭐</span>
+            <span className="text-sm font-bold text-amber-800">{totalXP}</span>
+            <span className="text-[10px] text-amber-600">/ {maxXP} XP</span>
+          </div>
+        </div>
       </div>
 
-      {/* Right column - Details */}
-      <div className="w-[55%] overflow-hidden">
-        <ProgressionDetails
-          challenges={challenges}
-          currentTierId={currentTierId}
-          highlightedTierId={highlightedTierId}
-        />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left column - Map */}
+        <div
+          className="w-[42%] border-r border-border overflow-hidden relative"
+          style={{
+            background: `
+              radial-gradient(ellipse at 20% 80%, hsla(45, 60%, 90%, 0.5) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, hsla(270, 40%, 92%, 0.4) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 50%, hsla(180, 30%, 95%, 0.3) 0%, transparent 60%),
+              linear-gradient(to bottom, hsla(40, 30%, 97%, 1), hsla(220, 15%, 96%, 1))
+            `,
+          }}
+        >
+          <ProgressionMap challenges={mapChallenges} tiers={mapTiers} currentTierId={currentTierId} onTierClick={handleTierClick} />
+        </div>
+
+        {/* Right column - Details */}
+        <div className="w-[58%] overflow-hidden bg-background">
+          <ProgressionDetails challenges={challenges} currentTierId={currentTierId} highlightedTierId={highlightedTierId} />
+        </div>
       </div>
     </div>
   );
