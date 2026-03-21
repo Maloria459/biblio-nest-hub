@@ -87,7 +87,7 @@ export function ProgressionContent() {
     const tierRows: TierRow[] = tierRes.data ?? [];
     const progressRows: ProgressRow[] = progressRes.data ?? [];
 
-    const progressMap = new Map<string, ProgressRow>();
+    const progressMap: globalThis.Map<string, ProgressRow> = new globalThis.Map();
     progressRows.forEach((p) => progressMap.set(p.tier_id, p));
 
     const processedTiers: ProcessedTier[] = tierRows.map((t) => {

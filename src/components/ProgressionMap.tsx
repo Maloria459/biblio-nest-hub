@@ -275,8 +275,9 @@ export function ProgressionMap({ challenges, tiers, currentTierId, onTierClick }
           // Place banner above the first tier of each challenge
           const challengeTiersInOrder = topLevelTiers.sort((a, b) => a.order - b.order);
           const firstTierIndex = 0; // For single challenge
+          const lastPos = nodePositions[nodePositions.length - 1];
           const bannerY = ci === 0
-            ? nodePositions[nodePositions.length - 1]?.y - 55 ?? 20
+            ? (lastPos ? lastPos.y - 55 : 20)
             : 20;
 
           if (ci > 0) return null; // Only handle first challenge for now
