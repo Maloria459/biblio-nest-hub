@@ -78,6 +78,7 @@ export function ProfileContent() {
   const { user } = useAuth();
   const { avatarUrl, setAvatarUrl } = useAvatar();
   const { books } = useBooks();
+  const { checkProgression } = useProgression();
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
