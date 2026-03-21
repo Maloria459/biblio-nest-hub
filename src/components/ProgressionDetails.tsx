@@ -87,11 +87,11 @@ export function ProgressionDetails({ challenges, currentTierId, highlightedTierI
             key={challenge.id}
             defaultOpen={challenge.inProgress || challenge.allCompleted}
           >
-            <div className="rounded-2xl border-2 border-border bg-card shadow-sm overflow-hidden">
-              {/* Challenge header - always visible, acts as trigger */}
+            <div className="rounded-2xl border-2 border-border bg-card shadow-sm overflow-hidden flex flex-col-reverse">
+              {/* Challenge header - always visible, acts as trigger - now at bottom */}
               <CollapsibleTrigger className="w-full text-left cursor-pointer group">
                 <div
-                  className="relative p-5 overflow-hidden"
+                  className="relative p-5 overflow-hidden border-t-2 border-border"
                   style={{
                     background: challenge.allCompleted
                       ? "linear-gradient(135deg, hsla(45, 80%, 92%, 1), hsla(35, 70%, 88%, 1))"
@@ -151,13 +151,13 @@ export function ProgressionDetails({ challenges, currentTierId, highlightedTierI
                       </div>
                     </div>
 
-                    {/* Chevron */}
+                    {/* Chevron - points up when open since tiers go above */}
                     <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                   </div>
                 </div>
               </CollapsibleTrigger>
 
-              {/* Collapsible tiers list */}
+              {/* Collapsible tiers list - renders above the header */}
               <CollapsibleContent>
                 <div className="divide-y divide-border">
                   {topTiers.map((tier, ti) => {
