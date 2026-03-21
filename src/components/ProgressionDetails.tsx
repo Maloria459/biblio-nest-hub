@@ -152,7 +152,7 @@ export function ProgressionDetails({ challenges, currentTierId, highlightedTierI
                     </div>
 
                     {/* Chevron - points up when open since tiers go above */}
-                    <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 rotate-180 group-data-[state=open]:rotate-0" />
                   </div>
                 </div>
               </CollapsibleTrigger>
