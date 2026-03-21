@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Check, Lock, Circle, BookOpen, Award, Scroll, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
