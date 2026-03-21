@@ -70,12 +70,21 @@ interface ProcessedChallenge {
 export function ProgressionContent() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const { avatarUrl } = useAvatar();
+  const [pseudo, setPseudo] = useState<string>("");
   const [challenges, setChallenges] = useState<ProcessedChallenge[]>([]);
   const [allTiers, setAllTiers] = useState<ProcessedTier[]>([]);
   const [currentTierId, setCurrentTierId] = useState<string | null>(null);
   const [highlightedTierId, setHighlightedTierId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"map" | "details">("map");
   const [loading, setLoading] = useState(true);
+
+  // Fetch pseudo
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("pseudo").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data?.pseudo) setPseudo(data.pseudo as string); });
+  }, [user?.id]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
