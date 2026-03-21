@@ -229,9 +229,9 @@ export function ProgressionContent() {
           `,
         }}
       >
-        {/* Profile card */}
-        <div className="flex justify-center px-4 pt-4 pb-2 shrink-0">
-          <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-border bg-card/90 backdrop-blur-sm shadow-sm max-w-xs w-full">
+        {/* Profile card - fixed */}
+        <div className="flex justify-center px-4 pt-4 pb-2 shrink-0 z-10 relative">
+          <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-border bg-card/95 backdrop-blur-sm shadow-sm max-w-xs w-full">
             <Avatar className="h-11 w-11 border-2 border-primary/30 shrink-0">
               {avatarUrl ? <AvatarImage src={avatarUrl} alt="Avatar" /> : null}
               <AvatarFallback className="bg-muted"><User className="h-5 w-5 text-muted-foreground" /></AvatarFallback>
@@ -248,13 +248,13 @@ export function ProgressionContent() {
         </div>
 
         {/* Scrollable map */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-auto">
           <ProgressionMap challenges={mapChallenges} tiers={mapTiers} currentTierId={currentTierId} onTierClick={handleTierClick} />
         </div>
       </div>
 
       {/* Right column - Details */}
-      <div className="w-1/2 overflow-hidden bg-background">
+      <div className="w-1/2 overflow-auto bg-background">
         <ProgressionDetails challenges={challenges} currentTierId={currentTierId} highlightedTierId={highlightedTierId} />
       </div>
     </div>
