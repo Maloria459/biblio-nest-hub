@@ -190,7 +190,7 @@ export function ProgressionContent() {
                 mobileView === "map" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
               }`}
             >
-              <Map className="h-3.5 w-3.5" /> Carte
+              <MapIcon className="h-3.5 w-3.5" /> Carte
             </button>
             <button
               onClick={() => setMobileView("details")}
