@@ -13,8 +13,8 @@ interface BottomTabBarProps {
 
 export function BottomTabBar({ tabs, activeTab, onTabChange }: BottomTabBarProps) {
   return (
-    <div className="sticky bottom-0 z-20 flex h-[var(--bottombar-height)] items-center justify-center border-t border-border bg-card px-4">
-      <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1">
+    <div className="fixed bottom-0 right-0 left-[var(--sidebar-width)] z-40 flex h-[var(--bottombar-height)] items-center justify-center border-t border-border bg-card/95 px-4 backdrop-blur-sm">
+      <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1 shadow-sm">
         {tabs.map((tab) => (
           <button
             key={tab.label}
