@@ -17,7 +17,7 @@ import Profil from "./pages/Profil";
 import Parametres from "./pages/Parametres";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
-
+import ResetPassword from "./pages/ResetPassword";
 const queryClient = new QueryClient();
 
 function AppRoutes() {
