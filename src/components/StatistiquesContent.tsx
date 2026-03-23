@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfYear, endOfMonth, isAfter, isBefore, parseISO, format, getDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 import { StatsSummaryCards } from "@/components/stats/StatsSummaryCards";
 import { StatsReadingEvolution } from "@/components/stats/StatsReadingEvolution";
