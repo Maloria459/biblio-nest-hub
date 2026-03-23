@@ -355,11 +355,10 @@ export function usePersonalObjectives() {
             .some((s) => (s.last_page_reached ?? 0) >= obj.target_value) ? 1 : 0;
           break;
         case "attend_literary_events":
-          // Will use literary_events count — fetched separately if needed
-          currentValue = 0;
+          currentValue = literaryEvents.filter((e) => inRange(e.event_date, range)).length;
           break;
         case "attend_book_clubs":
-          currentValue = 0;
+          currentValue = bookClubEvents.filter((e) => inRange(e.event_date, range)).length;
           break;
         default:
           currentValue = 0;
