@@ -370,7 +370,7 @@ export function usePersonalObjectives() {
         label: typeMeta?.label.replace("X", String(obj.target_value)) ?? obj.objective_type,
       };
     });
-  }, [objectives, books, sessions]);
+  }, [objectives, books, sessions, collections, collectionBooks, literaryEvents, bookClubEvents]);
 
   const pinnedObjectives = useMemo(
     () => objectivesWithProgress.filter((o) => o.pinned).slice(0, 3),
