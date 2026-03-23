@@ -4,6 +4,7 @@ import type { TabItem } from "@/components/BottomTabBar";
 import { ReadingSessionsContent } from "@/components/ReadingSessionsContent";
 import { ProfileContent } from "@/components/ProfileContent";
 import { StatistiquesContent } from "@/components/StatistiquesContent";
+import { PersonalObjectivesContent } from "@/components/PersonalObjectivesContent";
 
 const tabs: TabItem[] = [
   { label: "Profil", icon: User },
@@ -18,6 +19,7 @@ const Profil = () => (
     defaultTab={tabs[0].label}
     tabContent={{
       "Profil": <ProfileContent />,
+      "Mes objectifs personnels": <PersonalObjectivesContent />,
       "Mes statistiques": <StatistiquesContent />,
       "Mes sessions de lecture": <ReadingSessionsContent />,
     }}

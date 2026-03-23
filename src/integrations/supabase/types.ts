@@ -371,6 +371,45 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_objectives: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          filter_value: string | null
+          id: string
+          objective_type: string
+          period_type: string
+          pinned: boolean
+          start_date: string | null
+          target_value: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          filter_value?: string | null
+          id?: string
+          objective_type: string
+          period_type?: string
+          pinned?: boolean
+          start_date?: string | null
+          target_value: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          filter_value?: string | null
+          id?: string
+          objective_type?: string
+          period_type?: string
+          pinned?: boolean
+          start_date?: string | null
+          target_value?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
