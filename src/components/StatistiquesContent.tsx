@@ -264,7 +264,7 @@ export function StatistiquesContent() {
           </SelectContent>
         </Select>
 
-        <span className="text-xs text-muted-foreground ml-1">{filterLabel}</span>
+        
       </div>
 
       <StatsSummaryCards
