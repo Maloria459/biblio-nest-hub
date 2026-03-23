@@ -11,6 +11,7 @@ import { uploadCover } from "@/lib/uploadCover";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { LoanConditionalFields } from "@/components/LoanConditionalFields";
+import { GoogleBooksSearch, type GoogleBookResult } from "@/components/GoogleBooksSearch";
 
 interface AddBookModalProps {
   open: boolean;
