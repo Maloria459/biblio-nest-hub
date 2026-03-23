@@ -1,10 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { OBJECTIVE_TYPES, type ObjectiveTypeOption } from "@/hooks/usePersonalObjectives";
+import { OBJECTIVE_TYPES, type ObjectiveTypeOption, type PersonalObjective } from "@/hooks/usePersonalObjectives";
 import { useBooks } from "@/contexts/BooksContext";
 
 interface Props {
@@ -19,10 +19,13 @@ interface Props {
     end_date: string | null;
     pinned: boolean;
   }) => void;
+  onUpdate?: (obj: { id: string; target_value?: number; filter_value?: string | null; period_type?: string; start_date?: string | null; end_date?: string | null }) => void;
   isCreating: boolean;
+  isUpdating?: boolean;
+  editingObjective?: PersonalObjective | null;
 }
 
-export function CreateObjectiveModal({ open, onClose, onCreate, isCreating }: Props) {
+export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCreating, isUpdating, editingObjective }: Props) {
   const { books, genres, formats } = useBooks();
   const [selectedType, setSelectedType] = useState<string>("");
   const [targetValue, setTargetValue] = useState("");
@@ -30,6 +33,20 @@ export function CreateObjectiveModal({ open, onClose, onCreate, isCreating }: Pr
   const [periodType, setPeriodType] = useState("month");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  const isEditMode = !!editingObjective;
+
+  // Populate fields when editing
+  useEffect(() => {
+    if (editingObjective) {
+      setSelectedType(editingObjective.objective_type);
+      setTargetValue(String(editingObjective.target_value));
+      setFilterValue(editingObjective.filter_value ?? "");
+      setPeriodType(editingObjective.period_type);
+      setStartDate(editingObjective.start_date ?? "");
+      setEndDate(editingObjective.end_date ?? "");
+    }
+  }, [editingObjective]);
 
   const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === selectedType);
 
@@ -41,7 +58,6 @@ export function CreateObjectiveModal({ open, onClose, onCreate, isCreating }: Pr
     return map;
   }, []);
 
-  // Autocomplete options for filter
   const filterOptions = useMemo(() => {
     if (!typeMeta?.needsFilter) return [];
     switch (typeMeta.needsFilter) {
@@ -71,15 +87,27 @@ export function CreateObjectiveModal({ open, onClose, onCreate, isCreating }: Pr
 
   const handleSubmit = () => {
     if (!selectedType || !targetValue) return;
-    onCreate({
-      objective_type: selectedType,
-      target_value: Number(targetValue),
-      filter_value: typeMeta?.needsFilter ? filterValue || null : null,
-      period_type: periodType,
-      start_date: periodType === "custom" ? startDate || null : null,
-      end_date: periodType === "custom" ? endDate || null : null,
-      pinned: false,
-    });
+
+    if (isEditMode && onUpdate && editingObjective) {
+      onUpdate({
+        id: editingObjective.id,
+        target_value: Number(targetValue),
+        filter_value: typeMeta?.needsFilter ? filterValue || null : null,
+        period_type: periodType,
+        start_date: periodType === "custom" ? startDate || null : null,
+        end_date: periodType === "custom" ? endDate || null : null,
+      });
+    } else {
+      onCreate({
+        objective_type: selectedType,
+        target_value: Number(targetValue),
+        filter_value: typeMeta?.needsFilter ? filterValue || null : null,
+        period_type: periodType,
+        start_date: periodType === "custom" ? startDate || null : null,
+        end_date: periodType === "custom" ? endDate || null : null,
+        pinned: false,
+      });
+    }
     reset();
     onClose();
   };
@@ -88,14 +116,14 @@ export function CreateObjectiveModal({ open, onClose, onCreate, isCreating }: Pr
     <Dialog open={open} onOpenChange={(o) => { if (!o) { reset(); onClose(); } }}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Créer un objectif</DialogTitle>
+          <DialogTitle>{isEditMode ? "Modifier l'objectif" : "Créer un objectif"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          {/* Type */}
+          {/* Type — disabled in edit mode */}
           <div className="space-y-1.5">
             <Label>Type d'objectif</Label>
-            <Select value={selectedType} onValueChange={setSelectedType}>
+            <Select value={selectedType} onValueChange={setSelectedType} disabled={isEditMode}>
               <SelectTrigger><SelectValue placeholder="Choisir un type" /></SelectTrigger>
               <SelectContent className="max-h-60">
                 {Object.entries(grouped).map(([cat, types]) => (
@@ -175,10 +203,10 @@ export function CreateObjectiveModal({ open, onClose, onCreate, isCreating }: Pr
 
           <Button
             onClick={handleSubmit}
-            disabled={!selectedType || !targetValue || isCreating}
+            disabled={!selectedType || !targetValue || isCreating || isUpdating}
             className="w-full"
           >
-            Créer l'objectif
+            {isEditMode ? "Enregistrer les modifications" : "Créer l'objectif"}
           </Button>
         </div>
       </DialogContent>

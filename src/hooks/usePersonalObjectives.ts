@@ -382,8 +382,10 @@ export function usePersonalObjectives() {
     pinnedObjectives,
     isLoading,
     createObjective: createMutation.mutate,
+    updateObjective: updateMutation.mutate,
     deleteObjective: deleteMutation.mutate,
     togglePin,
     isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
   };
 }
