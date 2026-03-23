@@ -364,10 +364,22 @@ export function usePersonalObjectives() {
           currentValue = 0;
       }
 
+      const periodLabel = obj.period_type === "month" ? " (ce mois)"
+        : obj.period_type === "year" ? " (cette année)"
+        : obj.period_type === "custom" && obj.start_date && obj.end_date
+          ? ` (${obj.start_date} → ${obj.end_date})`
+          : "";
+
+      const rawLabel = typeMeta?.label ?? obj.objective_type;
+      const label = rawLabel
+        .replace("X", String(obj.target_value))
+        .replace("{filter}", obj.filter_value ?? "…")
+        + periodLabel;
+
       return {
         ...obj,
         currentValue,
-        label: typeMeta?.label.replace("X", String(obj.target_value)) ?? obj.objective_type,
+        label,
       };
     });
   }, [objectives, books, sessions, collections, collectionBooks, literaryEvents, bookClubEvents]);
