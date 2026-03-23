@@ -3,6 +3,7 @@ import { User, Target, BarChart3, Clock } from "lucide-react";
 import type { TabItem } from "@/components/BottomTabBar";
 import { ReadingSessionsContent } from "@/components/ReadingSessionsContent";
 import { ProfileContent } from "@/components/ProfileContent";
+import { StatistiquesContent } from "@/components/StatistiquesContent";
 
 const tabs: TabItem[] = [
   { label: "Profil", icon: User },
@@ -17,6 +18,7 @@ const Profil = () => (
     defaultTab={tabs[0].label}
     tabContent={{
       "Profil": <ProfileContent />,
+      "Mes statistiques": <StatistiquesContent />,
       "Mes sessions de lecture": <ReadingSessionsContent />,
     }}
   />
