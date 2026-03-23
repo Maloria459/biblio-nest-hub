@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 export interface GoogleBookResult {
   title: string;
@@ -11,7 +12,6 @@ export interface GoogleBookResult {
   publishedDate?: string;
   pageCount?: number;
   coverUrl?: string;
-  description?: string;
 }
 
 interface Props {
@@ -30,23 +30,23 @@ export function GoogleBooksSearch({ onSelect }: Props) {
     setSearched(true);
     try {
       const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8&langRestrict=fr`
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8&lang=fr`
       );
+      if (!res.ok) throw new Error("Erreur réseau");
       const data = await res.json();
-      const items = (data.items || []).map((item: any) => {
-        const info = item.volumeInfo;
-        return {
-          title: info.title || "",
-          author: (info.authors || []).join(", "),
-          publisher: info.publisher,
-          publishedDate: info.publishedDate,
-          pageCount: info.pageCount,
-          coverUrl: info.imageLinks?.thumbnail?.replace("http://", "https://"),
-          description: info.description,
-        } as GoogleBookResult;
-      });
+      const items: GoogleBookResult[] = (data.docs || []).slice(0, 8).map((doc: any) => ({
+        title: doc.title || "",
+        author: (doc.author_name || []).join(", "),
+        publisher: (doc.publisher || [])[0],
+        publishedDate: doc.first_publish_year ? String(doc.first_publish_year) : undefined,
+        pageCount: doc.number_of_pages_median,
+        coverUrl: doc.cover_i
+          ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
+          : undefined,
+      }));
       setResults(items);
     } catch {
+      toast.error("Impossible de rechercher des livres. Réessayez plus tard.");
       setResults([]);
     }
     setLoading(false);
