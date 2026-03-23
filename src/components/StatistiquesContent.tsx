@@ -266,7 +266,17 @@ export function StatistiquesContent() {
           </SelectContent>
         </Select>
 
-        
+        {(selectedMonth !== "all" || selectedYear !== "all") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 text-xs text-muted-foreground gap-1.5"
+            onClick={() => { setSelectedMonth("all"); setSelectedYear("all"); }}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Réinitialiser
+          </Button>
+        )}
       </div>
 
       <StatsSummaryCards
