@@ -143,27 +143,36 @@ export function StatistiquesContent() {
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
   }, [filteredSessions, selectedMonth]);
 
-  // ---- Genre chart ----
-  const genreData = useMemo(() => {
-    const map = new Map<string, number>();
-    filteredBooks.forEach((b) => {
-      if (b.genre) map.set(b.genre, (map.get(b.genre) ?? 0) + 1);
-    });
-    return Array.from(map.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-  }, [filteredBooks]);
+  // ---- Genre chart (owned = all books, read = filtered finished) ----
+  const readBooks = useMemo(
+    () => filteredBooks.filter((b) => finishedStatuses.includes(b.status)),
+    [filteredBooks],
+  );
 
-  // ---- Format chart ----
-  const formatData = useMemo(() => {
+  const genreDataOwned = useMemo(() => {
     const map = new Map<string, number>();
-    filteredBooks.forEach((b) => {
-      if (b.format) map.set(b.format, (map.get(b.format) ?? 0) + 1);
-    });
-    return Array.from(map.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-  }, [filteredBooks]);
+    books.forEach((b) => { if (b.genre) map.set(b.genre, (map.get(b.genre) ?? 0) + 1); });
+    return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [books]);
+
+  const genreDataRead = useMemo(() => {
+    const map = new Map<string, number>();
+    readBooks.forEach((b) => { if (b.genre) map.set(b.genre, (map.get(b.genre) ?? 0) + 1); });
+    return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [readBooks]);
+
+  // ---- Format chart (owned = all books, read = filtered finished) ----
+  const formatDataOwned = useMemo(() => {
+    const map = new Map<string, number>();
+    books.forEach((b) => { if (b.format) map.set(b.format, (map.get(b.format) ?? 0) + 1); });
+    return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [books]);
+
+  const formatDataRead = useMemo(() => {
+    const map = new Map<string, number>();
+    readBooks.forEach((b) => { if (b.format) map.set(b.format, (map.get(b.format) ?? 0) + 1); });
+    return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [readBooks]);
 
   // ---- Rating distribution ----
   const ratingDistribution = useMemo(() => {
@@ -290,8 +299,8 @@ export function StatistiquesContent() {
       <StatsReadingEvolution data={evolutionData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <StatsGenreChart data={genreData} />
-        <StatsFormatChart data={formatData} />
+        <StatsGenreChart ownedData={genreDataOwned} readData={genreDataRead} />
+        <StatsFormatChart ownedData={formatDataOwned} readData={formatDataRead} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
