@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useBooks } from "@/contexts/BooksContext";
 import { useReadingSessions, type ReadingSession } from "@/hooks/useReadingSessions";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfYear, endOfMonth, isAfter, isBefore, parseISO, format, getDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 import { StatsSummaryCards } from "@/components/stats/StatsSummaryCards";
 import { StatsReadingEvolution } from "@/components/stats/StatsReadingEvolution";
@@ -264,7 +266,17 @@ export function StatistiquesContent() {
           </SelectContent>
         </Select>
 
-        
+        {(selectedMonth !== "all" || selectedYear !== "all") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 text-xs text-muted-foreground gap-1.5"
+            onClick={() => { setSelectedMonth("all"); setSelectedYear("all"); }}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Réinitialiser
+          </Button>
+        )}
       </div>
 
       <StatsSummaryCards
