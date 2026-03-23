@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useBooks } from "@/contexts/BooksContext";
 import { useReadingSessions, type ReadingSession } from "@/hooks/useReadingSessions";
 import { useAuth } from "@/contexts/AuthContext";
