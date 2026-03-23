@@ -117,7 +117,7 @@ export function WishlistContent() {
                             onClick={() => setSelectedBook(book)}
                             renderBack={renderWishlistBack}
                           />
-                          <div className="flex items-center justify-between mt-2" style={{ width: 180 }}>
+                          <div className="flex items-center justify-between mt-2 max-w-[180px]">
                             <span className="text-xs text-foreground">
                               {book.price != null ? `${book.price.toFixed(2)} €` : "— €"}
                             </span>
