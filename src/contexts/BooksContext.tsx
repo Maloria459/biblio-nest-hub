@@ -106,7 +106,7 @@ function bookToRow(book: Book, userId: string) {
 
 export function BooksProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { checkProgression } = useProgression();
+  
   const [books, setBooks] = useState<Book[]>([]);
   const [genres, setGenres] = useState<string[]>(DEFAULT_GENRES);
   const [formats, setFormats] = useState<string[]>(DEFAULT_FORMATS);
