@@ -116,6 +116,65 @@ export function usePersonalObjectives() {
   const { data: sessions = [] } = useReadingSessions();
   const qc = useQueryClient();
 
+  // Fetch collections count
+  const { data: collections = [] } = useQuery({
+    queryKey: ["collections-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("collections")
+        .select("id, created_at")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
+  // Fetch collection_books count
+  const { data: collectionBooks = [] } = useQuery({
+    queryKey: ["collection-books-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("collection_books")
+        .select("id, added_at, collection_id");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
+  // Fetch literary events
+  const { data: literaryEvents = [] } = useQuery({
+    queryKey: ["literary-events-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("literary_events")
+        .select("id, event_date")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
+  // Fetch book club events
+  const { data: bookClubEvents = [] } = useQuery({
+    queryKey: ["book-club-events-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("book_club_events")
+        .select("id, event_date")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
   const queryKey = ["personal-objectives", user?.id];
 
   const { data: objectives = [], isLoading } = useQuery({
