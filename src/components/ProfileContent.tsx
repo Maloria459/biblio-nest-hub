@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAvatar } from "@/contexts/AvatarContext";
 import { useBooks } from "@/contexts/BooksContext";
-import { useProgression } from "@/hooks/useProgression";
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -78,7 +78,7 @@ export function ProfileContent() {
   const { user } = useAuth();
   const { avatarUrl, setAvatarUrl } = useAvatar();
   const { books } = useBooks();
-  const { checkProgression } = useProgression();
+  
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
@@ -133,7 +133,7 @@ export function ProfileContent() {
       setAvatarUrl(url);
       await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
       toast.success("Avatar mis à jour");
-      checkProgression("upload_avatar");
+      
     }
     setUploading(false);
     e.target.value = "";
@@ -148,7 +148,7 @@ export function ProfileContent() {
       setBannerUrl(url);
       await supabase.from("profiles").update({ banner_url: url } as any).eq("user_id", user.id);
       toast.success("Bannière mise à jour");
-      checkProgression("upload_banner");
+      
     }
     setUploading(false);
     e.target.value = "";

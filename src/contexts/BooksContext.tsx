@@ -4,7 +4,7 @@ import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librar
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useProgression } from "@/hooks/useProgression";
+
 
 interface BooksContextType {
   books: Book[];
@@ -106,7 +106,7 @@ function bookToRow(book: Book, userId: string) {
 
 export function BooksProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { checkProgression } = useProgression();
+  
   const [books, setBooks] = useState<Book[]>([]);
   const [genres, setGenres] = useState<string[]>(DEFAULT_GENRES);
   const [formats, setFormats] = useState<string[]>(DEFAULT_FORMATS);
@@ -164,17 +164,9 @@ export function BooksProvider({ children }: { children: ReactNode }) {
         toast.error("Erreur lors de l'enregistrement du livre");
         setBooks((prev) => prev.filter((b) => b.id !== book.id));
       } else {
-        // Progression checks based on book status
-        if (book.status === "Wishlist") {
-          checkProgression("add_book_to_wishlist");
-        } else if (book.status === "Dans ma PAL") {
-          checkProgression("add_book_to_tbr");
-        } else {
-          checkProgression("add_book_to_library");
-        }
       }
     });
-  }, [user, checkProgression]);
+  }, [user]);
 
   const updateBook = useCallback((updated: Book) => {
     if (!user) return;
