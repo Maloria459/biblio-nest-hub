@@ -94,9 +94,9 @@ export function WishlistContent() {
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className="grid gap-y-5"
+                  className="grid gap-y-5 gap-x-3"
                   style={{
-                    gridTemplateColumns: "repeat(8, 180px)",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 180px))",
                     justifyContent: "space-between",
                   }}
                 >
