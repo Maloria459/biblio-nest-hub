@@ -94,9 +94,9 @@ export function WishlistContent() {
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className="grid gap-y-5"
+                  className="grid gap-y-5 gap-x-3"
                   style={{
-                    gridTemplateColumns: "repeat(8, 180px)",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 180px))",
                     justifyContent: "space-between",
                   }}
                 >
@@ -117,7 +117,7 @@ export function WishlistContent() {
                             onClick={() => setSelectedBook(book)}
                             renderBack={renderWishlistBack}
                           />
-                          <div className="flex items-center justify-between mt-2" style={{ width: 180 }}>
+                          <div className="flex items-center justify-between mt-2 max-w-[180px]">
                             <span className="text-xs text-foreground">
                               {book.price != null ? `${book.price.toFixed(2)} €` : "— €"}
                             </span>

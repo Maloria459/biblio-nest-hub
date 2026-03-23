@@ -110,9 +110,9 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4 space-y-4 sm:space-y-6">
         {/* ── Profile Banner ── */}
-        <div className="flex items-center gap-5 rounded-lg border border-border bg-card p-5">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 rounded-lg border border-border bg-card p-4 sm:p-5">
           {/* Avatar */}
           <Avatar className="h-16 w-16 shrink-0">
             {avatarUrl ? (
@@ -124,7 +124,7 @@ const Dashboard = () => {
           </Avatar>
 
           {/* User info */}
-          <div className="flex flex-col gap-1 min-w-0 flex-1">
+          <div className="flex flex-col gap-1 min-w-0 flex-1 text-center sm:text-left">
             <span className="font-display text-lg font-bold text-foreground truncate">
               {pseudo || "—"}
             </span>
@@ -133,7 +133,7 @@ const Dashboard = () => {
             </span>
             <div className="flex items-center gap-3 mt-1">
               <Progress value={0} className="h-2 flex-1 max-w-xs" />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
+              <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
                 0 / 500 points avant le prochain rang
               </span>
             </div>
@@ -142,7 +142,6 @@ const Dashboard = () => {
           {/* Virtual currency */}
           <div className="flex flex-col items-center gap-1 shrink-0">
             <div className="relative h-14 w-14 shrink-0">
-              {/* Fixed placeholder to prevent any layout shift */}
               <div className="absolute inset-0 rounded-full bg-muted" />
               <img
                 src={eclatEncreSrc}
