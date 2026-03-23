@@ -11,6 +11,7 @@ import { uploadCover } from "@/lib/uploadCover";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { LoanConditionalFields } from "@/components/LoanConditionalFields";
+import { GoogleBooksSearch, type GoogleBookResult } from "@/components/GoogleBooksSearch";
 
 interface AddBookModalProps {
   open: boolean;
@@ -152,6 +153,19 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
 
         <div className="flex-1 overflow-y-auto p-6">
           <div className="flex flex-col gap-4">
+            {/* Google Books Search */}
+            <GoogleBooksSearch onSelect={(book: GoogleBookResult) => {
+              setTitle(book.title);
+              setAuthor(book.author);
+              if (book.publisher) setPublisher(book.publisher);
+              if (book.publishedDate) setPubDate(book.publishedDate);
+              if (book.pageCount) setPages(String(book.pageCount));
+              if (book.coverUrl) {
+                setCoverMode("url");
+                setCoverUrl(book.coverUrl);
+              }
+            }} />
+
             {/* Cover */}
             <div className="flex flex-col items-center gap-3">
               <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
