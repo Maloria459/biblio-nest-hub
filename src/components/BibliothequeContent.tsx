@@ -13,7 +13,7 @@ import { useBooks } from "@/contexts/BooksContext";
 
 export function BibliothequeContent() {
   const {
-    books, genres, formats, statuses,
+    books, booksLoading, genres, formats, statuses,
     setGenres, setFormats, setStatuses, saveSettings,
     addBook, updateBook, deleteBook, markPAL,
   } = useBooks();
