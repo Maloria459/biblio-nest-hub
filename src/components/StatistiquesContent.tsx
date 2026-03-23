@@ -299,8 +299,8 @@ export function StatistiquesContent() {
       <StatsReadingEvolution data={evolutionData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <StatsGenreChart data={genreData} />
-        <StatsFormatChart data={formatData} />
+        <StatsGenreChart ownedData={genreDataOwned} readData={genreDataRead} />
+        <StatsFormatChart ownedData={formatDataOwned} readData={formatDataRead} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
