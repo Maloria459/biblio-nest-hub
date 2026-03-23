@@ -133,7 +133,7 @@ export function ProfileContent() {
       setAvatarUrl(url);
       await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
       toast.success("Avatar mis à jour");
-      checkProgression("upload_avatar");
+      
     }
     setUploading(false);
     e.target.value = "";
