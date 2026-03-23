@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
+  onSwitchToForgot: () => void;
 }
 
-export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+export function LoginForm({ onSwitchToRegister, onSwitchToForgot }: LoginFormProps) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -97,6 +98,16 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       >
         {loading ? "Connexion…" : "Continuer ma quête littéraire"}
       </Button>
+
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onSwitchToForgot}
+          className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+        >
+          Mot de passe oublié ?
+        </button>
+      </div>
 
       <div className="text-center">
         <button
