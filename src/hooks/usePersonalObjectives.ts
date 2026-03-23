@@ -299,11 +299,10 @@ export function usePersonalObjectives() {
           currentValue = books.filter((b) => b.secondaryStatus === "Emprunté").length;
           break;
         case "collections_count":
-          // Will need collections data — for now count 0 (could be enhanced)
-          currentValue = 0;
+          currentValue = collections.filter((c) => inRange(c.created_at, range)).length;
           break;
         case "add_to_collections":
-          currentValue = 0;
+          currentValue = collectionBooks.filter((cb) => inRange(cb.added_at, range)).length;
           break;
         case "write_reviews":
           currentValue = books.filter((b) => b.avis && b.avis.trim().length > 0 && inRange(b.endDate, range)).length;
