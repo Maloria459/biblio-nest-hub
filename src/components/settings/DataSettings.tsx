@@ -22,10 +22,88 @@ import {
 
 export function DataSettings() {
   const { user, signOut } = useAuth();
+  const { addBook, books } = useBooks();
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const importRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setImporting(true);
+
+    try {
+      const text = await file.text();
+      let importedBooks: any[] = [];
+
+      if (file.name.endsWith(".json")) {
+        const parsed = JSON.parse(text);
+        // Support both raw array and export format { books: [...] }
+        importedBooks = Array.isArray(parsed) ? parsed : (parsed.books || []);
+      } else if (file.name.endsWith(".csv")) {
+        const lines = text.split("\n").filter((l) => l.trim());
+        if (lines.length < 2) throw new Error("Fichier CSV vide");
+        const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+        const titleIdx = headers.findIndex((h) => h === "title" || h === "titre");
+        const authorIdx = headers.findIndex((h) => h === "author" || h === "auteur" || h === "author l/f");
+        if (titleIdx === -1) throw new Error("Colonne 'title' ou 'titre' introuvable dans le CSV");
+
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+          if (!cols[titleIdx]) continue;
+          importedBooks.push({
+            title: cols[titleIdx],
+            author: authorIdx !== -1 ? cols[authorIdx] : "Inconnu",
+          });
+        }
+      } else {
+        throw new Error("Format non supporté. Utilisez un fichier JSON ou CSV.");
+      }
+
+      const existingTitles = new Set(books.map((b) => b.title.toLowerCase()));
+      let added = 0;
+      let skipped = 0;
+
+      for (const raw of importedBooks) {
+        const title = (raw.title || raw.Title || "").trim();
+        if (!title || existingTitles.has(title.toLowerCase())) {
+          skipped++;
+          continue;
+        }
+        existingTitles.add(title.toLowerCase());
+
+        addBook({
+          id: crypto.randomUUID(),
+          title,
+          author: (raw.author || raw.Author || "Inconnu").trim(),
+          coverUrl: raw.cover_url || raw.coverUrl || undefined,
+          status: raw.status || "Acheté",
+          genre: raw.genre || undefined,
+          format: raw.format || undefined,
+          pages: raw.pages ? Number(raw.pages) : undefined,
+          publisher: raw.publisher || undefined,
+        });
+        added++;
+      }
+
+      toast({
+        title: "Import terminé",
+        description: `${added} livre(s) importé(s)${skipped ? `, ${skipped} doublon(s) ignoré(s)` : ""}.`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Erreur d'import",
+        description: err.message || "Impossible de lire le fichier.",
+        variant: "destructive",
+      });
+    }
+
+    setImporting(false);
+    if (importRef.current) importRef.current.value = "";
+  };
 
   const handleExport = async () => {
     if (!user) return;
