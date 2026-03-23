@@ -2,6 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+const PAGE_SIZE = 1000;
+
 export interface ReadingSession {
   id: string;
   book_id: string;
@@ -12,20 +14,30 @@ export interface ReadingSession {
   created_at: string;
 }
 
+async function fetchAllSessions(userId: string): Promise<ReadingSession[]> {
+  const rows: any[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from("reading_sessions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("session_date", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    if (data) rows.push(...data);
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return rows as ReadingSession[];
+}
+
 export function useReadingSessions() {
   const { user } = useAuth();
 
   const query = useQuery({
     queryKey: ["reading-sessions", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("reading_sessions")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("session_date", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as ReadingSession[];
-    },
+    queryFn: () => fetchAllSessions(user!.id),
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });
