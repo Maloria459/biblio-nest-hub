@@ -88,7 +88,18 @@ export function ReadingSessionsContent() {
   }, [sessions, books]);
 
   if (isLoading) {
-    return <div className="flex-1 flex items-center justify-center"><div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" /></div>;
+    return (
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex justify-center py-3">
+          <Skeleton className="h-9 w-56 rounded-lg" />
+        </div>
+        <div className="px-6 py-4 space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const viewToggle = (
