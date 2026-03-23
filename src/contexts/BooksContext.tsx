@@ -166,7 +166,7 @@ export function BooksProvider({ children }: { children: ReactNode }) {
       } else {
       }
     });
-  }, [user, checkProgression]);
+  }, [user]);
 
   const updateBook = useCallback((updated: Book) => {
     if (!user) return;
