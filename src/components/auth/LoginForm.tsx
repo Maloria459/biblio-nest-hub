@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
+  onSwitchToForgot: () => void;
 }
 
 export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
