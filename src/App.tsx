@@ -39,6 +39,7 @@ function AppRoutes() {
     <AvatarProvider>
       <BooksProvider>
         <Routes>
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/aventure" element={<Aventure />} />
