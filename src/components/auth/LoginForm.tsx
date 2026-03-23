@@ -99,6 +99,16 @@ export function LoginForm({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
         {loading ? "Connexion…" : "Continuer ma quête littéraire"}
       </Button>
 
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onSwitchToForgot}
+          className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+        >
+          Mot de passe oublié ?
+        </button>
+      </div>
+
       <div className="text-center">
         <button
           type="button"
