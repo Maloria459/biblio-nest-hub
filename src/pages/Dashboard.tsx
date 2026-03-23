@@ -110,7 +110,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4 space-y-4 sm:space-y-6">
         {/* ── Profile Banner ── */}
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 rounded-lg border border-border bg-card p-4 sm:p-5">
           {/* Avatar */}
