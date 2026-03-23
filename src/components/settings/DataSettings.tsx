@@ -167,6 +167,20 @@ export function DataSettings() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Importer des livres</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Importez vos livres depuis un fichier JSON (format Biblio Nest) ou CSV (Goodreads, etc.). Les doublons seront automatiquement ignorés.
+          </p>
+          <input type="file" accept=".json,.csv" ref={importRef} onChange={handleImport} className="hidden" />
+          <Button variant="outline" onClick={() => importRef.current?.click()} disabled={importing} className="gap-2">
+            {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {importing ? "Import en cours..." : "Importer un fichier"}
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="border-destructive/30">
         <CardContent className="pt-6">
           <h3 className="text-sm font-semibold text-destructive uppercase tracking-wider mb-4">Zone de danger</h3>
