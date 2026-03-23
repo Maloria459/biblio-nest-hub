@@ -84,18 +84,28 @@ export function BibliothequeContent() {
       <div
         className="grid gap-y-5"
         style={{
-          gridTemplateColumns: "repeat(8, 180px)",
+          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 180px))",
           justifyContent: "space-between",
         }}
       >
-        {visibleBooks.map((book) => (
-          <FlipBookCard
-            key={book.id}
-            book={book}
-            onMarkPAL={markPAL}
-            onClick={() => setSelectedBook(book)}
-          />
-        ))}
+        {booksLoading ? (
+          Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="rounded-lg" style={{ width: 180, height: 270 }} />
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          ))
+        ) : (
+          visibleBooks.map((book) => (
+            <FlipBookCard
+              key={book.id}
+              book={book}
+              onMarkPAL={markPAL}
+              onClick={() => setSelectedBook(book)}
+            />
+          ))
+        )}
       </div>
 
       {/* Modals & Panels */}
