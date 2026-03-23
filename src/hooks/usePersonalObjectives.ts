@@ -27,11 +27,11 @@ export const OBJECTIVE_TYPES: ObjectiveTypeOption[] = [
   { value: "read_pages", label: "Lire X pages", category: "Lecture" },
   { value: "read_minutes", label: "Lire pendant X minutes", category: "Lecture" },
   { value: "sessions_count", label: "Effectuer X sessions de lecture", category: "Lecture" },
-  { value: "read_author", label: "Lire X livres d'un auteur", category: "Lecture", needsFilter: "author" },
-  { value: "read_genre", label: "Lire X livres d'un genre", category: "Lecture", needsFilter: "genre" },
-  { value: "read_format", label: "Lire X livres dans un format", category: "Lecture", needsFilter: "format" },
-  { value: "read_publisher", label: "Lire X livres d'un éditeur", category: "Lecture", needsFilter: "publisher" },
-  { value: "read_series", label: "Lire X livres d'une série", category: "Lecture", needsFilter: "series" },
+  { value: "read_author", label: "Lire X livres de {filter}", category: "Lecture", needsFilter: "author" },
+  { value: "read_genre", label: "Lire X livres en {filter}", category: "Lecture", needsFilter: "genre" },
+  { value: "read_format", label: "Lire X livres en {filter}", category: "Lecture", needsFilter: "format" },
+  { value: "read_publisher", label: "Lire X livres chez {filter}", category: "Lecture", needsFilter: "publisher" },
+  { value: "read_series", label: "Lire X livres de la série {filter}", category: "Lecture", needsFilter: "series" },
   { value: "read_big_book", label: "Terminer un livre de plus de X pages", category: "Lecture" },
   // Bibliothèque
   { value: "buy_books", label: "Acheter X livres", category: "Bibliothèque" },
@@ -364,10 +364,22 @@ export function usePersonalObjectives() {
           currentValue = 0;
       }
 
+      const periodLabel = obj.period_type === "month" ? " (ce mois)"
+        : obj.period_type === "year" ? " (cette année)"
+        : obj.period_type === "custom" && obj.start_date && obj.end_date
+          ? ` (${obj.start_date} → ${obj.end_date})`
+          : "";
+
+      const rawLabel = typeMeta?.label ?? obj.objective_type;
+      const label = rawLabel
+        .replace("X", String(obj.target_value))
+        .replace("{filter}", obj.filter_value ?? "…")
+        + periodLabel;
+
       return {
         ...obj,
         currentValue,
-        label: typeMeta?.label.replace("X", String(obj.target_value)) ?? obj.objective_type,
+        label,
       };
     });
   }, [objectives, books, sessions, collections, collectionBooks, literaryEvents, bookClubEvents]);
