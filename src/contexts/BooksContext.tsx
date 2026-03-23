@@ -5,9 +5,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+const PAGE_SIZE = 1000;
+
+async function fetchAllRows(table: "books", userId: string) {
+  const rows: any[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from(table)
+      .select("*")
+      .eq("user_id", userId)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    if (data) rows.push(...data);
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return rows;
+}
 
 interface BooksContextType {
   books: Book[];
+  booksLoading: boolean;
   genres: string[];
   formats: string[];
   statuses: string[];
@@ -108,31 +127,34 @@ export function BooksProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   
   const [books, setBooks] = useState<Book[]>([]);
+  const [booksLoading, setBooksLoading] = useState(true);
   const [genres, setGenres] = useState<string[]>(DEFAULT_GENRES);
   const [formats, setFormats] = useState<string[]>(DEFAULT_FORMATS);
   const [statuses, setStatuses] = useState<string[]>(DEFAULT_STATUSES);
 
   // Load books + library settings from DB on mount / user change
   useEffect(() => {
-    if (!user) { setBooks([]); setGenres(DEFAULT_GENRES); setFormats(DEFAULT_FORMATS); setStatuses(DEFAULT_STATUSES); return; }
+    if (!user) { setBooks([]); setGenres(DEFAULT_GENRES); setFormats(DEFAULT_FORMATS); setStatuses(DEFAULT_STATUSES); setBooksLoading(false); return; }
+    setBooksLoading(true);
     const load = async () => {
-      // Load books
-      const { data, error } = await supabase
-        .from("books")
-        .select("*")
-        .eq("user_id", user.id);
-      if (!error && data) setBooks(data.map(rowToBook));
+      try {
+        // Load all books with pagination
+        const rows = await fetchAllRows("books", user.id);
+        setBooks(rows.map(rowToBook));
 
-      // Load library settings
-      const { data: settingsData } = await supabase
-        .from("library_settings")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (settingsData) {
-        if (settingsData.genres?.length) setGenres(settingsData.genres as string[]);
-        if (settingsData.formats?.length) setFormats(settingsData.formats as string[]);
-        if (settingsData.statuses?.length) setStatuses(settingsData.statuses as string[]);
+        // Load library settings
+        const { data: settingsData } = await supabase
+          .from("library_settings")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (settingsData) {
+          if (settingsData.genres?.length) setGenres(settingsData.genres as string[]);
+          if (settingsData.formats?.length) setFormats(settingsData.formats as string[]);
+          if (settingsData.statuses?.length) setStatuses(settingsData.statuses as string[]);
+        }
+      } finally {
+        setBooksLoading(false);
       }
     };
     load();
@@ -163,7 +185,6 @@ export function BooksProvider({ children }: { children: ReactNode }) {
         console.error("addBook error:", error);
         toast.error("Erreur lors de l'enregistrement du livre");
         setBooks((prev) => prev.filter((b) => b.id !== book.id));
-      } else {
       }
     });
   }, [user]);
@@ -220,6 +241,7 @@ export function BooksProvider({ children }: { children: ReactNode }) {
     <BooksContext.Provider
       value={{
         books,
+        booksLoading,
         genres,
         formats,
         statuses,
