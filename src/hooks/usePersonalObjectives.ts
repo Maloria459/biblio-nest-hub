@@ -116,6 +116,65 @@ export function usePersonalObjectives() {
   const { data: sessions = [] } = useReadingSessions();
   const qc = useQueryClient();
 
+  // Fetch collections count
+  const { data: collections = [] } = useQuery({
+    queryKey: ["collections-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("collections")
+        .select("id, created_at")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
+  // Fetch collection_books count
+  const { data: collectionBooks = [] } = useQuery({
+    queryKey: ["collection-books-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("collection_books")
+        .select("id, added_at, collection_id");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
+  // Fetch literary events
+  const { data: literaryEvents = [] } = useQuery({
+    queryKey: ["literary-events-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("literary_events")
+        .select("id, event_date")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
+  // Fetch book club events
+  const { data: bookClubEvents = [] } = useQuery({
+    queryKey: ["book-club-events-for-objectives", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("book_club_events")
+        .select("id, event_date")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+  });
+
   const queryKey = ["personal-objectives", user?.id];
 
   const { data: objectives = [], isLoading } = useQuery({
@@ -240,11 +299,10 @@ export function usePersonalObjectives() {
           currentValue = books.filter((b) => b.secondaryStatus === "Emprunté").length;
           break;
         case "collections_count":
-          // Will need collections data — for now count 0 (could be enhanced)
-          currentValue = 0;
+          currentValue = collections.filter((c) => inRange(c.created_at, range)).length;
           break;
         case "add_to_collections":
-          currentValue = 0;
+          currentValue = collectionBooks.filter((cb) => inRange(cb.added_at, range)).length;
           break;
         case "write_reviews":
           currentValue = books.filter((b) => b.avis && b.avis.trim().length > 0 && inRange(b.endDate, range)).length;
@@ -297,11 +355,10 @@ export function usePersonalObjectives() {
             .some((s) => (s.last_page_reached ?? 0) >= obj.target_value) ? 1 : 0;
           break;
         case "attend_literary_events":
-          // Will use literary_events count — fetched separately if needed
-          currentValue = 0;
+          currentValue = literaryEvents.filter((e) => inRange(e.event_date, range)).length;
           break;
         case "attend_book_clubs":
-          currentValue = 0;
+          currentValue = bookClubEvents.filter((e) => inRange(e.event_date, range)).length;
           break;
         default:
           currentValue = 0;
@@ -313,7 +370,7 @@ export function usePersonalObjectives() {
         label: typeMeta?.label.replace("X", String(obj.target_value)) ?? obj.objective_type,
       };
     });
-  }, [objectives, books, sessions]);
+  }, [objectives, books, sessions, collections, collectionBooks, literaryEvents, bookClubEvents]);
 
   const pinnedObjectives = useMemo(
     () => objectivesWithProgress.filter((o) => o.pinned).slice(0, 3),
