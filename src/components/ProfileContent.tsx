@@ -148,7 +148,7 @@ export function ProfileContent() {
       setBannerUrl(url);
       await supabase.from("profiles").update({ banner_url: url } as any).eq("user_id", user.id);
       toast.success("Bannière mise à jour");
-      checkProgression("upload_banner");
+      
     }
     setUploading(false);
     e.target.value = "";
