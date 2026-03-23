@@ -1,67 +1,39 @@
 
 
-## Plan : "Mes statistiques" — Page complète
+## Plan : Double répartition genre & format
 
-### Vue d'ensemble
+### Constat actuel
 
-Page de statistiques riche, sans top bar ni titre, avec un filtre temporel discret en haut. Le contenu s'organise en sections scrollables avec mini-cards chiffrées et graphiques variés.
+Les graphiques genre et format comptent **tous les livres** filtrés par date, sans distinction de statut. L'utilisateur souhaite deux vues distinctes :
 
-### Sources de données
+1. **Livres détenus** (tous les livres, depuis l'inscription, sans filtre temporel)
+2. **Livres lus** (statut "Lu" / "Lecture terminée", filtré par mois/année/inscription selon les sélecteurs)
 
-- **`books`** via `BooksContext` : statuts, genres, formats, notes, pages, dates, coups de coeur
-- **`reading_sessions`** via `useReadingSessions` : durées, dates, pages par session
-- **`profiles.created_at`** via requête Supabase : date d'inscription (pour le filtre)
+### Modifications
 
-### Filtre temporel
+**`StatistiquesContent.tsx`** — Ajouter deux jeux de données :
+- `allBooks` (non filtré par date) → répartition "livres détenus"
+- `filteredBooks` filtré sur statut lu → répartition "livres lus" (déjà filtré par période)
 
-`ToggleGroup` horizontal en haut du contenu avec 3 options :
-- **Ce mois** — filtre sur le mois en cours
-- **Cette année** — filtre sur l'année en cours
-- **Depuis mon inscription** — aucun filtre
+Calculer 4 datasets :
+- `genreDataOwned` / `formatDataOwned` — tous les livres (depuis inscription)
+- `genreDataRead` / `formatDataRead` — livres lus dans la période sélectionnée
 
-Le filtre s'applique sur `session_date` des sessions et `end_date` / `start_date` des livres.
+**`StatsGenreChart.tsx`** — Accepter deux séries de données (`owned` et `read`), afficher deux donut charts côte à côte ou en onglets internes ("Livres détenus" / "Livres lus").
 
-### Contenu détaillé
+**`StatsFormatChart.tsx`** — Même approche : deux bar charts ou onglets ("Livres détenus" / "Livres lus").
 
-**1. Résumé chiffré (grille de 5 mini-cards)**
-- Livres terminés
-- Pages lues (somme `pagesRead`)
-- Temps total de lecture (somme `duration_minutes`)
-- Moyenne pages/jour
-- Sessions de lecture (nombre total)
+### UX proposée
 
-**2. Évolution de la lecture (Area chart)**
-- Courbe des pages lues par semaine (filtre mois) ou par mois (filtre année/inscription)
+Chaque carte (genre et format) contiendra un petit toggle à 2 options en haut :
+- **Livres détenus** — toujours basé sur l'ensemble des livres
+- **Livres lus** — basé sur les livres terminés dans la période filtrée
 
-**3. Répartition par genre (Donut chart)**
-- Camembert des livres par genre, avec légende et pourcentages
+### Fichiers modifiés
 
-**4. Répartition par format (Bar chart horizontal)**
-- Barres : Poche, Broché, Numérique, Audio, etc.
-
-**5. Distribution des notes (Bar chart vertical)**
-- Histogramme des notes 1-5 étoiles + note moyenne affichée
-
-**6. Temps de lecture par jour de la semaine (Radar ou Bar chart)**
-- Répartition du temps selon les jours (lundi à dimanche)
-
-**7. Records et faits marquants (mini-cards)**
-- Plus long livre lu, session la plus longue, meilleur mois, coups de coeur, moyenne temps/session
-
-### Structure technique
-
-```text
-src/components/StatistiquesContent.tsx            -- Conteneur + filtre
-src/components/stats/StatsSummaryCards.tsx         -- 5 mini-cards
-src/components/stats/StatsReadingEvolution.tsx     -- Area chart
-src/components/stats/StatsGenreChart.tsx           -- Donut
-src/components/stats/StatsFormatChart.tsx          -- Bar horizontal
-src/components/stats/StatsRatingChart.tsx          -- Bar vertical
-src/components/stats/StatsWeekdayChart.tsx         -- Radar/Bar
-src/components/stats/StatsHighlights.tsx           -- Records
-```
-
-- Branchement dans `src/pages/Profil.tsx` sur l'onglet "Mes statistiques"
-- Calculs côté client, graphiques via `recharts` + composants `chart.tsx` existants
-- Responsive : 2 colonnes desktop, 1 colonne mobile
+| Fichier | Action |
+|---|---|
+| `src/components/StatistiquesContent.tsx` | Calculer les 4 datasets, passer les props |
+| `src/components/stats/StatsGenreChart.tsx` | Ajouter toggle owned/read + deux séries |
+| `src/components/stats/StatsFormatChart.tsx` | Ajouter toggle owned/read + deux séries |
 
