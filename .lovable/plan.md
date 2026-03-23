@@ -1,77 +1,69 @@
 
 
-## Plan révisé : "Mes objectifs personnels" — Liste de types non exhaustive
+## Plan : Page Paramètres complète
 
-Le système stocke un `objective_type` en base et le hook calcule la progression dynamiquement. Voici la liste complète des types proposés, organisés par catégorie. L'utilisateur choisit parmi cette liste lors de la création d'un objectif.
+La page `/parametres` est actuellement vide. Les paramètres de la bibliothèque (genres, formats, statuts) restent dans leur emplacement actuel (panneau latéral dans la bibliothèque) et ne sont pas dupliqués ici.
 
-### Types d'objectifs
+### Sections
 
-**Lecture**
-- Lire X livres
-- Lire X pages
-- Lire pendant X minutes
-- Effectuer X sessions de lecture
-- Lire X livres d'un auteur (filtre : auteur)
-- Lire X livres d'un genre (filtre : genre)
-- Lire X livres d'un format (filtre : format)
-- Lire X livres d'un éditeur (filtre : éditeur)
-- Lire X livres d'une série (filtre : série)
-- Terminer un livre de plus de X pages
+**1. Mon compte**
+- Modifier pseudo, prénom, nom, date de naissance (formulaire pré-rempli depuis `profiles`)
+- Email affiché en lecture seule
+- Changer le mot de passe (ancien + nouveau + confirmation, via `supabase.auth.updateUser`)
+- Déconnexion
 
-**Bibliothèque**
-- Acheter X livres
-- Ajouter X livres à la wishlist
-- Ajouter X livres dans ma PAL
-- Vider X livres de ma PAL (passer de PAL a lu)
-- Prêter X livres
-- Emprunter X livres
-- Créer X collections
-- Ajouter X livres dans des collections
-- Rédiger X avis
-- Ajouter X citations
-- Dépenser moins de X euros en livres
+**2. Apparence**
+- Toggle thème clair / sombre (applique la classe `.dark` sur `<html>`, persisté en `localStorage`)
+- Les variables CSS dark existent déjà dans `index.css`
 
-**Qualité / Engagement**
-- Avoir X coups de coeur
-- Noter X livres
-- Atteindre une note moyenne >= X
-- Recommander X livres du mois
-- Renseigner X personnages préférés
-- Renseigner X passages préférés
+**3. Notifications** *(préparation future)*
+- Toggles : rappels de lecture, objectifs atteints, événements communautaires
+- Stocké dans une nouvelle table `user_preferences`
 
-**Sessions de lecture**
-- Lire X jours différents (régularité)
-- Faire une session de plus de X minutes
-- Atteindre X pages lues en une session
+**4. Confidentialité**
+- Profil public ou privé (toggle)
+- Afficher/masquer les statistiques
+- Afficher/masquer la bibliothèque
+- Stocké dans `user_preferences`
 
-**Communauté**
-- Participer à X évènements littéraires
-- Participer à X clubs de lecteurs
+**5. Données**
+- Exporter mes données (téléchargement JSON de books, sessions, collections)
+- Supprimer mon compte (confirmation en 2 étapes, appel `supabase.auth.admin.deleteUser` via edge function)
 
-### Chaque type est défini par
+### Base de données
 
-| Champ | Description |
-|---|---|
-| `objective_type` | Clé technique (ex: `read_books`, `read_author`) |
-| `target_value` | Cible chiffrée |
-| `filter_value` | Valeur optionnelle (auteur, genre, format, éditeur, série) |
-| `period_type` | `month`, `year`, `custom` |
+**Table `user_preferences`** (nouvelle, avec RLS `auth.uid() = user_id`) :
 
-### Structure technique inchangée
+| Colonne | Type | Default |
+|---|---|---|
+| id | uuid | gen_random_uuid() |
+| user_id | uuid | NOT NULL, unique |
+| theme | text | 'light' |
+| notify_reading_reminders | boolean | true |
+| notify_objectives | boolean | true |
+| notify_community | boolean | true |
+| profile_public | boolean | true |
+| show_stats | boolean | true |
+| show_library | boolean | true |
+| created_at | timestamptz | now() |
+| updated_at | timestamptz | now() |
 
-- Table `personal_objectives` + RLS
-- Hook `usePersonalObjectives` avec un `switch` sur chaque type pour calculer `currentValue`
-- Modal de création avec types groupés par catégorie
-- Page liste + carte dashboard (3 objectifs épinglés)
+RLS : SELECT / INSERT / UPDATE pour `auth.uid() = user_id`.
 
 ### Fichiers
 
 | Fichier | Action |
 |---|---|
-| Migration SQL | Table `personal_objectives` + RLS |
-| `src/hooks/usePersonalObjectives.ts` | CRUD + calcul progression (tous les types) |
-| `src/components/PersonalObjectivesContent.tsx` | Page liste + état vide |
-| `src/components/CreateObjectiveModal.tsx` | Formulaire avec types groupés |
-| `src/pages/Profil.tsx` | Brancher sur l'onglet |
-| `src/components/dashboard/PersonalObjectivesCard.tsx` | Brancher sur le hook |
+| Migration SQL | Table `user_preferences` + RLS + trigger `updated_at` |
+| `src/hooks/useUserPreferences.ts` | Créer — CRUD react-query sur `user_preferences`, upsert au premier accès |
+| `src/pages/Parametres.tsx` | Refondre — layout avec navigation verticale (liste de sections à gauche, contenu à droite) |
+| `src/components/settings/AccountSettings.tsx` | Créer — formulaire profil + changement mot de passe |
+| `src/components/settings/AppearanceSettings.tsx` | Créer — toggle dark mode |
+| `src/components/settings/NotificationSettings.tsx` | Créer — toggles notifications |
+| `src/components/settings/PrivacySettings.tsx` | Créer — toggles confidentialité |
+| `src/components/settings/DataSettings.tsx` | Créer — export données + suppression compte |
+
+### Layout
+
+Pas de titre ni de top bar. Navigation verticale à gauche avec les 5 sections. Au clic sur une section, le contenu s'affiche à droite. Chaque modification est auto-sauvegardée (même pattern que `SettingsPanel`).
 
