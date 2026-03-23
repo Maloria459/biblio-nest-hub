@@ -490,6 +490,48 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          notify_community: boolean
+          notify_objectives: boolean
+          notify_reading_reminders: boolean
+          profile_public: boolean
+          show_library: boolean
+          show_stats: boolean
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notify_community?: boolean
+          notify_objectives?: boolean
+          notify_reading_reminders?: boolean
+          profile_public?: boolean
+          show_library?: boolean
+          show_stats?: boolean
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notify_community?: boolean
+          notify_objectives?: boolean
+          notify_reading_reminders?: boolean
+          profile_public?: boolean
+          show_library?: boolean
+          show_stats?: boolean
+          theme?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           challenge_id: string
