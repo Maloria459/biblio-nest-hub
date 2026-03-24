@@ -227,36 +227,33 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   {eb.matureContent && <span className="ml-auto self-center leading-none" style={{ fontSize: "1.25rem", lineHeight: "1.75rem" }} title="Destiné à un public averti">🔞</span>}
                 </div>
 
-                {eb.series && (
-                  <div className="space-y-1">
-                    <Label className="text-xs">Série</Label>
-                    <p className="text-sm">{eb.series}</p>
+                {/* Metadata grid */}
+                <div className="grid grid-cols-3 gap-x-4 gap-y-3 rounded-lg border border-border bg-muted/30 p-4">
+                  {eb.series && (
+                    <div className="col-span-3 space-y-0.5">
+                      <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Série</Label>
+                      <p className="text-sm font-medium">{eb.series}</p>
+                    </div>
+                  )}
+                  <div className="space-y-0.5">
+                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Éditeur</Label>
+                    <p className="text-sm font-medium">{eb.publisher || "—"}</p>
                   </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Éditeur</Label>
-                    <p className="text-sm">{eb.publisher || "—"}</p>
+                  <div className="space-y-0.5">
+                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Date de publication</Label>
+                    <p className="text-sm font-medium">{eb.publicationDate || "—"}</p>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Date de publication</Label>
-                    <p className="text-sm">{eb.publicationDate || "—"}</p>
+                  <div className="space-y-0.5">
+                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Genre</Label>
+                    <p className="text-sm font-medium">{eb.genre || "—"}</p>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Genre</Label>
-                    <p className="text-sm">{eb.genre || "—"}</p>
+                  <div className="space-y-0.5">
+                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Format</Label>
+                    <p className="text-sm font-medium">{eb.format || "—"}</p>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Format</Label>
-                    <p className="text-sm">{eb.format || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Statut</Label>
-                    <p className="text-sm">{eb.status || "—"}{eb.secondaryStatus ? ` · ${eb.secondaryStatus}` : ""}</p>
+                  <div className="space-y-0.5">
+                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Statut</Label>
+                    <p className="text-sm font-medium">{eb.status || "—"}{eb.secondaryStatus ? ` · ${eb.secondaryStatus}` : ""}</p>
                   </div>
                 </div>
 
