@@ -1,28 +1,16 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { usePersonalObjectives, OBJECTIVE_TYPES, type PersonalObjective, type ObjectiveWithProgress } from "@/hooks/usePersonalObjectives";
 import { CreateObjectiveModal } from "@/components/CreateObjectiveModal";
+import { ObjectiveCard, isObjectiveCompleted } from "@/components/ObjectiveCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw, PartyPopper, Search, ArrowUpDown } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Target, Search, ArrowUpDown, History } from "lucide-react";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
-
-function getProgressColor(pct: number, inverted?: boolean): string {
-  if (inverted) {
-    // For inverted (budget): green when low, red when high
-    if (pct < 50) return "bg-green-500";
-    if (pct < 85) return "bg-orange-500";
-    return "bg-red-500";
-  }
-  if (pct >= 75) return "bg-green-500";
-  if (pct >= 25) return "bg-orange-500";
-  return "bg-red-500";
-}
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "Toutes les catégories" },
@@ -54,11 +42,15 @@ const SORT_OPTIONS = [
   { value: "category", label: "Catégorie" },
 ];
 
-function isCompleted(obj: ObjectiveWithProgress): boolean {
-  const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
-  return typeMeta?.inverted
-    ? obj.currentValue <= obj.target_value
-    : obj.currentValue >= obj.target_value;
+function isExpired(obj: ObjectiveWithProgress): boolean {
+  if (obj.period_type === "custom" && obj.end_date) {
+    return new Date(obj.end_date) < new Date();
+  }
+  return false;
+}
+
+function isHistorical(obj: ObjectiveWithProgress): boolean {
+  return isObjectiveCompleted(obj) || isExpired(obj);
 }
 
 export function PersonalObjectivesContent() {
@@ -66,6 +58,7 @@ export function PersonalObjectivesContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingObj, setEditingObj] = useState<PersonalObjective | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("active");
 
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -79,7 +72,7 @@ export function PersonalObjectivesContent() {
 
   // Track milestones and completion celebrations
   const celebratedRef = useRef<Set<string>>(new Set());
-  const milestonesRef = useRef<Map<string, number>>(new Map()); // objectiveId -> highest milestone reached
+  const milestonesRef = useRef<Map<string, number>>(new Map());
 
   const MILESTONES = [25, 50, 75];
   const MILESTONE_MESSAGES: Record<number, string> = {
@@ -93,7 +86,6 @@ export function PersonalObjectivesContent() {
       const pct = obj.target_value > 0 ? Math.min(100, (obj.currentValue / obj.target_value) * 100) : 0;
       const prevMilestone = milestonesRef.current.get(obj.id) ?? 0;
 
-      // Check milestones (25, 50, 75)
       for (const m of MILESTONES) {
         if (pct >= m && prevMilestone < m) {
           toast.success(MILESTONE_MESSAGES[m], {
@@ -104,8 +96,7 @@ export function PersonalObjectivesContent() {
       }
       milestonesRef.current.set(obj.id, Math.max(prevMilestone, ...MILESTONES.filter((m) => pct >= m), 0));
 
-      // 100% completion confetti
-      if (isCompleted(obj) && !celebratedRef.current.has(obj.id)) {
+      if (isObjectiveCompleted(obj) && !celebratedRef.current.has(obj.id)) {
         celebratedRef.current.add(obj.id);
         if (celebratedRef.current.size > 1 || milestonesRef.current.size > 1) {
           confetti({
@@ -118,22 +109,25 @@ export function PersonalObjectivesContent() {
       }
     });
 
-    // Initialize refs for already-completed objectives on first load
     objectives.forEach((obj) => {
-      if (isCompleted(obj)) celebratedRef.current.add(obj.id);
+      if (isObjectiveCompleted(obj)) celebratedRef.current.add(obj.id);
     });
   }, [objectives]);
 
-  const filtered = useMemo(() => {
+  // Split into active and history
+  const activeObjectives = useMemo(() => objectives.filter((o) => !isHistorical(o)), [objectives]);
+  const historyObjectives = useMemo(() => objectives.filter((o) => isHistorical(o)), [objectives]);
+
+  const applyFiltersAndSort = (list: ObjectiveWithProgress[]) => {
     const query = searchQuery.trim().toLowerCase();
-    const result = objectives.filter((obj) => {
+    const result = list.filter((obj) => {
       if (query && !obj.label.toLowerCase().includes(query)) return false;
       if (filterCategory !== "all") {
         const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
         if (typeMeta?.category !== filterCategory) return false;
       }
       if (filterStatus !== "all") {
-        const done = isCompleted(obj);
+        const done = isObjectiveCompleted(obj);
         if (filterStatus === "completed" && !done) return false;
         if (filterStatus === "in_progress" && done) return false;
       }
@@ -141,7 +135,6 @@ export function PersonalObjectivesContent() {
       return true;
     });
 
-    // Sort
     result.sort((a, b) => {
       switch (sortBy) {
         case "date_asc":
@@ -169,11 +162,39 @@ export function PersonalObjectivesContent() {
     });
 
     return result;
-  }, [objectives, filterCategory, filterStatus, filterPeriod, sortBy, searchQuery]);
+  };
+
+  const filteredActive = useMemo(() => applyFiltersAndSort(activeObjectives), [activeObjectives, filterCategory, filterStatus, filterPeriod, sortBy, searchQuery]);
+  const filteredHistory = useMemo(() => applyFiltersAndSort(historyObjectives), [historyObjectives, filterCategory, filterStatus, filterPeriod, sortBy, searchQuery]);
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Chargement…</div>;
   }
+
+  const renderGrid = (list: ObjectiveWithProgress[], readOnly: boolean) => {
+    if (list.length === 0) {
+      return (
+        <p className="text-sm text-muted-foreground text-center py-10">
+          {readOnly ? "Aucun objectif dans l'historique." : "Aucun objectif ne correspond aux filtres sélectionnés."}
+        </p>
+      );
+    }
+    return (
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((obj) => (
+          <ObjectiveCard
+            key={obj.id}
+            obj={obj}
+            onEdit={openEdit}
+            onDuplicate={duplicateObjective}
+            onTogglePin={togglePin}
+            onDelete={(id) => setDeletingId(id)}
+            readOnly={readOnly}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="p-4 md:p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-120px)]">
@@ -243,126 +264,54 @@ export function PersonalObjectivesContent() {
         </Button>
       </div>
 
-      {objectives.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-16 gap-3">
-          <Target className="h-10 w-10 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground text-center max-w-xs">
-            Vous n'avez pas encore d'objectifs. Créez votre premier objectif pour suivre votre progression !
-          </p>
-          <Button variant="outline" size="sm" onClick={openCreate}>
-            <Plus className="h-4 w-4 mr-1" /> Créer un objectif
-          </Button>
-        </Card>
-      ) : filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-10">Aucun objectif ne correspond aux filtres sélectionnés.</p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((obj) => {
-            const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
-            const isInverted = typeMeta?.inverted;
-            const pct = obj.target_value > 0 ? Math.min(100, (obj.currentValue / obj.target_value) * 100) : 0;
-            const completed = isCompleted(obj);
+      {/* Tabs: Actifs / Historique */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="active" className="gap-1.5">
+            <Target className="h-3.5 w-3.5" />
+            Actifs
+            {activeObjectives.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{activeObjectives.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-1.5">
+            <History className="h-3.5 w-3.5" />
+            Historique
+            {historyObjectives.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{historyObjectives.length}</Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-            return (
-              <Card key={obj.id} className="p-4 flex flex-col gap-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-foreground leading-tight line-clamp-2">
-                      {obj.label}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                      <Badge variant="outline" className="text-xs">{typeMeta?.category ?? ""}</Badge>
-                      {completed && <Badge variant="default" className="text-xs">Terminé</Badge>}
-                      {obj.recurring && (
-                        <Badge variant="secondary" className="text-xs gap-1">
-                          <RefreshCw className="h-2.5 w-2.5" />
-                          Récurrent
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(obj)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Modifier</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => duplicateObjective(obj)}>
-                          <Copy className="h-3.5 w-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Dupliquer</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => togglePin(obj)}>
-                          {obj.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{obj.pinned ? "Désépingler" : "Épingler"}</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeletingId(obj.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Supprimer</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </div>
+        <TabsContent value="active" className="mt-4">
+          {objectives.length === 0 ? (
+            <Card className="flex flex-col items-center justify-center py-16 gap-3">
+              <Target className="h-10 w-10 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground text-center max-w-xs">
+                Vous n'avez pas encore d'objectifs. Créez votre premier objectif pour suivre votre progression !
+              </p>
+              <Button variant="outline" size="sm" onClick={openCreate}>
+                <Plus className="h-4 w-4 mr-1" /> Créer un objectif
+              </Button>
+            </Card>
+          ) : (
+            renderGrid(filteredActive, false)
+          )}
+        </TabsContent>
 
-                <div className="space-y-1.5">
-                  {/* Milestone markers */}
-                  <div className="relative">
-                    <Progress
-                      value={pct}
-                      className="h-2"
-                      indicatorClassName={getProgressColor(pct, isInverted)}
-                    />
-                    {!isInverted && (
-                      <div className="absolute inset-0 flex items-center pointer-events-none">
-                        {MILESTONES.map((m) => (
-                          <div
-                            key={m}
-                            className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full border border-background"
-                            style={{ left: `${m}%`, transform: `translateX(-50%) translateY(-50%)` }}
-                            title={`${m}%`}
-                          >
-                            <div className={`w-full h-full rounded-full ${pct >= m ? "bg-foreground/40" : "bg-muted-foreground/30"}`} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    {completed ? (
-                      <span className="flex items-center gap-1 text-xs text-green-600">
-                        <PartyPopper className="h-3 w-3" /> Atteint !
-                      </span>
-                    ) : pct >= 75 ? (
-                      <span className="text-xs text-muted-foreground">💪 Presque !</span>
-                    ) : pct >= 50 ? (
-                      <span className="text-xs text-muted-foreground">🔥 Mi-parcours</span>
-                    ) : pct >= 25 ? (
-                      <span className="text-xs text-muted-foreground">🚀 Bon début</span>
-                    ) : null}
-                    <p className="text-xs text-muted-foreground text-right ml-auto">
-                      {obj.currentValue} / {obj.target_value}
-                      {isInverted ? " €" : ""}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+        <TabsContent value="history" className="mt-4">
+          {historyObjectives.length === 0 ? (
+            <Card className="flex flex-col items-center justify-center py-16 gap-3">
+              <History className="h-10 w-10 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground text-center max-w-xs">
+                Aucun objectif complété ou expiré pour le moment. Vos objectifs terminés apparaîtront ici.
+              </p>
+            </Card>
+          ) : (
+            renderGrid(filteredHistory, true)
+          )}
+        </TabsContent>
+      </Tabs>
 
       <CreateObjectiveModal
         open={modalOpen}
