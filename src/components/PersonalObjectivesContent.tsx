@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { usePersonalObjectives, OBJECTIVE_TYPES, type PersonalObjective, type ObjectiveWithProgress } from "@/hooks/usePersonalObjectives";
 import { CreateObjectiveModal } from "@/components/CreateObjectiveModal";
 import { Card } from "@/components/ui/card";
@@ -7,8 +7,21 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw } from "lucide-react";
+import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw, PartyPopper } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import confetti from "canvas-confetti";
+
+function getProgressColor(pct: number, inverted?: boolean): string {
+  if (inverted) {
+    // For inverted (budget): green when low, red when high
+    if (pct < 50) return "bg-green-500";
+    if (pct < 85) return "bg-orange-500";
+    return "bg-red-500";
+  }
+  if (pct >= 75) return "bg-green-500";
+  if (pct >= 25) return "bg-orange-500";
+  return "bg-red-500";
+}
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "Toutes les catégories" },
@@ -52,6 +65,31 @@ export function PersonalObjectivesContent() {
   const openCreate = () => { setEditingObj(null); setModalOpen(true); };
   const openEdit = (obj: PersonalObjective) => { setEditingObj(obj); setModalOpen(true); };
   const closeModal = () => { setEditingObj(null); setModalOpen(false); };
+
+  // Track which objectives have already celebrated to avoid repeat confetti
+  const celebratedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const newlyCompleted = objectives.filter(
+      (obj) => isCompleted(obj) && !celebratedRef.current.has(obj.id)
+    );
+    if (newlyCompleted.length > 0) {
+      newlyCompleted.forEach((obj) => celebratedRef.current.add(obj.id));
+      // Only fire confetti if objectives loaded (not on initial mount with all already completed)
+      if (celebratedRef.current.size > newlyCompleted.length) {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#22c55e", "#f59e0b", "#3b82f6", "#a855f7", "#ec4899"],
+        });
+      }
+    }
+    // Sync ref with current completed set
+    objectives.forEach((obj) => {
+      if (isCompleted(obj)) celebratedRef.current.add(obj.id);
+    });
+  }, [objectives]);
 
   const filtered = useMemo(() => {
     return objectives.filter((obj) => {
@@ -192,11 +230,22 @@ export function PersonalObjectivesContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <Progress value={pct} className="h-2" />
-                  <p className="text-xs text-muted-foreground text-right">
-                    {obj.currentValue} / {obj.target_value}
-                    {isInverted ? " €" : ""}
-                  </p>
+                  <Progress
+                    value={pct}
+                    className="h-2"
+                    indicatorClassName={getProgressColor(pct, isInverted)}
+                  />
+                  <div className="flex items-center justify-between">
+                    {completed && (
+                      <span className="flex items-center gap-1 text-xs text-green-600">
+                        <PartyPopper className="h-3 w-3" /> Atteint !
+                      </span>
+                    )}
+                    <p className="text-xs text-muted-foreground text-right ml-auto">
+                      {obj.currentValue} / {obj.target_value}
+                      {isInverted ? " €" : ""}
+                    </p>
+                  </div>
                 </div>
               </Card>
             );
