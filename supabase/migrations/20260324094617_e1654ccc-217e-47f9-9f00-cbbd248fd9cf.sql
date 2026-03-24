@@ -1,0 +1,1 @@
+ALTER TABLE public.personal_objectives ADD COLUMN recurring boolean NOT NULL DEFAULT false;

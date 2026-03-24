@@ -383,6 +383,7 @@ export type Database = {
           objective_type: string
           period_type: string
           pinned: boolean
+          recurring: boolean
           start_date: string | null
           target_value: number
           user_id: string
@@ -395,6 +396,7 @@ export type Database = {
           objective_type: string
           period_type?: string
           pinned?: boolean
+          recurring?: boolean
           start_date?: string | null
           target_value: number
           user_id: string
@@ -407,6 +409,7 @@ export type Database = {
           objective_type?: string
           period_type?: string
           pinned?: boolean
+          recurring?: boolean
           start_date?: string | null
           target_value?: number
           user_id?: string
