@@ -196,19 +196,24 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 {(() => {
                   const currentReread = eb.rereadCount ?? 0;
                   const bookSessions = allSessions.filter(s => s.book_id === eb.id && (s.reread_number ?? 0) === currentReread);
-                  if (eb.status !== "Lecture terminée" || bookSessions.length === 0) return null;
-                  const totalMinutes = bookSessions.reduce((sum, s) => sum + s.duration_minutes, 0);
-                  const uniqueDays = new Set(bookSessions.map(s => new Date(s.session_date).toDateString())).size;
+                  const showStats = eb.status === "Lecture terminée" && bookSessions.length > 0;
+                  const totalMinutes = showStats ? bookSessions.reduce((sum, s) => sum + s.duration_minutes, 0) : 0;
+                  const uniqueDays = showStats ? new Set(bookSessions.map(s => new Date(s.session_date).toDateString())).size : 0;
+                  if (!showStats && currentReread === 0) return null;
                   return (
                     <div className="space-y-2 w-full">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Temps total de lecture</Label>
-                        <p className="text-sm font-medium">{formatTotalReadingTime(totalMinutes)}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Nombre de jours de lecture</Label>
-                        <p className="text-sm font-medium">{uniqueDays} jour{uniqueDays > 1 ? "s" : ""}</p>
-                      </div>
+                      {showStats && (
+                        <>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Temps total de lecture</Label>
+                            <p className="text-sm font-medium">{formatTotalReadingTime(totalMinutes)}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Nombre de jours de lecture</Label>
+                            <p className="text-sm font-medium">{uniqueDays} jour{uniqueDays > 1 ? "s" : ""}</p>
+                          </div>
+                        </>
+                      )}
                       {currentReread > 0 && (
                         <div className="space-y-1">
                           <Label className="text-xs">Nombre de relectures</Label>
