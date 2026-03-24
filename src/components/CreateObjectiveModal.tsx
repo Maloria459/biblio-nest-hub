@@ -85,8 +85,10 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     setEndDate("");
   };
 
+  const isDateValid = periodType !== "custom" || (startDate && endDate && endDate >= startDate);
+
   const handleSubmit = () => {
-    if (!selectedType || !targetValue) return;
+    if (!selectedType || !targetValue || !isDateValid) return;
 
     if (isEditMode && onUpdate && editingObjective) {
       onUpdate({
