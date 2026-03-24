@@ -13,6 +13,7 @@ import { Star, Heart, Flame, Plus, Trash2, ChevronDown, X, Play, RotateCcw } fro
 import type { Book, Citation } from "@/data/mockBooks";
 import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
 import { useReadingSessions, formatTotalReadingTime } from "@/hooks/useReadingSessions";
+import { toast } from "sonner";
 
 interface BookDetailModalProps {
   book: Book | null;
