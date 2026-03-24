@@ -413,19 +413,41 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
               </div>
             </div>
 
-            {/* Bottom buttons — play left, edit center, delete right */}
+            {/* Bottom buttons — left action, edit center, delete right */}
             <div className="flex items-center justify-between mt-6 pt-4 border-t">
-              <div>
+              <div className="w-10">
                 {eb.status === "Lecture en cours" && (
                   <Button variant="outline" size="icon" onClick={() => setTimerOpen(true)} title="Commencer une session de lecture">
                     <Play className="h-4 w-4" />
                   </Button>
                 )}
+                {eb.status === "Lecture terminée" && (
+                  <Button variant="outline" size="icon" onClick={() => {
+                    const today = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+                    const newRereadCount = (eb.rereadCount ?? 0) + 1;
+                    const updates: Partial<Book> = {
+                      status: "Lecture en cours",
+                      startDate: today,
+                      endDate: undefined,
+                      pagesRead: 0,
+                      rereadCount: newRereadCount,
+                    };
+                    const updatedBook = { ...eb, ...updates } as Book;
+                    onSave(updatedBook);
+                    setEditBook(updatedBook);
+                    setDirty(false);
+                    toast.success("Relecture commencée !");
+                  }} title="Relire ce livre">
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
               <Button onClick={() => setEditModalOpen(true)}>Modifier le livre</Button>
-              <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(true)} title="Supprimer le livre" className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="w-10">
+                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(true)} title="Supprimer le livre" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
