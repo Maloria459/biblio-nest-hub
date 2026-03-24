@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -126,14 +126,20 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     onClose();
   };
 
-  return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) { reset(); onClose(); } }}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{isEditMode ? "Modifier l'objectif" : "Créer un objectif"}</DialogTitle>
-        </DialogHeader>
+  if (!open) return null;
 
-        <div className="space-y-4 pt-2">
+  return (
+    <div className="absolute inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={() => { reset(); onClose(); }} />
+      <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "90%", maxWidth: 450, maxHeight: "90%" }}>
+        <div className="flex items-center justify-between h-14 px-6 border-b border-border shrink-0">
+          <h2 className="text-base font-semibold">{isEditMode ? "Modifier l'objectif" : "Créer un objectif"}</h2>
+          <button onClick={() => { reset(); onClose(); }} className="p-1 rounded-md hover:bg-accent transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
           {/* Type — disabled in edit mode */}
           <div className="space-y-1.5">
             <Label>Type d'objectif</Label>
@@ -241,7 +247,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
             {isEditMode ? "Enregistrer les modifications" : "Créer l'objectif"}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
