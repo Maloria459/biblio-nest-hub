@@ -7,7 +7,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Pin, PinOff, Trash2, Target, Pencil } from "lucide-react";
+import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "Toutes les catégories" },
@@ -39,7 +40,7 @@ function isCompleted(obj: ObjectiveWithProgress): boolean {
 }
 
 export function PersonalObjectivesContent() {
-  const { objectives, isLoading, createObjective, updateObjective, deleteObjective, togglePin, isCreating, isUpdating } = usePersonalObjectives();
+  const { objectives, isLoading, createObjective, updateObjective, deleteObjective, duplicateObjective, togglePin, isCreating, isUpdating } = usePersonalObjectives();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingObj, setEditingObj] = useState<PersonalObjective | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -143,21 +144,50 @@ export function PersonalObjectivesContent() {
                     <p className="font-medium text-sm text-foreground leading-tight line-clamp-2">
                       {obj.label}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-1">
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                       <Badge variant="outline" className="text-xs">{typeMeta?.category ?? ""}</Badge>
                       {completed && <Badge variant="default" className="text-xs">Terminé</Badge>}
+                      {obj.recurring && (
+                        <Badge variant="secondary" className="text-xs gap-1">
+                          <RefreshCw className="h-2.5 w-2.5" />
+                          Récurrent
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(obj)}>
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => togglePin(obj)}>
-                      {obj.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeletingId(obj.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(obj)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Modifier</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => duplicateObjective(obj)}>
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Dupliquer</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => togglePin(obj)}>
+                          {obj.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{obj.pinned ? "Désépingler" : "Épingler"}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeletingId(obj.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Supprimer</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 

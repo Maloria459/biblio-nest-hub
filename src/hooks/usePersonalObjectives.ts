@@ -428,6 +428,7 @@ export function usePersonalObjectives() {
     createObjective: createMutation.mutate,
     updateObjective: updateMutation.mutate,
     deleteObjective: deleteMutation.mutate,
+    duplicateObjective,
     togglePin,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
