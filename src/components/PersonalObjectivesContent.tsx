@@ -66,6 +66,31 @@ export function PersonalObjectivesContent() {
   const openEdit = (obj: PersonalObjective) => { setEditingObj(obj); setModalOpen(true); };
   const closeModal = () => { setEditingObj(null); setModalOpen(false); };
 
+  // Track which objectives have already celebrated to avoid repeat confetti
+  const celebratedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const newlyCompleted = objectives.filter(
+      (obj) => isCompleted(obj) && !celebratedRef.current.has(obj.id)
+    );
+    if (newlyCompleted.length > 0) {
+      newlyCompleted.forEach((obj) => celebratedRef.current.add(obj.id));
+      // Only fire confetti if objectives loaded (not on initial mount with all already completed)
+      if (celebratedRef.current.size > newlyCompleted.length) {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#22c55e", "#f59e0b", "#3b82f6", "#a855f7", "#ec4899"],
+        });
+      }
+    }
+    // Sync ref with current completed set
+    objectives.forEach((obj) => {
+      if (isCompleted(obj)) celebratedRef.current.add(obj.id);
+    });
+  }, [objectives]);
+
   const filtered = useMemo(() => {
     return objectives.filter((obj) => {
       if (filterCategory !== "all") {
