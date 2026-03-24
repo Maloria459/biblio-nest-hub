@@ -210,7 +210,7 @@ export function usePersonalObjectives() {
       const { error } = await supabase.from("personal_objectives").update(fields).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey }); toast.success("Objectif mis à jour"); },
     onError: () => toast.error("Erreur lors de la mise à jour"),
   });
 
