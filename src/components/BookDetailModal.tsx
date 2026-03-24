@@ -191,9 +191,10 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 </div>
 
-                {/* Total reading time & days — under end date, for "Lecture terminée" with sessions */}
+                {/* Total reading time & days — only for current read (filtered by reread_number) */}
                 {(() => {
-                  const bookSessions = allSessions.filter(s => s.book_id === eb.id);
+                  const currentReread = eb.rereadCount ?? 0;
+                  const bookSessions = allSessions.filter(s => s.book_id === eb.id && (s.reread_number ?? 0) === currentReread);
                   if (eb.status !== "Lecture terminée" || bookSessions.length === 0) return null;
                   const totalMinutes = bookSessions.reduce((sum, s) => sum + s.duration_minutes, 0);
                   const uniqueDays = new Set(bookSessions.map(s => new Date(s.session_date).toDateString())).size;
@@ -207,6 +208,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                         <Label className="text-xs">Nombre de jours de lecture</Label>
                         <p className="text-sm font-medium">{uniqueDays} jour{uniqueDays > 1 ? "s" : ""}</p>
                       </div>
+                      {currentReread > 0 && (
+                        <div className="space-y-1">
+                          <Label className="text-xs">Nombre de relectures</Label>
+                          <p className="text-sm font-medium">{currentReread}</p>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
