@@ -380,17 +380,19 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                     {(!eb.chapters || eb.chapters === 0) ? (
                       <p className="text-sm text-muted-foreground italic">Aucun chapitre renseigné. Modifiez le nombre de chapitres pour activer cette fonctionnalité.</p>
                     ) : (
-                      Array.from({ length: eb.chapters }, (_, i) => i + 1).map(chapterNum => (
-                        <Collapsible key={chapterNum}>
-                          <CollapsibleTrigger className="flex items-center gap-2 w-full text-left p-2 rounded-md hover:bg-accent text-sm font-medium">
-                            <ChevronDown className="h-4 w-4" />
-                            Chapitre {chapterNum}
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="pl-6 pt-1">
-                            <Textarea value={(eb.chapterNotes || {})[chapterNum] || ""} onChange={e => setChapterNote(chapterNum, e.target.value)} placeholder={`Notes pour le chapitre ${chapterNum}...`} className="min-h-[60px] resize-y" />
-                          </CollapsibleContent>
-                        </Collapsible>
-                      ))
+                      <div className="grid grid-cols-3 gap-2">
+                        {Array.from({ length: eb.chapters }, (_, i) => i + 1).map(chapterNum => (
+                          <Collapsible key={chapterNum}>
+                            <CollapsibleTrigger className="flex items-center gap-1.5 w-full text-left px-2 py-1.5 rounded-md border border-border hover:bg-accent text-xs font-medium">
+                              <ChevronDown className="h-3 w-3 shrink-0" />
+                              Ch. {chapterNum}
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="pt-1 col-span-1">
+                              <Textarea value={(eb.chapterNotes || {})[chapterNum] || ""} onChange={e => setChapterNote(chapterNum, e.target.value)} placeholder={`Notes ch. ${chapterNum}...`} className="min-h-[60px] resize-y text-xs" />
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}
