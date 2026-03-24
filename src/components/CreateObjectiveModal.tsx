@@ -139,7 +139,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
           </button>
         </div>
 
-        <div className="space-y-4 pt-2">
+        <div className="flex-1 overflow-y-auto p-6">
           {/* Type — disabled in edit mode */}
           <div className="space-y-1.5">
             <Label>Type d'objectif</Label>
