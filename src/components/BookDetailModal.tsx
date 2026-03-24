@@ -212,7 +212,27 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                       {currentReread > 0 && (
                         <div className="space-y-1">
                           <Label className="text-xs">Nombre de relectures</Label>
-                          <p className="text-sm font-medium">{currentReread}</p>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min={0}
+                              value={eb.rereadCount ?? 0}
+                              onChange={e => {
+                                const val = Math.max(0, parseInt(e.target.value) || 0);
+                                set({ rereadCount: val });
+                              }}
+                              className="w-16 h-8 text-center text-sm"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => set({ rereadCount: 0 })}
+                              title="Supprimer les relectures"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
