@@ -73,6 +73,7 @@ export interface PersonalObjective {
   start_date: string | null;
   end_date: string | null;
   pinned: boolean;
+  recurring: boolean;
   created_at: string;
 }
 
