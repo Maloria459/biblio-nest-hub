@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw, PartyPopper, Search, ArrowUpDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import confetti from "canvas-confetti";
+import { toast } from "sonner";
 
 function getProgressColor(pct: number, inverted?: boolean): string {
   if (inverted) {
@@ -76,26 +77,48 @@ export function PersonalObjectivesContent() {
   const openEdit = (obj: PersonalObjective) => { setEditingObj(obj); setModalOpen(true); };
   const closeModal = () => { setEditingObj(null); setModalOpen(false); };
 
-  // Track which objectives have already celebrated to avoid repeat confetti
+  // Track milestones and completion celebrations
   const celebratedRef = useRef<Set<string>>(new Set());
+  const milestonesRef = useRef<Map<string, number>>(new Map()); // objectiveId -> highest milestone reached
+
+  const MILESTONES = [25, 50, 75];
+  const MILESTONE_MESSAGES: Record<number, string> = {
+    25: "🚀 25% atteint ! Bon début, continuez !",
+    50: "🔥 Mi-parcours ! Vous êtes à 50% !",
+    75: "💪 75% ! Plus que quelques efforts !",
+  };
 
   useEffect(() => {
-    const newlyCompleted = objectives.filter(
-      (obj) => isCompleted(obj) && !celebratedRef.current.has(obj.id)
-    );
-    if (newlyCompleted.length > 0) {
-      newlyCompleted.forEach((obj) => celebratedRef.current.add(obj.id));
-      // Only fire confetti if objectives loaded (not on initial mount with all already completed)
-      if (celebratedRef.current.size > newlyCompleted.length) {
-        confetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ["#22c55e", "#f59e0b", "#3b82f6", "#a855f7", "#ec4899"],
-        });
+    objectives.forEach((obj) => {
+      const pct = obj.target_value > 0 ? Math.min(100, (obj.currentValue / obj.target_value) * 100) : 0;
+      const prevMilestone = milestonesRef.current.get(obj.id) ?? 0;
+
+      // Check milestones (25, 50, 75)
+      for (const m of MILESTONES) {
+        if (pct >= m && prevMilestone < m) {
+          toast.success(MILESTONE_MESSAGES[m], {
+            description: obj.label,
+            duration: 4000,
+          });
+        }
       }
-    }
-    // Sync ref with current completed set
+      milestonesRef.current.set(obj.id, Math.max(prevMilestone, ...MILESTONES.filter((m) => pct >= m), 0));
+
+      // 100% completion confetti
+      if (isCompleted(obj) && !celebratedRef.current.has(obj.id)) {
+        celebratedRef.current.add(obj.id);
+        if (celebratedRef.current.size > 1 || milestonesRef.current.size > 1) {
+          confetti({
+            particleCount: 120,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ["#22c55e", "#f59e0b", "#3b82f6", "#a855f7", "#ec4899"],
+          });
+        }
+      }
+    });
+
+    // Initialize refs for already-completed objectives on first load
     objectives.forEach((obj) => {
       if (isCompleted(obj)) celebratedRef.current.add(obj.id);
     });
@@ -294,18 +317,41 @@ export function PersonalObjectivesContent() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Progress
-                    value={pct}
-                    className="h-2"
-                    indicatorClassName={getProgressColor(pct, isInverted)}
-                  />
+                <div className="space-y-1.5">
+                  {/* Milestone markers */}
+                  <div className="relative">
+                    <Progress
+                      value={pct}
+                      className="h-2"
+                      indicatorClassName={getProgressColor(pct, isInverted)}
+                    />
+                    {!isInverted && (
+                      <div className="absolute inset-0 flex items-center pointer-events-none">
+                        {MILESTONES.map((m) => (
+                          <div
+                            key={m}
+                            className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full border border-background"
+                            style={{ left: `${m}%`, transform: `translateX(-50%) translateY(-50%)` }}
+                            title={`${m}%`}
+                          >
+                            <div className={`w-full h-full rounded-full ${pct >= m ? "bg-foreground/40" : "bg-muted-foreground/30"}`} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-center justify-between">
-                    {completed && (
+                    {completed ? (
                       <span className="flex items-center gap-1 text-xs text-green-600">
                         <PartyPopper className="h-3 w-3" /> Atteint !
                       </span>
-                    )}
+                    ) : pct >= 75 ? (
+                      <span className="text-xs text-muted-foreground">💪 Presque !</span>
+                    ) : pct >= 50 ? (
+                      <span className="text-xs text-muted-foreground">🔥 Mi-parcours</span>
+                    ) : pct >= 25 ? (
+                      <span className="text-xs text-muted-foreground">🚀 Bon début</span>
+                    ) : null}
                     <p className="text-xs text-muted-foreground text-right ml-auto">
                       {obj.currentValue} / {obj.target_value}
                       {isInverted ? " €" : ""}
