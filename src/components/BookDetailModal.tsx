@@ -367,6 +367,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 </div>
 
 
+                {/* Synopsis */}
+                <div className="space-y-1 mt-3">
+                  <Label className="text-xs font-semibold uppercase tracking-wide">Synopsis</Label>
+                  <Textarea value={(eb as any).synopsis || ""} onChange={e => set({ synopsis: e.target.value } as any)} placeholder="Résumé du livre..." className="min-h-[80px] resize-y" />
+                </div>
+
                 {/* Avis */}
                 <div className="space-y-1 mt-3">
                   <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
