@@ -214,6 +214,13 @@ function SessionListView({ sessions, books, onDelete }: {
               <p className="text-xs text-muted-foreground truncate">{book.author}</p>
             </div>
 
+            {/* Reread badge */}
+            {(session.reread_number ?? 0) > 0 && (
+              <span className="text-[10px] font-medium bg-accent text-accent-foreground rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
+                Relecture {session.reread_number}
+              </span>
+            )}
+
             {/* Duration */}
             <span className="text-xs font-medium whitespace-nowrap shrink-0">
               {formatDurationFull(session.duration_minutes)}
