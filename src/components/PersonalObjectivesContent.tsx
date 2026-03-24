@@ -42,6 +42,7 @@ export function PersonalObjectivesContent() {
   const { objectives, isLoading, createObjective, updateObjective, deleteObjective, togglePin, isCreating, isUpdating } = usePersonalObjectives();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingObj, setEditingObj] = useState<PersonalObjective | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
