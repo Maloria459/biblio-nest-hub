@@ -69,6 +69,8 @@ export function PersonalObjectivesContent() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("all");
+  const [sortBy, setSortBy] = useState("date_desc");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openCreate = () => { setEditingObj(null); setModalOpen(true); };
   const openEdit = (obj: PersonalObjective) => { setEditingObj(obj); setModalOpen(true); };
