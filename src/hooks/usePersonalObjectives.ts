@@ -73,6 +73,7 @@ export interface PersonalObjective {
   start_date: string | null;
   end_date: string | null;
   pinned: boolean;
+  recurring: boolean;
   created_at: string;
 }
 
@@ -232,6 +233,19 @@ export function usePersonalObjectives() {
       }
     }
     updateMutation.mutate({ id: obj.id, pinned: !obj.pinned });
+  };
+
+  const duplicateObjective = (obj: PersonalObjective) => {
+    createMutation.mutate({
+      objective_type: obj.objective_type,
+      target_value: obj.target_value,
+      filter_value: obj.filter_value,
+      period_type: obj.period_type,
+      start_date: obj.start_date,
+      end_date: obj.end_date,
+      pinned: false,
+      recurring: obj.recurring,
+    });
   };
 
   /* ───────── progression calculation ───────── */
@@ -414,6 +428,7 @@ export function usePersonalObjectives() {
     createObjective: createMutation.mutate,
     updateObjective: updateMutation.mutate,
     deleteObjective: deleteMutation.mutate,
+    duplicateObjective,
     togglePin,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,

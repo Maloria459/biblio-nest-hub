@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { OBJECTIVE_TYPES, type ObjectiveTypeOption, type PersonalObjective } from "@/hooks/usePersonalObjectives";
 import { useBooks } from "@/contexts/BooksContext";
 
@@ -18,8 +19,9 @@ interface Props {
     start_date: string | null;
     end_date: string | null;
     pinned: boolean;
+    recurring: boolean;
   }) => void;
-  onUpdate?: (obj: { id: string; target_value?: number; filter_value?: string | null; period_type?: string; start_date?: string | null; end_date?: string | null }) => void;
+  onUpdate?: (obj: { id: string; target_value?: number; filter_value?: string | null; period_type?: string; start_date?: string | null; end_date?: string | null; recurring?: boolean }) => void;
   isCreating: boolean;
   isUpdating?: boolean;
   editingObjective?: PersonalObjective | null;
@@ -33,6 +35,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
   const [periodType, setPeriodType] = useState("month");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [recurring, setRecurring] = useState(false);
 
   const isEditMode = !!editingObjective;
 
@@ -45,6 +48,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
       setPeriodType(editingObjective.period_type);
       setStartDate(editingObjective.start_date ?? "");
       setEndDate(editingObjective.end_date ?? "");
+      setRecurring(editingObjective.recurring ?? false);
     }
   }, [editingObjective]);
 
@@ -76,6 +80,9 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     }
   }, [typeMeta, books, genres, formats]);
 
+  // Recurring only makes sense for month/year periods
+  const canBeRecurring = periodType === "month" || periodType === "year";
+
   const reset = () => {
     setSelectedType("");
     setTargetValue("");
@@ -83,12 +90,15 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     setPeriodType("month");
     setStartDate("");
     setEndDate("");
+    setRecurring(false);
   };
 
   const isDateValid = periodType !== "custom" || (startDate && endDate && endDate >= startDate);
 
   const handleSubmit = () => {
     if (!selectedType || !targetValue || !isDateValid) return;
+
+    const effectiveRecurring = canBeRecurring ? recurring : false;
 
     if (isEditMode && onUpdate && editingObjective) {
       onUpdate({
@@ -98,6 +108,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
         period_type: periodType,
         start_date: periodType === "custom" ? startDate || null : null,
         end_date: periodType === "custom" ? endDate || null : null,
+        recurring: effectiveRecurring,
       });
     } else {
       onCreate({
@@ -108,6 +119,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
         start_date: periodType === "custom" ? startDate || null : null,
         end_date: periodType === "custom" ? endDate || null : null,
         pinned: false,
+        recurring: effectiveRecurring,
       });
     }
     reset();
@@ -180,7 +192,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
           {/* Period */}
           <div className="space-y-1.5">
             <Label>Période</Label>
-            <Select value={periodType} onValueChange={setPeriodType}>
+            <Select value={periodType} onValueChange={(v) => { setPeriodType(v); if (v === "custom") setRecurring(false); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="month">Ce mois</SelectItem>
@@ -191,15 +203,33 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
           </div>
 
           {periodType === "custom" && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Début</Label>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Début</Label>
+                  <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Fin</Label>
+                  <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label>Fin</Label>
-                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              {startDate && endDate && endDate < startDate && (
+                <p className="text-xs text-destructive">La date de fin doit être postérieure à la date de début.</p>
+              )}
+            </div>
+          )}
+
+          {/* Recurring toggle */}
+          {canBeRecurring && (
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-medium">Objectif récurrent</Label>
+                <p className="text-xs text-muted-foreground">
+                  Se réinitialise automatiquement chaque {periodType === "month" ? "mois" : "année"}
+                </p>
               </div>
+              <Switch checked={recurring} onCheckedChange={setRecurring} />
             </div>
           )}
 
