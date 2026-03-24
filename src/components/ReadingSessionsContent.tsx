@@ -21,7 +21,9 @@ function formatDateFR(dateStr: string) {
 }
 
 function getSessionPagesRead(session: ReadingSession, allBookSessions: ReadingSession[]) {
-  const sorted = [...allBookSessions].sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
+  // Only compare within same reread_number
+  const sameReread = allBookSessions.filter(s => (s.reread_number ?? 0) === (session.reread_number ?? 0));
+  const sorted = [...sameReread].sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
   const idx = sorted.findIndex(s => s.id === session.id);
   const prevPage = idx > 0 ? (sorted[idx - 1].last_page_reached ?? 0) : 0;
   return (session.last_page_reached ?? 0) - prevPage;
