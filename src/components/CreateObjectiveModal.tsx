@@ -247,7 +247,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
             {isEditMode ? "Enregistrer les modifications" : "Créer l'objectif"}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
