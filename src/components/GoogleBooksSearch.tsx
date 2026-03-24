@@ -30,20 +30,21 @@ export function GoogleBooksSearch({ onSelect }: Props) {
     setSearched(true);
     try {
       const res = await fetch(
-        `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8&lang=fr`
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8&langRestrict=fr`
       );
       if (!res.ok) throw new Error("Erreur réseau");
       const data = await res.json();
-      const items: GoogleBookResult[] = (data.docs || []).slice(0, 8).map((doc: any) => ({
-        title: doc.title || "",
-        author: (doc.author_name || []).join(", "),
-        publisher: (doc.publisher || [])[0],
-        publishedDate: doc.first_publish_year ? String(doc.first_publish_year) : undefined,
-        pageCount: doc.number_of_pages_median,
-        coverUrl: doc.cover_i
-          ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
-          : undefined,
-      }));
+      const items: GoogleBookResult[] = (data.items || []).map((item: any) => {
+        const vol = item.volumeInfo || {};
+        return {
+          title: vol.title || "",
+          author: (vol.authors || []).join(", "),
+          publisher: vol.publisher,
+          publishedDate: vol.publishedDate,
+          pageCount: vol.pageCount,
+          coverUrl: vol.imageLinks?.thumbnail?.replace("http://", "https://"),
+        };
+      });
       setResults(items);
     } catch {
       toast.error("Impossible de rechercher des livres. Réessayez plus tard.");
