@@ -183,6 +183,26 @@ export function PersonalObjectivesContent() {
         isUpdating={isUpdating}
         editingObjective={editingObj}
       />
+
+      <AlertDialog open={!!deletingId} onOpenChange={(o) => { if (!o) setDeletingId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cet objectif ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. L'objectif et sa progression seront définitivement supprimés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { if (deletingId) { deleteObjective(deletingId); setDeletingId(null); } }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

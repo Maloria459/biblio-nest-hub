@@ -205,7 +205,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
 
           <Button
             onClick={handleSubmit}
-            disabled={!selectedType || !targetValue || isCreating || isUpdating}
+            disabled={!selectedType || !targetValue || !isDateValid || isCreating || isUpdating}
             className="w-full"
           >
             {isEditMode ? "Enregistrer les modifications" : "Créer l'objectif"}
