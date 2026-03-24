@@ -12,6 +12,7 @@ export interface ReadingSession {
   last_page_reached: number | null;
   user_id: string;
   created_at: string;
+  reread_number: number;
 }
 
 async function fetchAllSessions(userId: string): Promise<ReadingSession[]> {

@@ -104,6 +104,7 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
       session_date: today,
       duration_minutes: Math.round(durationMinutes),
       last_page_reached: pageNum,
+      reread_number: book.rereadCount ?? 0,
     });
 
     if (error) {

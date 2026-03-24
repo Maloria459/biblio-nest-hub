@@ -79,6 +79,7 @@ function rowToBook(row: any): Book {
     borrowDate: row.borrow_date ?? undefined,
     returnDate: row.return_date ?? undefined,
     lenderName: row.lender_name ?? undefined,
+    rereadCount: row.reread_count ?? 0,
   };
 }
 
@@ -120,6 +121,7 @@ function bookToRow(book: Book, userId: string) {
     borrow_date: book.borrowDate ?? null,
     return_date: book.returnDate ?? null,
     lender_name: book.lenderName ?? null,
+    reread_count: book.rereadCount ?? 0,
   };
 }
 

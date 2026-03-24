@@ -71,6 +71,7 @@ export type Database = {
           rating: number | null
           recommandation_du_mois: boolean | null
           recommandation_month: string | null
+          reread_count: number
           return_date: string | null
           secondary_status: string | null
           series: string | null
@@ -111,6 +112,7 @@ export type Database = {
           rating?: number | null
           recommandation_du_mois?: boolean | null
           recommandation_month?: string | null
+          reread_count?: number
           return_date?: string | null
           secondary_status?: string | null
           series?: string | null
@@ -151,6 +153,7 @@ export type Database = {
           rating?: number | null
           recommandation_du_mois?: boolean | null
           recommandation_month?: string | null
+          reread_count?: number
           return_date?: string | null
           secondary_status?: string | null
           series?: string | null
@@ -459,6 +462,7 @@ export type Database = {
           duration_minutes: number
           id: string
           last_page_reached: number | null
+          reread_number: number
           session_date: string
           user_id: string
         }
@@ -468,6 +472,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           last_page_reached?: number | null
+          reread_number?: number
           session_date?: string
           user_id: string
         }
@@ -477,6 +482,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           last_page_reached?: number | null
+          reread_number?: number
           session_date?: string
           user_id?: string
         }

@@ -41,6 +41,7 @@ export interface Book {
   borrowDate?: string;
   returnDate?: string;
   lenderName?: string;
+  rereadCount?: number;
 }
 
 export const mockBooks: Book[] = [
