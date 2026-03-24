@@ -227,14 +227,14 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   {eb.matureContent && <span className="ml-auto self-center leading-none" style={{ fontSize: "1.25rem", lineHeight: "1.75rem" }} title="Destiné à un public averti">🔞</span>}
                 </div>
 
-                {/* Metadata cards */}
-                <div className="flex flex-wrap gap-2">
-                  {eb.series && (
-                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Série</p>
-                      <p className="text-sm font-medium">{eb.series}</p>
-                    </div>
-                  )}
+                {eb.series && (
+                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Série</p>
+                    <p className="text-sm font-medium">{eb.series}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-2">
                   <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
                     <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Éditeur</p>
                     <p className="text-sm font-medium">{eb.publisher || "—"}</p>
@@ -243,6 +243,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                     <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Date de publication</p>
                     <p className="text-sm font-medium">{eb.publicationDate || "—"}</p>
                   </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
                     <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Genre</p>
                     <p className="text-sm font-medium">{eb.genre || "—"}</p>
