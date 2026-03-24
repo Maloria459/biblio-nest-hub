@@ -406,13 +406,19 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
               </div>
             </div>
 
-            {/* Bottom buttons — full width, centered */}
-            <div className="flex justify-center gap-4 mt-6 pt-4 border-t">
-              {eb.status === "Lecture en cours" && (
-                <Button variant="outline" onClick={() => setTimerOpen(true)}>Commencer une session de lecture</Button>
-              )}
+            {/* Bottom buttons — play left, edit center, delete right */}
+            <div className="flex items-center justify-between mt-6 pt-4 border-t">
+              <div>
+                {eb.status === "Lecture en cours" && (
+                  <Button variant="outline" size="icon" onClick={() => setTimerOpen(true)} title="Commencer une session de lecture">
+                    <Play className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
               <Button onClick={() => setEditModalOpen(true)}>Modifier le livre</Button>
-              <Button variant="outline" onClick={() => setDeleteConfirm(true)}>Supprimer le livre</Button>
+              <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(true)} title="Supprimer le livre" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
