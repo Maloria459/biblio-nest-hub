@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw, PartyPopper, Search, ArrowUpDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import confetti from "canvas-confetti";
+import { toast } from "sonner";
 
 function getProgressColor(pct: number, inverted?: boolean): string {
   if (inverted) {
