@@ -317,18 +317,41 @@ export function PersonalObjectivesContent() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Progress
-                    value={pct}
-                    className="h-2"
-                    indicatorClassName={getProgressColor(pct, isInverted)}
-                  />
+                <div className="space-y-1.5">
+                  {/* Milestone markers */}
+                  <div className="relative">
+                    <Progress
+                      value={pct}
+                      className="h-2"
+                      indicatorClassName={getProgressColor(pct, isInverted)}
+                    />
+                    {!isInverted && (
+                      <div className="absolute inset-0 flex items-center pointer-events-none">
+                        {MILESTONES.map((m) => (
+                          <div
+                            key={m}
+                            className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full border border-background"
+                            style={{ left: `${m}%`, transform: `translateX(-50%) translateY(-50%)` }}
+                            title={`${m}%`}
+                          >
+                            <div className={`w-full h-full rounded-full ${pct >= m ? "bg-foreground/40" : "bg-muted-foreground/30"}`} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-center justify-between">
-                    {completed && (
+                    {completed ? (
                       <span className="flex items-center gap-1 text-xs text-green-600">
                         <PartyPopper className="h-3 w-3" /> Atteint !
                       </span>
-                    )}
+                    ) : pct >= 75 ? (
+                      <span className="text-xs text-muted-foreground">💪 Presque !</span>
+                    ) : pct >= 50 ? (
+                      <span className="text-xs text-muted-foreground">🔥 Mi-parcours</span>
+                    ) : pct >= 25 ? (
+                      <span className="text-xs text-muted-foreground">🚀 Bon début</span>
+                    ) : null}
                     <p className="text-xs text-muted-foreground text-right ml-auto">
                       {obj.currentValue} / {obj.target_value}
                       {isInverted ? " €" : ""}
