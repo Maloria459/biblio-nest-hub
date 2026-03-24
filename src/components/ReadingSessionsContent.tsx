@@ -21,7 +21,9 @@ function formatDateFR(dateStr: string) {
 }
 
 function getSessionPagesRead(session: ReadingSession, allBookSessions: ReadingSession[]) {
-  const sorted = [...allBookSessions].sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
+  // Only compare within same reread_number
+  const sameReread = allBookSessions.filter(s => (s.reread_number ?? 0) === (session.reread_number ?? 0));
+  const sorted = [...sameReread].sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
   const idx = sorted.findIndex(s => s.id === session.id);
   const prevPage = idx > 0 ? (sorted[idx - 1].last_page_reached ?? 0) : 0;
   return (session.last_page_reached ?? 0) - prevPage;
@@ -212,6 +214,13 @@ function SessionListView({ sessions, books, onDelete }: {
               <p className="text-xs text-muted-foreground truncate">{book.author}</p>
             </div>
 
+            {/* Reread badge */}
+            {(session.reread_number ?? 0) > 0 && (
+              <span className="text-[10px] font-medium bg-accent text-accent-foreground rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
+                Relecture {session.reread_number}
+              </span>
+            )}
+
             {/* Duration */}
             <span className="text-xs font-medium whitespace-nowrap shrink-0">
               {formatDurationFull(session.duration_minutes)}
@@ -324,32 +333,42 @@ function BookGroupView({ groups, sessions, onDelete, onStartSession }: {
               )}
             </div>
 
-            {/* Session accordion */}
+            {/* Session accordion — grouped by reread */}
             <div className="border-t border-border">
-              <Collapsible>
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-medium hover:bg-muted/50 transition-colors">
-                  <span>Voir les sessions</span>
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="px-4 pb-3 space-y-1">
-                    {bookSessions.map(session => {
-                      const pagesRead = getSessionPagesRead(session, sortedAsc);
-                      return (
-                        <div key={session.id} className="flex items-center gap-2 text-xs py-1 border-b border-border last:border-0">
-                          <span className="text-muted-foreground">{formatDateFR(session.session_date)}</span>
-                          <span className="font-medium">{formatDurationFull(session.duration_minutes)}</span>
-                          {session.last_page_reached != null && <span className="text-muted-foreground">p.{session.last_page_reached}</span>}
-                          {pagesRead > 0 && <span className="bg-muted rounded-full px-1.5 py-0.5 text-[10px]">+{pagesRead}</span>}
-                          <button onClick={() => onDelete(session)} className="ml-auto text-muted-foreground hover:text-foreground p-0.5">
-                            <Trash2 className="h-3 w-3" />
-                          </button>
+              {(() => {
+                const rereadNumbers = [...new Set(bookSessions.map(s => s.reread_number ?? 0))].sort((a, b) => b - a);
+                return rereadNumbers.map(rereadNum => {
+                  const rereadSessions = bookSessions.filter(s => (s.reread_number ?? 0) === rereadNum);
+                  const sortedAscReread = [...rereadSessions].sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
+                  const label = rereadNum === 0 ? "Première lecture" : `Relecture ${rereadNum}`;
+                  return (
+                    <Collapsible key={rereadNum}>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-medium hover:bg-muted/50 transition-colors">
+                        <span>{label} ({rereadSessions.length} session{rereadSessions.length > 1 ? "s" : ""})</span>
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="px-4 pb-3 space-y-1">
+                          {rereadSessions.map(session => {
+                            const pagesRead = getSessionPagesRead(session, sortedAscReread);
+                            return (
+                              <div key={session.id} className="flex items-center gap-2 text-xs py-1 border-b border-border last:border-0">
+                                <span className="text-muted-foreground">{formatDateFR(session.session_date)}</span>
+                                <span className="font-medium">{formatDurationFull(session.duration_minutes)}</span>
+                                {session.last_page_reached != null && <span className="text-muted-foreground">p.{session.last_page_reached}</span>}
+                                {pagesRead > 0 && <span className="bg-muted rounded-full px-1.5 py-0.5 text-[10px]">+{pagesRead}</span>}
+                                <button onClick={() => onDelete(session)} className="ml-auto text-muted-foreground hover:text-foreground p-0.5">
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                });
+              })()}
             </div>
 
             {/* Start session button */}
