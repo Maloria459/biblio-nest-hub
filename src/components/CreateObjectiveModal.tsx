@@ -126,12 +126,18 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     onClose();
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) { reset(); onClose(); } }}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{isEditMode ? "Modifier l'objectif" : "Créer un objectif"}</DialogTitle>
-        </DialogHeader>
+    <div className="absolute inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={() => { reset(); onClose(); }} />
+      <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "90%", maxWidth: 450, maxHeight: "90%" }}>
+        <div className="flex items-center justify-between h-14 px-6 border-b border-border shrink-0">
+          <h2 className="text-base font-semibold">{isEditMode ? "Modifier l'objectif" : "Créer un objectif"}</h2>
+          <button onClick={() => { reset(); onClose(); }} className="p-1 rounded-md hover:bg-accent transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
         <div className="space-y-4 pt-2">
           {/* Type — disabled in edit mode */}
