@@ -227,32 +227,32 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   {eb.matureContent && <span className="ml-auto self-center leading-none" style={{ fontSize: "1.25rem", lineHeight: "1.75rem" }} title="Destiné à un public averti">🔞</span>}
                 </div>
 
-                {/* Metadata grid */}
-                <div className="grid grid-cols-3 gap-x-4 gap-y-3 rounded-lg border border-border bg-muted/30 p-4">
+                {/* Metadata cards */}
+                <div className="flex flex-wrap gap-2">
                   {eb.series && (
-                    <div className="col-span-3 space-y-0.5">
-                      <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Série</Label>
+                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Série</p>
                       <p className="text-sm font-medium">{eb.series}</p>
                     </div>
                   )}
-                  <div className="space-y-0.5">
-                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Éditeur</Label>
+                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Éditeur</p>
                     <p className="text-sm font-medium">{eb.publisher || "—"}</p>
                   </div>
-                  <div className="space-y-0.5">
-                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Date de publication</Label>
+                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Date de publication</p>
                     <p className="text-sm font-medium">{eb.publicationDate || "—"}</p>
                   </div>
-                  <div className="space-y-0.5">
-                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Genre</Label>
+                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Genre</p>
                     <p className="text-sm font-medium">{eb.genre || "—"}</p>
                   </div>
-                  <div className="space-y-0.5">
-                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Format</Label>
+                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Format</p>
                     <p className="text-sm font-medium">{eb.format || "—"}</p>
                   </div>
-                  <div className="space-y-0.5">
-                    <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Statut</Label>
+                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Statut</p>
                     <p className="text-sm font-medium">{eb.status || "—"}{eb.secondaryStatus ? ` · ${eb.secondaryStatus}` : ""}</p>
                   </div>
                 </div>
