@@ -29,8 +29,11 @@ export function GoogleBooksSearch({ onSelect }: Props) {
     setLoading(true);
     setSearched(true);
     try {
+      const trimmed = query.trim();
+      const isIsbn = /^[\d-]{10,17}$/.test(trimmed.replace(/-/g, ""));
+      const searchQuery = isIsbn ? `isbn:${trimmed.replace(/-/g, "")}` : trimmed;
       const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8&langRestrict=fr`
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=8&langRestrict=fr`
       );
       if (!res.ok) throw new Error("Erreur réseau");
       const data = await res.json();
