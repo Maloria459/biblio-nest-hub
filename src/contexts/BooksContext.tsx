@@ -79,6 +79,7 @@ function rowToBook(row: any): Book {
     borrowDate: row.borrow_date ?? undefined,
     returnDate: row.return_date ?? undefined,
     lenderName: row.lender_name ?? undefined,
+    rereadCount: row.reread_count ?? 0,
   };
 }
 
