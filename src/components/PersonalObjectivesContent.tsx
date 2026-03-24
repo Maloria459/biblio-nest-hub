@@ -155,7 +155,7 @@ export function PersonalObjectivesContent() {
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => togglePin(obj)}>
                       {obj.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteObjective(obj.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeletingId(obj.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
