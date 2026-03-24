@@ -210,7 +210,7 @@ export function usePersonalObjectives() {
       const { error } = await supabase.from("personal_objectives").update(fields).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey }); toast.success("Objectif mis à jour"); },
     onError: () => toast.error("Erreur lors de la mise à jour"),
   });
 
@@ -349,11 +349,29 @@ export function usePersonalObjectives() {
             .filter((s) => inRange(s.session_date, range))
             .some((s) => s.duration_minutes > obj.target_value) ? 1 : 0;
           break;
-        case "pages_in_session":
-          currentValue = sessions
-            .filter((s) => inRange(s.session_date, range))
-            .some((s) => (s.last_page_reached ?? 0) >= obj.target_value) ? 1 : 0;
+        case "pages_in_session": {
+          // Calculate actual pages read per session by comparing with previous session
+          const sessionsInRange = sessions
+            .filter((s) => inRange(s.session_date, range) && s.last_page_reached != null);
+          const allSessionsSorted = [...sessions]
+            .filter((s) => s.last_page_reached != null)
+            .sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
+          
+          currentValue = sessionsInRange.some((s) => {
+            const idx = allSessionsSorted.findIndex((as) => as.id === s.id);
+            // Find previous session for the same book and reread_number
+            let prevPage = 0;
+            for (let i = idx - 1; i >= 0; i--) {
+              if (allSessionsSorted[i].book_id === s.book_id && allSessionsSorted[i].reread_number === s.reread_number) {
+                prevPage = allSessionsSorted[i].last_page_reached ?? 0;
+                break;
+              }
+            }
+            const pagesRead = (s.last_page_reached ?? 0) - prevPage;
+            return pagesRead >= obj.target_value;
+          }) ? 1 : 0;
           break;
+        }
         case "attend_literary_events":
           currentValue = literaryEvents.filter((e) => inRange(e.event_date, range)).length;
           break;

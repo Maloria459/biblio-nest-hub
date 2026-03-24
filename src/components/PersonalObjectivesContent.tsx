@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Pin, PinOff, Trash2, Target, Pencil } from "lucide-react";
 
 const CATEGORY_OPTIONS = [
@@ -41,6 +42,7 @@ export function PersonalObjectivesContent() {
   const { objectives, isLoading, createObjective, updateObjective, deleteObjective, togglePin, isCreating, isUpdating } = usePersonalObjectives();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingObj, setEditingObj] = useState<PersonalObjective | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -153,7 +155,7 @@ export function PersonalObjectivesContent() {
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => togglePin(obj)}>
                       {obj.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteObjective(obj.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeletingId(obj.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -181,6 +183,26 @@ export function PersonalObjectivesContent() {
         isUpdating={isUpdating}
         editingObjective={editingObj}
       />
+
+      <AlertDialog open={!!deletingId} onOpenChange={(o) => { if (!o) setDeletingId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cet objectif ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. L'objectif et sa progression seront définitivement supprimés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { if (deletingId) { deleteObjective(deletingId); setDeletingId(null); } }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
