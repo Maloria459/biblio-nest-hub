@@ -79,6 +79,7 @@ export type Database = {
           spicy_level: number | null
           start_date: string | null
           status: string
+          synopsis: string | null
           title: string
           updated_at: string
           user_id: string
@@ -120,6 +121,7 @@ export type Database = {
           spicy_level?: number | null
           start_date?: string | null
           status?: string
+          synopsis?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -161,6 +163,7 @@ export type Database = {
           spicy_level?: number | null
           start_date?: string | null
           status?: string
+          synopsis?: string | null
           title?: string
           updated_at?: string
           user_id?: string
