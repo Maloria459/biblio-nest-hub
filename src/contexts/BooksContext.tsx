@@ -121,6 +121,7 @@ function bookToRow(book: Book, userId: string) {
     borrow_date: book.borrowDate ?? null,
     return_date: book.returnDate ?? null,
     lender_name: book.lenderName ?? null,
+    reread_count: book.rereadCount ?? 0,
   };
 }
 
