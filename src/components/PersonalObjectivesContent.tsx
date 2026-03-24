@@ -257,15 +257,6 @@ export function PersonalObjectivesContent() {
           </SelectContent>
         </Select>
 
-        <div className="flex-1" />
-
-        <Button size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-1" /> Créer un objectif
-        </Button>
-      </div>
-
-      {/* Tabs: Actifs / Historique */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="active" className="gap-1.5">
             <Target className="h-3.5 w-3.5" />
@@ -282,6 +273,13 @@ export function PersonalObjectivesContent() {
             )}
           </TabsTrigger>
         </TabsList>
+
+        <div className="flex-1" />
+
+        <Button size="sm" onClick={openCreate}>
+          <Plus className="h-4 w-4 mr-1" /> Créer un objectif
+        </Button>
+      </div>
 
         <TabsContent value="active" className="mt-4">
           {objectives.length === 0 ? (
