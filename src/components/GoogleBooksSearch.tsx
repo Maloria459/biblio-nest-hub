@@ -35,7 +35,6 @@ export function GoogleBooksSearch({ onSelect }: Props) {
       const res = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=8&langRestrict=fr`
       );
-      );
       if (!res.ok) throw new Error("Erreur réseau");
       const data = await res.json();
       const items: GoogleBookResult[] = (data.items || []).map((item: any) => {
