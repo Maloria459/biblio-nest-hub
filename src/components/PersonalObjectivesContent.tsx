@@ -230,11 +230,22 @@ export function PersonalObjectivesContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <Progress value={pct} className="h-2" />
-                  <p className="text-xs text-muted-foreground text-right">
-                    {obj.currentValue} / {obj.target_value}
-                    {isInverted ? " €" : ""}
-                  </p>
+                  <Progress
+                    value={pct}
+                    className="h-2"
+                    indicatorClassName={getProgressColor(pct, isInverted)}
+                  />
+                  <div className="flex items-center justify-between">
+                    {completed && (
+                      <span className="flex items-center gap-1 text-xs text-green-600">
+                        <PartyPopper className="h-3 w-3" /> Atteint !
+                      </span>
+                    )}
+                    <p className="text-xs text-muted-foreground text-right ml-auto">
+                      {obj.currentValue} / {obj.target_value}
+                      {isInverted ? " €" : ""}
+                    </p>
+                  </div>
                 </div>
               </Card>
             );
