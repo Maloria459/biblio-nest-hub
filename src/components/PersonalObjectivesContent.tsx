@@ -45,6 +45,14 @@ const PERIOD_OPTIONS = [
   { value: "custom", label: "Personnalisée" },
 ];
 
+const SORT_OPTIONS = [
+  { value: "date_desc", label: "Plus récents" },
+  { value: "date_asc", label: "Plus anciens" },
+  { value: "progress_desc", label: "Progression ↓" },
+  { value: "progress_asc", label: "Progression ↑" },
+  { value: "category", label: "Catégorie" },
+];
+
 function isCompleted(obj: ObjectiveWithProgress): boolean {
   const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
   return typeMeta?.inverted
