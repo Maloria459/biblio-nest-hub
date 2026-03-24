@@ -385,7 +385,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                           <Collapsible key={chapterNum}>
                             <CollapsibleTrigger className="flex items-center gap-1.5 w-full text-left px-2 py-1.5 rounded-md border border-border hover:bg-accent text-xs font-medium">
                               <ChevronDown className="h-3 w-3 shrink-0" />
-                              Ch. {chapterNum}
+                              <span className="flex-1">Ch. {chapterNum}</span>
+                              {((eb.chapterNotes || {})[chapterNum] || "").trim().length > 0 && (
+                                <span className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                                  <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                </span>
+                              )}
                             </CollapsibleTrigger>
                             <CollapsibleContent className="pt-1 col-span-1">
                               <Textarea value={(eb.chapterNotes || {})[chapterNum] || ""} onChange={e => setChapterNote(chapterNum, e.target.value)} placeholder={`Notes ch. ${chapterNum}...`} className="min-h-[60px] resize-y text-xs" />
