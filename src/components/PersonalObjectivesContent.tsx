@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { usePersonalObjectives, OBJECTIVE_TYPES, type PersonalObjective, type ObjectiveWithProgress } from "@/hooks/usePersonalObjectives";
 import { CreateObjectiveModal } from "@/components/CreateObjectiveModal";
 import { Card } from "@/components/ui/card";
@@ -7,8 +7,21 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw } from "lucide-react";
+import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw, PartyPopper } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import confetti from "canvas-confetti";
+
+function getProgressColor(pct: number, inverted?: boolean): string {
+  if (inverted) {
+    // For inverted (budget): green when low, red when high
+    if (pct < 50) return "bg-green-500";
+    if (pct < 85) return "bg-orange-500";
+    return "bg-red-500";
+  }
+  if (pct >= 75) return "bg-green-500";
+  if (pct >= 25) return "bg-orange-500";
+  return "bg-red-500";
+}
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "Toutes les catégories" },
