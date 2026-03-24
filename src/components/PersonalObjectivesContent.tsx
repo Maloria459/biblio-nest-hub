@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw, PartyPopper } from "lucide-react";
+import { Plus, Pin, PinOff, Trash2, Target, Pencil, Copy, RefreshCw, PartyPopper, Search, ArrowUpDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import confetti from "canvas-confetti";
 
@@ -45,6 +45,14 @@ const PERIOD_OPTIONS = [
   { value: "custom", label: "Personnalisée" },
 ];
 
+const SORT_OPTIONS = [
+  { value: "date_desc", label: "Plus récents" },
+  { value: "date_asc", label: "Plus anciens" },
+  { value: "progress_desc", label: "Progression ↓" },
+  { value: "progress_asc", label: "Progression ↑" },
+  { value: "category", label: "Catégorie" },
+];
+
 function isCompleted(obj: ObjectiveWithProgress): boolean {
   const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
   return typeMeta?.inverted
@@ -61,6 +69,8 @@ export function PersonalObjectivesContent() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("all");
+  const [sortBy, setSortBy] = useState("date_desc");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openCreate = () => { setEditingObj(null); setModalOpen(true); };
   const openEdit = (obj: PersonalObjective) => { setEditingObj(obj); setModalOpen(true); };
@@ -92,7 +102,9 @@ export function PersonalObjectivesContent() {
   }, [objectives]);
 
   const filtered = useMemo(() => {
-    return objectives.filter((obj) => {
+    const query = searchQuery.trim().toLowerCase();
+    const result = objectives.filter((obj) => {
+      if (query && !obj.label.toLowerCase().includes(query)) return false;
       if (filterCategory !== "all") {
         const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
         if (typeMeta?.category !== filterCategory) return false;
@@ -105,7 +117,36 @@ export function PersonalObjectivesContent() {
       if (filterPeriod !== "all" && obj.period_type !== filterPeriod) return false;
       return true;
     });
-  }, [objectives, filterCategory, filterStatus, filterPeriod]);
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "date_asc":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "date_desc":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "progress_desc": {
+          const pctA = a.target_value > 0 ? a.currentValue / a.target_value : 0;
+          const pctB = b.target_value > 0 ? b.currentValue / b.target_value : 0;
+          return pctB - pctA;
+        }
+        case "progress_asc": {
+          const pctA2 = a.target_value > 0 ? a.currentValue / a.target_value : 0;
+          const pctB2 = b.target_value > 0 ? b.currentValue / b.target_value : 0;
+          return pctA2 - pctB2;
+        }
+        case "category": {
+          const catA = OBJECTIVE_TYPES.find((t) => t.value === a.objective_type)?.category ?? "";
+          const catB = OBJECTIVE_TYPES.find((t) => t.value === b.objective_type)?.category ?? "";
+          return catA.localeCompare(catB);
+        }
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [objectives, filterCategory, filterStatus, filterPeriod, sortBy, searchQuery]);
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Chargement…</div>;
@@ -113,7 +154,19 @@ export function PersonalObjectivesContent() {
 
   return (
     <div className="p-4 md:p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-120px)]">
-      {/* Top bar: filters + create button */}
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Rechercher un objectif…"
+          className="w-full h-9 pl-9 pr-3 text-sm rounded-md border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+
+      {/* Filters + sort + create */}
       <div className="flex flex-wrap items-center gap-2">
         <Select value={filterCategory} onValueChange={setFilterCategory}>
           <SelectTrigger className="w-[180px] h-9 text-xs">
@@ -143,6 +196,18 @@ export function PersonalObjectivesContent() {
           </SelectTrigger>
           <SelectContent>
             {PERIOD_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[160px] h-9 text-xs">
+            <ArrowUpDown className="h-3 w-3 mr-1" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((o) => (
               <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
             ))}
           </SelectContent>
