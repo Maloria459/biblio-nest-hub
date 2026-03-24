@@ -102,7 +102,9 @@ export function PersonalObjectivesContent() {
   }, [objectives]);
 
   const filtered = useMemo(() => {
-    return objectives.filter((obj) => {
+    const query = searchQuery.trim().toLowerCase();
+    const result = objectives.filter((obj) => {
+      if (query && !obj.label.toLowerCase().includes(query)) return false;
       if (filterCategory !== "all") {
         const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
         if (typeMeta?.category !== filterCategory) return false;
@@ -115,7 +117,36 @@ export function PersonalObjectivesContent() {
       if (filterPeriod !== "all" && obj.period_type !== filterPeriod) return false;
       return true;
     });
-  }, [objectives, filterCategory, filterStatus, filterPeriod]);
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "date_asc":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "date_desc":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "progress_desc": {
+          const pctA = a.target_value > 0 ? a.currentValue / a.target_value : 0;
+          const pctB = b.target_value > 0 ? b.currentValue / b.target_value : 0;
+          return pctB - pctA;
+        }
+        case "progress_asc": {
+          const pctA2 = a.target_value > 0 ? a.currentValue / a.target_value : 0;
+          const pctB2 = b.target_value > 0 ? b.currentValue / b.target_value : 0;
+          return pctA2 - pctB2;
+        }
+        case "category": {
+          const catA = OBJECTIVE_TYPES.find((t) => t.value === a.objective_type)?.category ?? "";
+          const catB = OBJECTIVE_TYPES.find((t) => t.value === b.objective_type)?.category ?? "";
+          return catA.localeCompare(catB);
+        }
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [objectives, filterCategory, filterStatus, filterPeriod, sortBy, searchQuery]);
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Chargement…</div>;
