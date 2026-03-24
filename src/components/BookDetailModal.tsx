@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Star, Heart, Flame, Plus, Trash2, ChevronDown, X } from "lucide-react";
+import { Star, Heart, Flame, Plus, Trash2, ChevronDown, X, Play } from "lucide-react";
 import type { Book, Citation } from "@/data/mockBooks";
 import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
 import { useReadingSessions, formatTotalReadingTime } from "@/hooks/useReadingSessions";
