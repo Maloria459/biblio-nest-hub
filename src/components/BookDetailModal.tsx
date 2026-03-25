@@ -25,6 +25,7 @@ function AutoTextarea({ value, onChange, ...props }: React.ComponentProps<typeof
   return <Textarea ref={ref} value={value} onChange={onChange} {...props} />;
 }
 
+interface BookDetailModalProps {
   book: Book | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
