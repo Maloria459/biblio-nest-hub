@@ -128,7 +128,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     }
   }, [typeMeta, books, genres, formats]);
 
-  const canBeRecurring = periodType === "month" || periodType === "year";
+  const canBeRecurring = periodType === "day" || periodType === "week" || periodType === "month" || periodType === "year";
 
   const reset = () => {
     setSelectedType("");
@@ -152,7 +152,9 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
   /* ─── Preview label ─── */
   const previewLabel = useMemo(() => {
     if (!typeMeta || !targetValue) return null;
-    const periodLabel = periodType === "month" ? " (ce mois)"
+    const periodLabel = periodType === "day" ? " (aujourd'hui)"
+      : periodType === "week" ? " (cette semaine)"
+      : periodType === "month" ? " (ce mois)"
       : periodType === "year" ? " (cette année)"
       : periodType === "custom" && startDate && endDate
         ? ` (${startDate} → ${endDate})`
@@ -241,9 +243,18 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
                         {CatIcon && <CatIcon className="h-3.5 w-3.5" />}
                         {cat}
                       </div>
-                      {types.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>{t.label.replace("X", "…").replace("{filter}", "…")}</SelectItem>
-                      ))}
+                      {types.map((t) => {
+                        const displayLabel = t.label.replace("X", "…").replace("{filter}", "…");
+                        const contextHint = t.needsFilter === "author" ? " (par auteur)"
+                          : t.needsFilter === "genre" ? " (par genre)"
+                          : t.needsFilter === "format" ? " (par format)"
+                          : t.needsFilter === "publisher" ? " (par éditeur)"
+                          : t.needsFilter === "series" ? " (par série)"
+                          : "";
+                        return (
+                          <SelectItem key={t.value} value={t.value}>{displayLabel}{contextHint && <span className="text-muted-foreground text-xs ml-1">{contextHint}</span>}</SelectItem>
+                        );
+                      })}
                     </div>
                   );
                 })}
@@ -277,24 +288,16 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
             <div className="space-y-1.5">
               <Label>{filterLabel} <span className="text-destructive">*</span></Label>
               {filterOptions.length > 0 ? (
-                <>
-                  <Select value={filterValue} onValueChange={setFilterValue}>
-                    <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {filterOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
-                    placeholder={`Ou saisir un ${filterLabel.toLowerCase()} libre`}
-                    className="mt-1.5"
-                  />
-                </>
+                <Select value={filterValue} onValueChange={setFilterValue}>
+                  <SelectTrigger><SelectValue placeholder={`Choisir un ${filterLabel.toLowerCase()}`} /></SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {filterOptions.map((opt) => (
+                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
-                <Input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} placeholder={`Saisir un ${filterLabel.toLowerCase()}`} />
+                <p className="text-xs text-muted-foreground italic">Aucun {filterLabel.toLowerCase()} disponible dans votre bibliothèque.</p>
               )}
               {touched && !isFilterValid && (
                 <p className="text-xs text-destructive">Ce champ est requis pour ce type d'objectif.</p>
@@ -308,6 +311,8 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
             <Select value={periodType} onValueChange={(v) => { setPeriodType(v); if (v === "custom") setRecurring(false); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="day">Aujourd'hui</SelectItem>
+                <SelectItem value="week">Cette semaine</SelectItem>
                 <SelectItem value="month">Ce mois</SelectItem>
                 <SelectItem value="year">Cette année</SelectItem>
                 <SelectItem value="custom">Personnalisée</SelectItem>
@@ -342,7 +347,7 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
               <div className="space-y-0.5">
                 <Label className="text-sm font-medium">Objectif récurrent</Label>
                 <p className="text-xs text-muted-foreground">
-                  Se réinitialise automatiquement chaque {periodType === "month" ? "mois" : "année"}
+                  Se réinitialise automatiquement chaque {periodType === "day" ? "jour" : periodType === "week" ? "semaine" : periodType === "month" ? "mois" : "année"}
                 </p>
               </div>
               <Switch checked={recurring} onCheckedChange={setRecurring} />
