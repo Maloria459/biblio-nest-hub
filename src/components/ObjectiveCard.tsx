@@ -24,7 +24,7 @@ export function isObjectiveCompleted(obj: ObjectiveWithProgress): boolean {
     : obj.currentValue >= obj.target_value;
 }
 
-const MILESTONES = [25, 50, 75];
+
 
 interface ObjectiveCardProps {
   obj: ObjectiveWithProgress;
@@ -127,20 +127,6 @@ export function ObjectiveCard({ obj, onEdit, onDuplicate, onTogglePin, onDelete,
             className="h-2"
             indicatorClassName={getProgressColor(pct, isInverted)}
           />
-          {!isInverted && (
-            <div className="absolute inset-0 flex items-center pointer-events-none">
-              {MILESTONES.map((m) => (
-                <div
-                  key={m}
-                  className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full border border-background"
-                  style={{ left: `${m}%`, transform: `translateX(-50%) translateY(-50%)` }}
-                  title={`${m}%`}
-                >
-                  <div className={`w-full h-full rounded-full ${pct >= m ? "bg-foreground/40" : "bg-muted-foreground/30"}`} />
-                </div>
-              ))}
-            </div>
-          )}
         </div>
         <div className="flex items-center justify-between">
           {completed ? (
