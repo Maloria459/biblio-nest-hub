@@ -5,6 +5,7 @@ import { useBooks } from "@/contexts/BooksContext";
 import { useReadingSessions } from "@/hooks/useReadingSessions";
 import { useMemo } from "react";
 import {
+  startOfDay, endOfDay, startOfWeek, endOfWeek,
   startOfMonth, endOfMonth, startOfYear, endOfYear,
   parseISO, isAfter, isBefore, isEqual,
 } from "date-fns";
@@ -87,6 +88,10 @@ export interface ObjectiveWithProgress extends PersonalObjective {
 function periodRange(obj: PersonalObjective): { start: Date; end: Date } | null {
   const now = new Date();
   switch (obj.period_type) {
+    case "day":
+      return { start: startOfDay(now), end: endOfDay(now) };
+    case "week":
+      return { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
     case "month":
       return { start: startOfMonth(now), end: endOfMonth(now) };
     case "year":
@@ -396,7 +401,9 @@ export function usePersonalObjectives() {
           currentValue = 0;
       }
 
-      const periodLabel = obj.period_type === "month" ? " (ce mois)"
+      const periodLabel = obj.period_type === "day" ? " (aujourd'hui)"
+        : obj.period_type === "week" ? " (cette semaine)"
+        : obj.period_type === "month" ? " (ce mois)"
         : obj.period_type === "year" ? " (cette année)"
         : obj.period_type === "custom" && obj.start_date && obj.end_date
           ? ` (${obj.start_date} → ${obj.end_date})`
