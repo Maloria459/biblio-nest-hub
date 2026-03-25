@@ -81,7 +81,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   const eb = editBook;
   const set = (partial: Partial<Book>) => { setEditBook({ ...eb, ...partial }); setDirty(true); };
-  const autoResize = (el: HTMLTextAreaElement | null) => { if (!el) return; el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; };
+  
 
   const pagesRead = eb.pagesRead || 0;
   const totalPages = eb.pages || 0;
