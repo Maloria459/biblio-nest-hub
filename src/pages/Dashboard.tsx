@@ -55,7 +55,7 @@ const Dashboard = () => {
   }, [user?.id]);
 
   /* ── stat counts ── */
-  const libraryCount = useMemo(() => books.length, [books]);
+  const libraryCount = useMemo(() => books.filter((b) => b.status !== "Wishlist").length, [books]);
   const palCount = useMemo(() => books.filter((b) => b.status === "Dans ma PAL").length, [books]);
   const wishlistCount = useMemo(() => books.filter((b) => b.status === "Wishlist").length, [books]);
   const finishedCount = useMemo(() => books.filter((b) => b.status === "Lecture terminée" || b.status === "Lu").length, [books]);
