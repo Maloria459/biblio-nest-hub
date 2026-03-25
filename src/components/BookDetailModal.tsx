@@ -15,7 +15,16 @@ import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
 import { useReadingSessions, formatTotalReadingTime } from "@/hooks/useReadingSessions";
 import { toast } from "sonner";
 
-interface BookDetailModalProps {
+/** Textarea that auto-grows to fit its content */
+function AutoTextarea({ value, onChange, ...props }: React.ComponentProps<typeof Textarea>) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el) { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }
+  }, [value]);
+  return <Textarea ref={ref} value={value} onChange={onChange} {...props} />;
+}
+
   book: Book | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
