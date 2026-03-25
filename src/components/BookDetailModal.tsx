@@ -71,6 +71,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   const eb = editBook;
   const set = (partial: Partial<Book>) => { setEditBook({ ...eb, ...partial }); setDirty(true); };
+  const autoResize = (el: HTMLTextAreaElement) => { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; };
 
   const pagesRead = eb.pagesRead || 0;
   const totalPages = eb.pages || 0;
@@ -370,13 +371,13 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 {/* Synopsis */}
                 <div className="space-y-1 mt-3">
                   <Label className="text-xs font-semibold uppercase tracking-wide">Synopsis</Label>
-                  <Textarea value={(eb as any).synopsis || ""} onChange={e => set({ synopsis: e.target.value } as any)} placeholder="Résumé du livre..." className="min-h-[80px] resize-y" />
+                  <Textarea value={eb.synopsis || ""} onChange={e => { set({ synopsis: e.target.value }); autoResize(e.target); }} onFocus={e => autoResize(e.target)} placeholder="Résumé du livre..." className="min-h-[80px] resize-none overflow-hidden" />
                 </div>
 
                 {/* Avis */}
                 <div className="space-y-1 mt-3">
                   <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
-                  <Textarea value={eb.avis || ""} onChange={e => set({ avis: e.target.value })} placeholder="Votre avis sur ce livre..." className="min-h-[100px] resize-y" />
+                  <Textarea value={eb.avis || ""} onChange={e => { set({ avis: e.target.value }); autoResize(e.target); }} onFocus={e => autoResize(e.target)} placeholder="Votre avis sur ce livre..." className="min-h-[100px] resize-none overflow-hidden" />
                 </div>
 
                 {/* Chapter notes */}
@@ -442,11 +443,11 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Passages préférés</Label>
-                    <Textarea value={eb.passagesPreferes || ""} onChange={e => set({ passagesPreferes: e.target.value })} placeholder="Vos passages préférés..." className="min-h-[80px] resize-y" />
+                    <Textarea value={eb.passagesPreferes || ""} onChange={e => { set({ passagesPreferes: e.target.value }); autoResize(e.target); }} onFocus={e => autoResize(e.target)} placeholder="Vos passages préférés..." className="min-h-[80px] resize-none overflow-hidden" />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Personnages préférés</Label>
-                    <Textarea value={eb.personnagesPreferes || ""} onChange={e => set({ personnagesPreferes: e.target.value })} placeholder="Vos personnages préférés..." className="min-h-[80px] resize-y" />
+                    <Textarea value={eb.personnagesPreferes || ""} onChange={e => { set({ personnagesPreferes: e.target.value }); autoResize(e.target); }} onFocus={e => autoResize(e.target)} placeholder="Vos personnages préférés..." className="min-h-[80px] resize-none overflow-hidden" />
                   </div>
                 </div>
               </div>
