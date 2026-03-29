@@ -1,25 +1,23 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useBooks } from "@/contexts/BooksContext";
 import { useReadingSessions, type ReadingSession } from "@/hooks/useReadingSessions";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { startOfMonth, startOfYear, endOfMonth, isAfter, isBefore, parseISO, format, getDay } from "date-fns";
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isAfter, isBefore, parseISO, format, getDay } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-import { StatsSummaryCards } from "@/components/stats/StatsSummaryCards";
-import { StatsReadingEvolution } from "@/components/stats/StatsReadingEvolution";
-import { StatsGenreChart } from "@/components/stats/StatsGenreChart";
-import { StatsFormatChart } from "@/components/stats/StatsFormatChart";
-import { StatsRatingChart } from "@/components/stats/StatsRatingChart";
-import { StatsWeekdayChart } from "@/components/stats/StatsWeekdayChart";
-import { StatsHighlights } from "@/components/stats/StatsHighlights";
+import { StatsLectureBlock } from "@/components/stats/StatsLectureBlock";
+import { StatsBibliothequeBlock } from "@/components/stats/StatsBibliothequeBlock";
+import { StatsObjectifsBlock } from "@/components/stats/StatsObjectifsBlock";
+import { StatsGamificationBlock } from "@/components/stats/StatsGamificationBlock";
+import { StatsCommunauteBlock } from "@/components/stats/StatsCommunauteBlock";
 
-const MONTHS = [
-  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+const PERIOD_OPTIONS = [
+  { value: "week", label: "Semaine" },
+  { value: "month", label: "Mois" },
+  { value: "year", label: "Année" },
+  { value: "all", label: "Depuis mon inscription" },
 ];
 
 function useMemberSince() {
@@ -27,94 +25,59 @@ function useMemberSince() {
   const [since, setSince] = useState<Date | null>(null);
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("created_at")
-      .eq("user_id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.created_at) setSince(new Date(data.created_at));
-      });
+    supabase.from("profiles").select("created_at").eq("user_id", user.id).single().then(({ data }) => {
+      if (data?.created_at) setSince(new Date(data.created_at));
+    });
   }, [user]);
   return since;
 }
 
 function dateInRange(dateStr: string | undefined | null, start: Date | null, end: Date | null): boolean {
-  if (!dateStr) return !start; // include if no filter
+  if (!dateStr) return !start;
   try {
     const d = parseISO(dateStr);
     if (start && isBefore(d, start)) return false;
     if (end && isAfter(d, end)) return false;
     return true;
-  } catch {
-    return true;
-  }
+  } catch { return true; }
 }
 
-// JS getDay: 0=Sun..6=Sat → convert to 0=Mon..6=Sun
 function toMondayIndex(d: Date) {
   const day = getDay(d);
   return day === 0 ? 6 : day - 1;
 }
 
-export function StatistiquesContent() {
-  const currentYear = new Date().getFullYear();
-  const [selectedMonth, setSelectedMonth] = useState<string>("all"); // "all" or "0"-"11"
-  const [selectedYear, setSelectedYear] = useState<string>("all"); // "all" or year string
+function dateKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
+export function StatistiquesContent() {
+  const [period, setPeriod] = useState("all");
   const { books } = useBooks();
   const { data: sessions = [] } = useReadingSessions();
+  const { user } = useAuth();
   const memberSince = useMemberSince();
 
-  // Build year options from member since
-  const yearOptions = useMemo(() => {
-    const startYear = memberSince ? memberSince.getFullYear() : currentYear;
-    const years: number[] = [];
-    for (let y = startYear; y <= currentYear; y++) years.push(y);
-    return years;
-  }, [memberSince, currentYear]);
-
-  // Compute date range from filters
+  // Period range
   const { rangeStart, rangeEnd } = useMemo(() => {
-    let start: Date | null = null;
-    let end: Date | null = null;
+    const now = new Date();
+    if (period === "week") return { rangeStart: startOfWeek(now, { weekStartsOn: 1 }), rangeEnd: endOfWeek(now, { weekStartsOn: 1 }) };
+    if (period === "month") return { rangeStart: startOfMonth(now), rangeEnd: endOfMonth(now) };
+    if (period === "year") return { rangeStart: startOfYear(now), rangeEnd: endOfYear(now) };
+    return { rangeStart: null, rangeEnd: null };
+  }, [period]);
 
-    if (selectedYear !== "all") {
-      const year = parseInt(selectedYear);
-      if (selectedMonth !== "all") {
-        const month = parseInt(selectedMonth);
-        start = new Date(year, month, 1);
-        end = endOfMonth(start);
-      } else {
-        start = startOfYear(new Date(year, 0, 1));
-        end = new Date(year, 11, 31, 23, 59, 59);
-      }
-    } else if (selectedMonth !== "all") {
-      const month = parseInt(selectedMonth);
-      start = new Date(currentYear, month, 1);
-      end = endOfMonth(start);
-    }
-
-    return { rangeStart: start, rangeEnd: end };
-  }, [selectedMonth, selectedYear, currentYear]);
-
-  // Filtered data
-  const filteredBooks = useMemo(
-    () => books.filter((b) => dateInRange(b.endDate || b.startDate, rangeStart, rangeEnd)),
-    [books, rangeStart, rangeEnd],
-  );
-  const filteredSessions = useMemo(
-    () => sessions.filter((s) => dateInRange(s.session_date, rangeStart, rangeEnd)),
-    [sessions, rangeStart, rangeEnd],
-  );
+  const filteredBooks = useMemo(() => books.filter((b) => dateInRange(b.endDate || b.startDate, rangeStart, rangeEnd)), [books, rangeStart, rangeEnd]);
+  const filteredSessions = useMemo(() => sessions.filter((s) => dateInRange(s.session_date, rangeStart, rangeEnd)), [sessions, rangeStart, rangeEnd]);
 
   const finishedStatuses = ["Lu", "Lecture terminée"];
 
-  // ---- Summary ----
+  // ── Lecture block data ──
   const booksFinished = filteredBooks.filter((b) => finishedStatuses.includes(b.status)).length;
   const totalPagesRead = filteredBooks.reduce((s, b) => s + (b.pagesRead ?? 0), 0);
   const totalReadingMinutes = filteredSessions.reduce((s, se) => s + se.duration_minutes, 0);
   const totalSessions = filteredSessions.length;
+  const avgReadingMinutes = totalSessions > 0 ? totalReadingMinutes / totalSessions : null;
 
   const daySpan = useMemo(() => {
     if (!rangeStart) {
@@ -127,28 +90,70 @@ export function StatistiquesContent() {
   }, [rangeStart, rangeEnd, filteredSessions]);
 
   const avgPagesPerDay = totalPagesRead / daySpan;
+  const coupsDeCoeur = filteredBooks.filter((b) => b.coupDeCoeur).length;
 
-  // ---- Evolution chart ----
+  // Records
+  const readBooks = useMemo(() => filteredBooks.filter((b) => finishedStatuses.includes(b.status)), [filteredBooks]);
+  const longestBook = useMemo(() => {
+    const finished = readBooks.filter((b) => b.pages);
+    return finished.sort((a, b) => (b.pages ?? 0) - (a.pages ?? 0))[0] ?? null;
+  }, [readBooks]);
+
+  const longestSession = useMemo(() => {
+    if (!filteredSessions.length) return null;
+    return filteredSessions.reduce((best, s) => s.duration_minutes > best.duration_minutes ? s : best, filteredSessions[0]);
+  }, [filteredSessions]);
+
+  // Best period
+  const bestPeriod = useMemo(() => {
+    const monthMap = new Map<string, number>();
+    readBooks.filter((b) => b.endDate).forEach((b) => {
+      const key = format(parseISO(b.endDate!), "MMMM yyyy", { locale: fr });
+      monthMap.set(key, (monthMap.get(key) ?? 0) + 1);
+    });
+    let best: string | null = null;
+    let bestCount = 0;
+    monthMap.forEach((count, m) => { if (count > bestCount) { best = m; bestCount = count; } });
+    return { label: best, count: bestCount || null };
+  }, [readBooks]);
+
+  // Longest streak
+  const longestStreak = useMemo(() => {
+    const dates = new Set<string>();
+    filteredSessions.forEach((s) => dates.add(dateKey(new Date(s.session_date))));
+    if (dates.size === 0) return 0;
+    const sorted = Array.from(dates).sort();
+    let max = 1, cur = 1;
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = new Date(sorted[i - 1]);
+      const next = new Date(sorted[i]);
+      const diff = (next.getTime() - prev.getTime()) / 86400000;
+      if (diff === 1) { cur++; max = Math.max(max, cur); } else { cur = 1; }
+    }
+    return max;
+  }, [filteredSessions]);
+
+  // Evolution chart
   const evolutionData = useMemo(() => {
     if (filteredSessions.length === 0) return [];
     const byKey = new Map<string, number>();
-    const useWeeks = selectedMonth !== "all";
+    const useWeeks = period === "month" || period === "week";
     filteredSessions.forEach((s) => {
       const d = new Date(s.session_date);
-      const key = useWeeks
-        ? `S${Math.ceil(d.getDate() / 7)}`
-        : format(d, "MMM yy", { locale: fr });
+      const key = useWeeks ? `S${Math.ceil(d.getDate() / 7)}` : format(d, "MMM yy", { locale: fr });
       byKey.set(key, (byKey.get(key) ?? 0) + (s.last_page_reached ?? 0));
     });
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, selectedMonth]);
+  }, [filteredSessions, period]);
 
-  // ---- Genre chart (owned = all books, read = filtered finished) ----
-  const readBooks = useMemo(
-    () => filteredBooks.filter((b) => finishedStatuses.includes(b.status)),
-    [filteredBooks],
-  );
+  // Weekday chart
+  const weekdayMinutes = useMemo(() => {
+    const arr = [0, 0, 0, 0, 0, 0, 0];
+    filteredSessions.forEach((s) => { arr[toMondayIndex(new Date(s.session_date))] += s.duration_minutes; });
+    return arr;
+  }, [filteredSessions]);
 
+  // ── Bibliothèque block data ──
   const genreDataOwned = useMemo(() => {
     const map = new Map<string, number>();
     books.forEach((b) => { if (b.genre) map.set(b.genre, (map.get(b.genre) ?? 0) + 1); });
@@ -161,7 +166,6 @@ export function StatistiquesContent() {
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [readBooks]);
 
-  // ---- Format chart (owned = all books, read = filtered finished) ----
   const formatDataOwned = useMemo(() => {
     const map = new Map<string, number>();
     books.forEach((b) => { if (b.format) map.set(b.format, (map.get(b.format) ?? 0) + 1); });
@@ -174,141 +178,123 @@ export function StatistiquesContent() {
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [readBooks]);
 
-  // ---- Rating distribution ----
-  const ratingDistribution = useMemo(() => {
-    const dist = [0, 0, 0, 0, 0];
-    filteredBooks.forEach((b) => {
-      if (b.rating && b.rating >= 1 && b.rating <= 5) dist[b.rating - 1]++;
-    });
-    return dist;
-  }, [filteredBooks]);
+  const booksAcquired = useMemo(() => filteredBooks.filter((b) => b.price != null && b.price > 0).length, [filteredBooks]);
+  const totalSpent = useMemo(() => filteredBooks.reduce((s, b) => s + (b.price ?? 0), 0), [filteredBooks]);
 
-  const ratingAvg = useMemo(() => {
-    const rated = filteredBooks.filter((b) => b.rating);
-    if (rated.length === 0) return null;
-    return rated.reduce((s, b) => s + (b.rating ?? 0), 0) / rated.length;
-  }, [filteredBooks]);
+  // ── Objectifs ──
+  const { data: objectives = [] } = useQuery({
+    queryKey: ["personal-objectives-stats", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("personal_objectives").select("*").eq("user_id", user!.id);
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+  // Placeholder: count objectives that are "completed" — for now we just show the total count
+  const objectivesCompleted = 0; // TODO: compute when progress tracking is available
 
-  // ---- Weekday chart ----
-  const weekdayMinutes = useMemo(() => {
-    const arr = [0, 0, 0, 0, 0, 0, 0];
-    filteredSessions.forEach((s) => {
-      const idx = toMondayIndex(new Date(s.session_date));
-      arr[idx] += s.duration_minutes;
-    });
-    return arr;
-  }, [filteredSessions]);
+  // ── Gamification ──
+  const { data: userProgress = [] } = useQuery({
+    queryKey: ["user-progress-stats", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_progress").select("*").eq("user_id", user!.id);
+      return data ?? [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+  const challengesCompleted = userProgress.filter((p) => p.completed).length;
 
-  // ---- Highlights ----
-  const highlights = useMemo(() => {
-    const finished = filteredBooks.filter((b) => finishedStatuses.includes(b.status) && b.pages);
-    const longestBook = finished.sort((a, b) => (b.pages ?? 0) - (a.pages ?? 0))[0] ?? null;
+  // ── Communauté ──
+  const { data: pastLiteraryEvents = 0 } = useQuery({
+    queryKey: ["past-literary-events", user?.id],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase.from("literary_events").select("id", { count: "exact", head: true }).eq("user_id", user!.id).lt("event_date", today);
+      return count ?? 0;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
-    const longestSession = filteredSessions.length
-      ? filteredSessions.reduce((best, s) => (s.duration_minutes > best.duration_minutes ? s : best), filteredSessions[0])
-      : null;
-
-    // Best month
-    const monthMap = new Map<string, number>();
-    filteredBooks
-      .filter((b) => finishedStatuses.includes(b.status) && b.endDate)
-      .forEach((b) => {
-        const key = format(parseISO(b.endDate!), "MMMM yyyy", { locale: fr });
-        monthMap.set(key, (monthMap.get(key) ?? 0) + 1);
-      });
-    let bestMonth: string | null = null;
-    let bestMonthCount = 0;
-    monthMap.forEach((count, month) => {
-      if (count > bestMonthCount) {
-        bestMonth = month;
-        bestMonthCount = count;
-      }
-    });
-
-    const coupsDeCoeur = filteredBooks.filter((b) => b.coupDeCoeur).length;
-    const avgSession = totalSessions > 0 ? totalReadingMinutes / totalSessions : null;
-
-    return {
-      longestBookTitle: longestBook?.title ?? null,
-      longestBookPages: longestBook?.pages ?? null,
-      longestSessionMinutes: longestSession?.duration_minutes ?? null,
-      bestMonth,
-      bestMonthCount: bestMonthCount || null,
-      coupsDeCoeur,
-      avgSessionMinutes: avgSession,
-    };
-  }, [filteredBooks, filteredSessions, totalSessions, totalReadingMinutes]);
-
-  const filterLabel = useMemo(() => {
-    if (selectedMonth === "all" && selectedYear === "all") return "Depuis mon inscription";
-    const parts: string[] = [];
-    if (selectedMonth !== "all") parts.push(MONTHS[parseInt(selectedMonth)]);
-    if (selectedYear !== "all") parts.push(selectedYear);
-    return parts.join(" ");
-  }, [selectedMonth, selectedYear]);
+  const { data: pastClubEvents = 0 } = useQuery({
+    queryKey: ["past-club-events", user?.id],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase.from("book_club_events").select("id", { count: "exact", head: true }).eq("user_id", user!.id).lt("event_date", today);
+      return count ?? 0;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-5">
-      {/* Period filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-[160px] h-9 text-sm">
-            <SelectValue placeholder="Mois" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les mois</SelectItem>
-            {MONTHS.map((m, i) => (
-              <SelectItem key={i} value={String(i)}>{m}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-[130px] h-9 text-sm">
-            <SelectValue placeholder="Année" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toutes</SelectItem>
-            {yearOptions.map((y) => (
-              <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {(selectedMonth !== "all" || selectedYear !== "all") && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 text-xs text-muted-foreground gap-1.5"
-            onClick={() => { setSelectedMonth("all"); setSelectedYear("all"); }}
+    <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-8">
+      {/* Period filter */}
+      <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
+        {PERIOD_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => setPeriod(opt.value)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              period === opt.value
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Réinitialiser
-          </Button>
-        )}
+            {opt.label}
+          </button>
+        ))}
       </div>
 
-      <StatsSummaryCards
+      {/* Lecture */}
+      <StatsLectureBlock
         booksFinished={booksFinished}
         totalPagesRead={totalPagesRead}
-        totalReadingMinutes={totalReadingMinutes}
-        avgPagesPerDay={avgPagesPerDay}
         totalSessions={totalSessions}
+        totalReadingMinutes={totalReadingMinutes}
+        avgReadingMinutes={avgReadingMinutes}
+        avgPagesPerDay={avgPagesPerDay}
+        coupsDeCoeur={coupsDeCoeur}
+        longestSessionMinutes={longestSession?.duration_minutes ?? null}
+        longestBookTitle={longestBook?.title ?? null}
+        longestBookPages={longestBook?.pages ?? null}
+        bestPeriodLabel={bestPeriod.label}
+        bestPeriodCount={bestPeriod.count}
+        longestStreak={longestStreak}
+        evolutionData={evolutionData}
+        weekdayMinutes={weekdayMinutes}
       />
 
-      <StatsReadingEvolution data={evolutionData} />
+      {/* Bibliothèque */}
+      <StatsBibliothequeBlock
+        genreOwned={genreDataOwned}
+        genreRead={genreDataRead}
+        formatOwned={formatDataOwned}
+        formatRead={formatDataRead}
+        booksAcquired={booksAcquired}
+        totalSpent={totalSpent}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <StatsGenreChart ownedData={genreDataOwned} readData={genreDataRead} />
-        <StatsFormatChart ownedData={formatDataOwned} readData={formatDataRead} />
-      </div>
+      {/* Objectifs */}
+      <StatsObjectifsBlock objectivesCompleted={objectivesCompleted} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <StatsRatingChart distribution={ratingDistribution} average={ratingAvg} />
-        <StatsWeekdayChart minutesByDay={weekdayMinutes} />
-      </div>
+      {/* Gamification */}
+      <StatsGamificationBlock
+        challengesCompleted={challengesCompleted}
+        totalEclats={0}
+        totalXpPages={0}
+        totalBadges={0}
+        currentRank="Novice des Pages"
+      />
 
-      <StatsHighlights {...highlights} />
+      {/* Communauté */}
+      <StatsCommunauteBlock
+        literaryEventsCount={pastLiteraryEvents}
+        clubEventsCount={pastClubEvents}
+        publicationsCount={0}
+      />
     </div>
   );
 }
