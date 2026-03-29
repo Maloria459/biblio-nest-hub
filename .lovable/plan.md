@@ -1,50 +1,104 @@
 
 
-## Audit du formulaire de création d'objectifs
+## Refonte complète du système d'objectifs personnels
 
-### Problèmes identifiés
-
-1. **Pas d'espacement entre les champs** — Les `div.space-y-1.5` sont empilés sans `gap` ni `space-y` sur le conteneur parent, ce qui colle tous les champs ensemble.
-
-2. **Pas de validation visuelle** — Aucun message d'erreur si la valeur cible est 0 ou négative, si le filtre obligatoire est vide, etc. Le bouton est juste désactivé sans explication.
-
-3. **Pas de description/aide contextuelle** — L'utilisateur ne sait pas ce que signifie concrètement chaque type d'objectif ni comment la progression sera calculée.
-
-4. **Le filtre obligatoire n'est pas signalé** — Quand un type nécessite un filtre (auteur, genre...), rien n'indique que c'est requis pour valider.
-
-5. **Pas de prévisualisation de l'objectif** — L'utilisateur ne voit pas le libellé final de son objectif avant de le créer.
-
-6. **Bouton Créer dans la zone scrollable** — Le bouton de validation devrait être dans un footer fixe, pas dans la zone qui scroll.
-
-7. **Pas de confirmation avant fermeture** — Si l'utilisateur a rempli des champs et clique sur l'overlay, tout est perdu sans avertissement.
+### Résumé
+Remplacement intégral des `OBJECTIVE_TYPES` par les 39 objectifs demandés, organisés en **7 catégories**. Refonte du formulaire, du calcul de progression et des cartes d'objectifs.
 
 ---
 
-### Propositions d'amélioration
+### Nouvelles catégories et objectifs
 
-| # | Amélioration | Détail |
-|---|---|---|
-| 1 | **Espacement correct** | Ajouter `space-y-5` sur le conteneur des champs |
-| 2 | **Prévisualisation du libellé** | Afficher en temps réel le libellé final de l'objectif (ex: "Lire 12 livres de Victor Hugo (ce mois)") dans un encadré en bas du formulaire |
-| 3 | **Messages de validation inline** | Afficher des messages d'erreur sous chaque champ invalide (valeur ≤ 0, filtre manquant, dates incohérentes) |
-| 4 | **Description contextuelle du type** | Ajouter une petite description sous le sélecteur de type expliquant comment la progression est mesurée |
-| 5 | **Footer fixe avec bouton** | Sortir le bouton "Créer" du scroll et le placer dans un footer fixe avec bordure en haut |
-| 6 | **Indicateur de filtre requis** | Marquer le champ filtre avec un astérisque rouge quand il est obligatoire, et bloquer la validation si vide |
-| 7 | **Icône par catégorie** | Ajouter une icône devant chaque catégorie dans le sélecteur de type (livre, bibliothèque, étoile, chrono, utilisateurs) |
-| 8 | **Saisie libre + sélection pour le filtre** | Permettre de taper un auteur/éditeur qui n'est pas encore dans la bibliothèque via un Combobox (sélection + saisie libre) |
+```text
+📖 LECTURE (PAGES & TEMPS)
+├─ read_pages_period       Lire X pages (période sélectionnable)
+├─ read_pages_session      Lire X pages pendant une session
+├─ read_duration           Lire pendant X minutes/heures
+├─ read_duration_day       Lire X min/h par jour
+├─ read_duration_week      Lire X min/h par semaine
+├─ read_duration_month     Lire X min/h par mois
+├─ read_duration_streak    Atteindre X min/jour pendant Y jours d'affilée
+
+📚 LIVRES TERMINÉS
+├─ finish_books            Finir X livres (période sélectionnable)
+├─ finish_books_month      Finir X livres dans le mois        → période verrouillée mois
+├─ finish_books_year       Finir X livres dans l'année         → période verrouillée année
+├─ read_big_book           Lire un livre de plus de X pages    → binaire (cible=1)
+├─ finish_book_fast        Finir un livre en moins de X jours  → binaire (cible=1)
+
+⏱️ SESSIONS
+├─ sessions_count          Réaliser X sessions (période)
+├─ session_per_day         Lire au moins une session par jour  → période verrouillée jour
+├─ sessions_per_week       Lire X sessions par semaine         → période verrouillée semaine
+
+🎯 DIVERSITÉ & DÉCOUVERTE
+├─ read_genre              Lire X livres d'un genre             → filtre genre
+├─ read_author             Lire X livres d'un auteur            → filtre auteur
+├─ read_format             Lire X livres d'un format            → filtre format
+├─ finish_series           Finir une saga/série                 → filtre série, binaire
+├─ read_new_language       Lire un livre dans une autre langue  → binaire
+├─ read_new_genre          Lire un livre d'un genre jamais lu   → binaire
+├─ read_old_book           Lire un livre commencé depuis longtemps → binaire
+
+🔥 RÉGULARITÉ & STREAKS
+├─ read_daily_streak       Lire tous les jours pendant X jours
+├─ read_weekly_streak      Lire chaque semaine pendant X semaines
+├─ max_gap_one_day         Ne pas sauter plus d'un jour (période)
+├─ read_every_weekday      Lire chaque jour de la semaine       → période verrouillée semaine
+
+📦 BIBLIOTHÈQUE & FICHES
+├─ finish_in_progress      Finir les livres en cours            → binaire
+├─ clear_pal               Vider X livres de ma PAL
+├─ write_reviews           Rédiger X avis
+├─ add_citations           Ajouter X citations
+├─ fill_book_sheets        Remplir X fiches complètes
+├─ buy_from_wishlist       Acheter X livres de ma wishlist
+├─ budget_max              Dépenser moins de X € (période)      → inversé
+
+🏆 RECORDS & DÉFIS
+├─ beat_daily_pages        Battre son record de pages en un jour    → binaire
+├─ beat_reading_minutes    Battre son record de minutes lues        → binaire
+├─ read_more_than_last_month  Lire plus que le mois précédent      → mois verrouillé
+├─ read_more_than_last_year   Lire plus que l'an dernier           → année verrouillée
+├─ cumulative_pages        Atteindre X pages cumulées              → pas de période
+├─ cumulative_books        Atteindre X livres finis                → pas de période
+```
 
 ---
 
-### Plan d'implémentation (fichier unique : `CreateObjectiveModal.tsx`)
+### Changements par fichier
 
-1. **Restructurer le layout** : séparer header / corps scrollable / footer fixe avec le bouton
-2. **Ajouter `space-y-5`** sur le conteneur des champs
-3. **Ajouter un encadré de prévisualisation** qui reconstruit le libellé dynamiquement (même logique que dans le hook)
-4. **Ajouter des messages d'erreur inline** sous les champs invalides (valeur cible, filtre, dates)
-5. **Ajouter des descriptions contextuelles** par type d'objectif via un mapping `OBJECTIVE_DESCRIPTIONS`
-6. **Ajouter des icônes par catégorie** dans le Select groupé (Book, Library, Star, Clock, Users)
-7. **Marquer les champs requis** avec un astérisque visuel
-8. **Déplacer le bouton dans un footer fixe** avec `border-t` et `px-6 py-4`
+#### 1. `src/hooks/usePersonalObjectives.ts`
+- **Remplacer** `OBJECTIVE_TYPES` par les 39 nouveaux types avec nouvelles propriétés :
+  - `periodLocked?: string` — période imposée (masque le sélecteur)
+  - `binary?: boolean` — objectif 0/1 (cible fixée à 1, masque le champ valeur)
+  - `noPeriod?: boolean` — pas de période (cumulatif ou one-shot)
+  - `needsSecondTarget?: boolean` — pour `read_duration_streak` (X min + Y jours)
+  - `timeUnit?: boolean` — affiche un sélecteur minutes/heures
+- **Ajouter les calculs de progression** pour chaque nouveau type :
+  - Streaks : analyser les dates de sessions pour compter jours/semaines consécutifs
+  - Records : calculer le max historique (pages/jour, minutes/session) et comparer
+  - `finish_book_fast` : vérifier `endDate - startDate < X jours`
+  - `read_old_book` : vérifier si un livre "En cours" depuis > 6 mois a été terminé
+  - `fill_book_sheets` : compter les livres avec synopsis + note + avis + citations + passages + personnages tous remplis
+  - `buy_from_wishlist` : livres passés de Wishlist à Acheté
+  - `read_more_than_last_month/year` : comparer avec la période précédente
+- **Supprimer** les anciens types absents de la nouvelle liste et les queries inutiles (collections, literary_events, book_club_events)
+- **Adapter le label** : remplacer dynamiquement X, filtre, période
 
-Aucune modification de base de données nécessaire. Uniquement des changements UI dans `CreateObjectiveModal.tsx` et potentiellement l'ajout de descriptions dans `usePersonalObjectives.ts`.
+#### 2. `src/components/CreateObjectiveModal.tsx`
+- **7 catégories** avec icônes (BookOpen, BookCheck, Timer, Compass, Flame, Archive, Trophy)
+- **Masquer** le sélecteur de période quand `periodLocked` ou `noPeriod`
+- **Masquer** le champ valeur cible quand `binary` (cible auto = 1)
+- **Ajouter** un sélecteur minutes/heures pour les types `timeUnit`
+- **Ajouter** un champ "Nombre de jours" pour `read_duration_streak`
+- **Adapter** les descriptions contextuelles pour chaque type
+- **Stocker** l'unité de temps et le second target dans `filter_value` (format JSON si nécessaire, ex: `{"unit":"hours","secondTarget":7}`)
+
+#### 3. `src/components/ObjectiveCard.tsx`
+- Afficher une **icône check** au lieu d'une barre de progression pour les objectifs binaires
+- Adapter l'affichage du compteur (masquer "0/1" pour les binaires, afficher "Réalisé" / "Non réalisé")
+
+#### 4. Pas de migration SQL nécessaire
+Les colonnes `objective_type` (text), `filter_value` (text), `target_value` (numeric) existantes suffisent.
 
