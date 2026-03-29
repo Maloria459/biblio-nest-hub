@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { X, BookOpen, Library, Star, Timer, Users } from "lucide-react";
+import { X, BookOpen, BookCheck, Timer, Compass, Flame, Archive, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,52 +8,15 @@ import { Switch } from "@/components/ui/switch";
 import { OBJECTIVE_TYPES, type ObjectiveTypeOption, type PersonalObjective } from "@/hooks/usePersonalObjectives";
 import { useBooks } from "@/contexts/BooksContext";
 
-/* ─── descriptions contextuelles par type ─── */
-
-const OBJECTIVE_DESCRIPTIONS: Record<string, string> = {
-  read_books: "Compte les livres marqués comme terminés sur la période.",
-  read_pages: "Additionne les pages de tous les livres terminés.",
-  read_minutes: "Additionne les minutes de vos sessions de lecture.",
-  sessions_count: "Nombre total de sessions de lecture enregistrées.",
-  read_author: "Livres terminés dont l'auteur correspond au filtre.",
-  read_genre: "Livres terminés dont le genre correspond au filtre.",
-  read_format: "Livres terminés dont le format correspond au filtre.",
-  read_publisher: "Livres terminés dont l'éditeur correspond au filtre.",
-  read_series: "Livres terminés appartenant à la série choisie.",
-  read_big_book: "Atteint dès qu'un livre de plus de X pages est terminé.",
-  buy_books: "Livres avec le statut « Acheté » sur la période.",
-  add_wishlist: "Nombre de livres actuellement dans votre wishlist.",
-  add_pal: "Nombre de livres actuellement dans votre PAL.",
-  clear_pal: "Livres sortis de votre PAL (terminés) sur la période.",
-  loan_books: "Livres actuellement marqués comme « Prêté ».",
-  borrow_books: "Livres actuellement marqués comme « Emprunté ».",
-  collections_count: "Collections créées sur la période.",
-  add_to_collections: "Livres ajoutés à une collection sur la période.",
-  write_reviews: "Livres terminés avec un avis rédigé.",
-  add_citations: "Nombre total de citations enregistrées.",
-  budget_max: "Total dépensé en livres sur la période (ne pas dépasser).",
-  coups_de_coeur: "Livres terminés marqués comme coup de cœur.",
-  rate_books: "Livres terminés auxquels vous avez attribué une note.",
-  avg_rating_above: "Moyenne de vos notes sur tous les livres notés.",
-  recommend_books: "Livres marqués comme recommandation du mois.",
-  fav_characters: "Livres où vous avez renseigné des personnages préférés.",
-  fav_passages: "Livres où vous avez renseigné des passages préférés.",
-  reading_days: "Jours distincts où au moins une session a été enregistrée.",
-  long_session: "Atteint dès qu'une session dépasse X minutes.",
-  pages_in_session: "Atteint dès qu'une session atteint X pages lues.",
-  attend_literary_events: "Évènements littéraires enregistrés sur la période.",
-  attend_book_clubs: "Clubs de lecteurs auxquels vous avez participé.",
-};
-
 const CATEGORY_ICONS: Record<string, typeof BookOpen> = {
   Lecture: BookOpen,
-  Bibliothèque: Library,
-  Qualité: Star,
+  "Livres terminés": BookCheck,
   Sessions: Timer,
-  Communauté: Users,
+  Diversité: Compass,
+  Régularité: Flame,
+  Bibliothèque: Archive,
+  Records: Trophy,
 };
-
-/* ─── Props ─── */
 
 interface Props {
   open: boolean;
@@ -84,14 +47,27 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
   const [endDate, setEndDate] = useState("");
   const [recurring, setRecurring] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [timeUnit, setTimeUnit] = useState<"minutes" | "hours">("minutes");
+  const [secondTarget, setSecondTarget] = useState("");
 
   const isEditMode = !!editingObjective;
 
   useEffect(() => {
     if (editingObjective) {
       setSelectedType(editingObjective.objective_type);
+      // Parse filter_value JSON
+      let fv = editingObjective.filter_value;
+      try {
+        const parsed = JSON.parse(fv ?? "");
+        setFilterValue(parsed.filter ?? "");
+        setTimeUnit(parsed.unit ?? "minutes");
+        setSecondTarget(parsed.secondTarget ? String(parsed.secondTarget) : "");
+      } catch {
+        setFilterValue(fv ?? "");
+        setTimeUnit("minutes");
+        setSecondTarget("");
+      }
       setTargetValue(String(editingObjective.target_value));
-      setFilterValue(editingObjective.filter_value ?? "");
       setPeriodType(editingObjective.period_type);
       setStartDate(editingObjective.start_date ?? "");
       setEndDate(editingObjective.end_date ?? "");
@@ -119,8 +95,6 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
         return [...new Set([...genres, ...books.map((b) => b.genre).filter(Boolean) as string[]])].sort();
       case "format":
         return [...new Set([...formats, ...books.map((b) => b.format).filter(Boolean) as string[]])].sort();
-      case "publisher":
-        return [...new Set(books.map((b) => b.publisher).filter(Boolean) as string[])].sort();
       case "series":
         return [...new Set(books.map((b) => b.series).filter(Boolean) as string[])].sort();
       default:
@@ -128,7 +102,13 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     }
   }, [typeMeta, books, genres, formats]);
 
-  const canBeRecurring = periodType === "day" || periodType === "week" || periodType === "month" || periodType === "year";
+  // Period logic
+  const showPeriod = !typeMeta?.periodLocked && !typeMeta?.noPeriod;
+  const effectivePeriod = typeMeta?.periodLocked ?? (typeMeta?.noPeriod ? "none" : periodType);
+  const canBeRecurring = effectivePeriod === "day" || effectivePeriod === "week" || effectivePeriod === "month" || effectivePeriod === "year";
+
+  // Target logic
+  const showTarget = !typeMeta?.binary;
 
   const reset = () => {
     setSelectedType("");
@@ -139,63 +119,82 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
     setEndDate("");
     setRecurring(false);
     setTouched(false);
+    setTimeUnit("minutes");
+    setSecondTarget("");
   };
 
   /* ─── Validation ─── */
   const targetNum = Number(targetValue);
-  const isTargetValid = targetValue !== "" && targetNum > 0;
+  const isTargetValid = typeMeta?.binary || (targetValue !== "" && targetNum > 0);
   const isFilterRequired = !!typeMeta?.needsFilter;
   const isFilterValid = !isFilterRequired || filterValue.trim().length > 0;
-  const isDateValid = periodType !== "custom" || (startDate && endDate && endDate >= startDate);
-  const isFormValid = !!selectedType && isTargetValid && isFilterValid && isDateValid;
+  const isDateValid = effectivePeriod !== "custom" || (startDate && endDate && endDate >= startDate);
+  const isSecondTargetValid = !typeMeta?.needsSecondTarget || (secondTarget !== "" && Number(secondTarget) > 0);
+  const isFormValid = !!selectedType && isTargetValid && isFilterValid && isDateValid && isSecondTargetValid;
 
   /* ─── Preview label ─── */
   const previewLabel = useMemo(() => {
-    if (!typeMeta || !targetValue) return null;
-    const periodLabel = periodType === "day" ? " (aujourd'hui)"
-      : periodType === "week" ? " (cette semaine)"
-      : periodType === "month" ? " (ce mois)"
-      : periodType === "year" ? " (cette année)"
-      : periodType === "custom" && startDate && endDate
+    if (!typeMeta) return null;
+    const val = typeMeta.binary ? "1" : (targetValue || "…");
+    const pLabel = effectivePeriod === "day" ? " (aujourd'hui)"
+      : effectivePeriod === "week" ? " (cette semaine)"
+      : effectivePeriod === "month" ? " (ce mois)"
+      : effectivePeriod === "year" ? " (cette année)"
+      : effectivePeriod === "custom" && startDate && endDate
         ? ` (${startDate} → ${endDate})`
         : "";
-    return typeMeta.label
-      .replace("X", targetValue || "…")
-      .replace("{filter}", filterValue || "…")
-      + periodLabel;
-  }, [typeMeta, targetValue, filterValue, periodType, startDate, endDate]);
+    let label = typeMeta.label.replace("X", val);
+    if (typeMeta.needsSecondTarget) {
+      label = label.replace("Y", secondTarget || "…");
+    }
+    if (typeMeta.timeUnit) {
+      label = label.replace("min/h", timeUnit === "hours" ? "h" : "min")
+                   .replace("minutes/heures", timeUnit === "hours" ? "heures" : "minutes");
+    }
+    return label + pLabel;
+  }, [typeMeta, targetValue, effectivePeriod, startDate, endDate, timeUnit, secondTarget]);
 
-  const isDirty = selectedType !== "" || targetValue !== "" || filterValue !== "";
-
-  const handleClose = () => {
-    reset();
-    onClose();
-  };
+  const handleClose = () => { reset(); onClose(); };
 
   const handleSubmit = () => {
     setTouched(true);
     if (!isFormValid) return;
 
     const effectiveRecurring = canBeRecurring ? recurring : false;
+    const effectiveTarget = typeMeta?.binary ? 1 : targetNum;
+
+    // Build filter_value
+    let fv: string | null = null;
+    if (isFilterRequired && filterValue) {
+      if (typeMeta?.timeUnit || typeMeta?.needsSecondTarget) {
+        fv = JSON.stringify({ filter: filterValue, unit: timeUnit, secondTarget: secondTarget ? Number(secondTarget) : undefined });
+      } else {
+        fv = JSON.stringify({ filter: filterValue });
+      }
+    } else if (typeMeta?.timeUnit || typeMeta?.needsSecondTarget) {
+      fv = JSON.stringify({ unit: timeUnit, secondTarget: secondTarget ? Number(secondTarget) : undefined });
+    }
+
+    const finalPeriod = typeMeta?.periodLocked ?? (typeMeta?.noPeriod ? "month" : periodType);
 
     if (isEditMode && onUpdate && editingObjective) {
       onUpdate({
         id: editingObjective.id,
-        target_value: targetNum,
-        filter_value: isFilterRequired ? filterValue || null : null,
-        period_type: periodType,
-        start_date: periodType === "custom" ? startDate || null : null,
-        end_date: periodType === "custom" ? endDate || null : null,
+        target_value: effectiveTarget,
+        filter_value: fv,
+        period_type: finalPeriod,
+        start_date: finalPeriod === "custom" ? startDate || null : null,
+        end_date: finalPeriod === "custom" ? endDate || null : null,
         recurring: effectiveRecurring,
       });
     } else {
       onCreate({
         objective_type: selectedType,
-        target_value: targetNum,
-        filter_value: isFilterRequired ? filterValue || null : null,
-        period_type: periodType,
-        start_date: periodType === "custom" ? startDate || null : null,
-        end_date: periodType === "custom" ? endDate || null : null,
+        target_value: effectiveTarget,
+        filter_value: fv,
+        period_type: finalPeriod,
+        start_date: finalPeriod === "custom" ? startDate || null : null,
+        end_date: finalPeriod === "custom" ? endDate || null : null,
         pinned: false,
         recurring: effectiveRecurring,
       });
@@ -209,14 +208,13 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
   const filterLabel = typeMeta?.needsFilter === "author" ? "Auteur"
     : typeMeta?.needsFilter === "genre" ? "Genre"
     : typeMeta?.needsFilter === "format" ? "Format"
-    : typeMeta?.needsFilter === "publisher" ? "Éditeur"
     : typeMeta?.needsFilter === "series" ? "Série"
     : "";
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
-      <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "90%", maxWidth: 450, maxHeight: "90%" }}>
+      <div className="relative z-10 flex flex-col bg-card border border-border rounded-xl shadow-xl overflow-hidden" style={{ width: "90%", maxWidth: 480, maxHeight: "90%" }}>
 
         {/* Header */}
         <div className="flex items-center justify-between h-14 px-6 border-b border-border shrink-0">
@@ -232,27 +230,23 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
           {/* Type */}
           <div className="space-y-1.5">
             <Label>Type d'objectif <span className="text-destructive">*</span></Label>
-            <Select value={selectedType} onValueChange={(v) => { setSelectedType(v); setFilterValue(""); }} disabled={isEditMode}>
+            <Select value={selectedType} onValueChange={(v) => { setSelectedType(v); setFilterValue(""); setSecondTarget(""); }} disabled={isEditMode}>
               <SelectTrigger><SelectValue placeholder="Choisir un type" /></SelectTrigger>
-              <SelectContent className="max-h-60">
+              <SelectContent className="max-h-72">
                 {Object.entries(grouped).map(([cat, types]) => {
                   const CatIcon = CATEGORY_ICONS[cat];
                   return (
                     <div key={cat}>
-                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground flex items-center gap-1.5 border-b border-border/50 mt-1">
                         {CatIcon && <CatIcon className="h-3.5 w-3.5" />}
                         {cat}
                       </div>
                       {types.map((t) => {
-                        const displayLabel = t.label.replace("X", "…").replace("{filter}", "…");
-                        const contextHint = t.needsFilter === "author" ? " (par auteur)"
-                          : t.needsFilter === "genre" ? " (par genre)"
-                          : t.needsFilter === "format" ? " (par format)"
-                          : t.needsFilter === "publisher" ? " (par éditeur)"
-                          : t.needsFilter === "series" ? " (par série)"
-                          : "";
+                        const displayLabel = t.label.replace(/X|Y/g, "…").replace("min/h", "min/h").replace("minutes/heures", "min/h");
                         return (
-                          <SelectItem key={t.value} value={t.value}>{displayLabel}{contextHint && <span className="text-muted-foreground text-xs ml-1">{contextHint}</span>}</SelectItem>
+                          <SelectItem key={t.value} value={t.value} className="text-sm">
+                            {displayLabel}
+                          </SelectItem>
                         );
                       })}
                     </div>
@@ -263,25 +257,61 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
             {touched && !selectedType && (
               <p className="text-xs text-destructive">Veuillez choisir un type d'objectif.</p>
             )}
-            {typeMeta && OBJECTIVE_DESCRIPTIONS[selectedType] && (
-              <p className="text-xs text-muted-foreground italic">{OBJECTIVE_DESCRIPTIONS[selectedType]}</p>
+            {typeMeta?.description && (
+              <p className="text-xs text-muted-foreground italic">{typeMeta.description}</p>
             )}
           </div>
 
-          {/* Target value */}
-          <div className="space-y-1.5">
-            <Label>{typeMeta?.inverted ? "Montant maximum (€)" : "Objectif (valeur cible)"} <span className="text-destructive">*</span></Label>
-            <Input
-              type="number"
-              min={1}
-              value={targetValue}
-              onChange={(e) => setTargetValue(e.target.value)}
-              placeholder={typeMeta?.inverted ? "Ex : 100" : "Ex : 12"}
-            />
-            {touched && !isTargetValid && (
-              <p className="text-xs text-destructive">La valeur cible doit être un nombre supérieur à 0.</p>
-            )}
-          </div>
+          {/* Target value (hidden for binary) */}
+          {showTarget && selectedType && (
+            <div className="space-y-1.5">
+              <Label>
+                {typeMeta?.inverted ? "Montant maximum (€)" : typeMeta?.timeUnit ? `Durée (${timeUnit === "hours" ? "heures" : "minutes"})` : "Objectif (valeur cible)"}
+                {" "}<span className="text-destructive">*</span>
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  value={targetValue}
+                  onChange={(e) => setTargetValue(e.target.value)}
+                  placeholder={typeMeta?.inverted ? "Ex : 100" : "Ex : 12"}
+                  className="flex-1"
+                />
+                {typeMeta?.timeUnit && (
+                  <Select value={timeUnit} onValueChange={(v) => setTimeUnit(v as "minutes" | "hours")}>
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minutes">Minutes</SelectItem>
+                      <SelectItem value="hours">Heures</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              {touched && !isTargetValid && (
+                <p className="text-xs text-destructive">La valeur cible doit être un nombre supérieur à 0.</p>
+              )}
+            </div>
+          )}
+
+          {/* Second target for streak types */}
+          {typeMeta?.needsSecondTarget && (
+            <div className="space-y-1.5">
+              <Label>Nombre de jours d'affilée <span className="text-destructive">*</span></Label>
+              <Input
+                type="number"
+                min={1}
+                value={secondTarget}
+                onChange={(e) => setSecondTarget(e.target.value)}
+                placeholder="Ex : 7"
+              />
+              {touched && !isSecondTargetValid && (
+                <p className="text-xs text-destructive">Ce champ est requis.</p>
+              )}
+            </div>
+          )}
 
           {/* Filter */}
           {isFilterRequired && (
@@ -305,22 +335,38 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
             </div>
           )}
 
-          {/* Period */}
-          <div className="space-y-1.5">
-            <Label>Période <span className="text-destructive">*</span></Label>
-            <Select value={periodType} onValueChange={(v) => { setPeriodType(v); if (v === "custom") setRecurring(false); }}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="day">Aujourd'hui</SelectItem>
-                <SelectItem value="week">Cette semaine</SelectItem>
-                <SelectItem value="month">Ce mois</SelectItem>
-                <SelectItem value="year">Cette année</SelectItem>
-                <SelectItem value="custom">Personnalisée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Period (hidden if locked or noPeriod) */}
+          {showPeriod && selectedType && (
+            <div className="space-y-1.5">
+              <Label>Période <span className="text-destructive">*</span></Label>
+              <Select value={periodType} onValueChange={(v) => { setPeriodType(v); if (v === "custom") setRecurring(false); }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="day">Aujourd'hui</SelectItem>
+                  <SelectItem value="week">Cette semaine</SelectItem>
+                  <SelectItem value="month">Ce mois</SelectItem>
+                  <SelectItem value="year">Cette année</SelectItem>
+                  <SelectItem value="custom">Personnalisée</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-          {periodType === "custom" && (
+          {/* Locked period info */}
+          {typeMeta?.periodLocked && (
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">
+                Période fixée : <span className="font-medium text-foreground">
+                  {typeMeta.periodLocked === "day" ? "Aujourd'hui"
+                    : typeMeta.periodLocked === "week" ? "Cette semaine"
+                    : typeMeta.periodLocked === "month" ? "Ce mois"
+                    : "Cette année"}
+                </span>
+              </p>
+            </div>
+          )}
+
+          {effectivePeriod === "custom" && (
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -342,12 +388,12 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
           )}
 
           {/* Recurring */}
-          {canBeRecurring && (
+          {canBeRecurring && selectedType && (
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <div className="space-y-0.5">
                 <Label className="text-sm font-medium">Objectif récurrent</Label>
                 <p className="text-xs text-muted-foreground">
-                  Se réinitialise automatiquement chaque {periodType === "day" ? "jour" : periodType === "week" ? "semaine" : periodType === "month" ? "mois" : "année"}
+                  Se réinitialise automatiquement chaque {effectivePeriod === "day" ? "jour" : effectivePeriod === "week" ? "semaine" : effectivePeriod === "month" ? "mois" : "année"}
                 </p>
               </div>
               <Switch checked={recurring} onCheckedChange={setRecurring} />
