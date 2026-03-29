@@ -535,12 +535,12 @@ export function usePersonalObjectives() {
       }
 
       // Build label
-      const periodLabel = effectivePeriod === "day" ? " — aujourd'hui"
-        : effectivePeriod === "week" ? " — cette semaine"
-        : effectivePeriod === "month" ? " — ce mois"
-        : effectivePeriod === "year" ? " — cette année"
+      const periodLabel = effectivePeriod === "day" ? " aujourd'hui"
+        : effectivePeriod === "week" ? " cette semaine"
+        : effectivePeriod === "month" ? " ce mois"
+        : effectivePeriod === "year" ? " cette année"
         : obj.period_type === "custom" && obj.start_date && obj.end_date
-          ? ` — ${obj.start_date} → ${obj.end_date}`
+          ? ` du ${obj.start_date} au ${obj.end_date}`
           : "";
 
       const rawLabel = typeMeta?.label ?? obj.objective_type;
