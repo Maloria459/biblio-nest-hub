@@ -136,12 +136,12 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
   const previewLabel = useMemo(() => {
     if (!typeMeta) return null;
     const val = typeMeta.binary ? "1" : (targetValue || "…");
-    const pLabel = effectivePeriod === "day" ? " — aujourd'hui"
-      : effectivePeriod === "week" ? " — cette semaine"
-      : effectivePeriod === "month" ? " — ce mois"
-      : effectivePeriod === "year" ? " — cette année"
+    const pLabel = effectivePeriod === "day" ? " aujourd'hui"
+      : effectivePeriod === "week" ? " cette semaine"
+      : effectivePeriod === "month" ? " ce mois"
+      : effectivePeriod === "year" ? " cette année"
       : effectivePeriod === "custom" && startDate && endDate
-        ? ` — ${startDate} → ${endDate}`
+        ? ` du ${startDate} au ${endDate}`
         : "";
     let label = typeMeta.label.replace("X", val);
     if (typeMeta.needsSecondTarget) {
