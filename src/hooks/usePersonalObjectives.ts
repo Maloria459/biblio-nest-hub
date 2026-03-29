@@ -535,12 +535,12 @@ export function usePersonalObjectives() {
       }
 
       // Build label
-      const periodLabel = effectivePeriod === "day" ? " (aujourd'hui)"
-        : effectivePeriod === "week" ? " (cette semaine)"
-        : effectivePeriod === "month" ? " (ce mois)"
-        : effectivePeriod === "year" ? " (cette année)"
+      const periodLabel = effectivePeriod === "day" ? " — aujourd'hui"
+        : effectivePeriod === "week" ? " — cette semaine"
+        : effectivePeriod === "month" ? " — ce mois"
+        : effectivePeriod === "year" ? " — cette année"
         : obj.period_type === "custom" && obj.start_date && obj.end_date
-          ? ` (${obj.start_date} → ${obj.end_date})`
+          ? ` — ${obj.start_date} → ${obj.end_date}`
           : "";
 
       const rawLabel = typeMeta?.label ?? obj.objective_type;
@@ -551,9 +551,17 @@ export function usePersonalObjectives() {
         label = label.replace("Y", String(filterJson.secondTarget));
       }
 
-      // Replace filter display (only for filter types)
+      // Replace filter display for genre/author/format
       if (simpleFilter && typeMeta?.needsFilter) {
-        // filter info is NOT shown in label per user request
+        const targetNum = obj.target_value;
+        const plural = targetNum > 1 ? "s" : "";
+        if (typeMeta.needsFilter === "genre") {
+          label = `Lire ${targetNum} livre${plural} de ${simpleFilter}`;
+        } else if (typeMeta.needsFilter === "author") {
+          label = `Lire ${targetNum} livre${plural} de ${simpleFilter}`;
+        } else if (typeMeta.needsFilter === "format") {
+          label = `Lire ${targetNum} livre${plural} en format ${simpleFilter}`;
+        }
       }
 
       // Append time unit
