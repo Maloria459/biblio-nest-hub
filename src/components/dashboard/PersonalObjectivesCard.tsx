@@ -41,9 +41,6 @@ export function PersonalObjectivesCard() {
                 <div className="flex items-center gap-3">
                   <p className="font-medium text-sm text-foreground line-clamp-2 leading-tight flex-1 min-w-0">
                     {obj.label}
-                    {obj.filter_value && (
-                      <span className="text-muted-foreground"> — {obj.filter_value}</span>
-                    )}
                   </p>
                   <div className="w-28 shrink-0 space-y-0.5">
                     <Progress
