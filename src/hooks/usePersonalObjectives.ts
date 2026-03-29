@@ -8,6 +8,8 @@ import {
   startOfDay, endOfDay, startOfWeek, endOfWeek,
   startOfMonth, endOfMonth, startOfYear, endOfYear,
   parseISO, isAfter, isBefore, isEqual,
+  subMonths, subYears, differenceInDays, eachDayOfInterval,
+  format as fmtDate,
 } from "date-fns";
 import { toast } from "sonner";
 
@@ -17,49 +19,69 @@ export interface ObjectiveTypeOption {
   value: string;
   label: string;
   category: string;
-  needsFilter?: "author" | "genre" | "format" | "publisher" | "series";
-  /** When true the objective is "spend less than X" (inverted progress) */
+  needsFilter?: "author" | "genre" | "format" | "series";
   inverted?: boolean;
+  periodLocked?: string;   // forced period (hides selector)
+  noPeriod?: boolean;       // no period at all (cumulative / one-shot)
+  binary?: boolean;         // 0/1 objective (target auto = 1, hides target input)
+  needsSecondTarget?: boolean; // e.g. read_duration_streak: X min + Y days
+  timeUnit?: boolean;       // shows minutes/hours selector
+  description?: string;
 }
 
 export const OBJECTIVE_TYPES: ObjectiveTypeOption[] = [
-  // Lecture
-  { value: "read_books", label: "Lire X livres", category: "Lecture" },
-  { value: "read_pages", label: "Lire X pages", category: "Lecture" },
-  { value: "read_minutes", label: "Lire pendant X minutes", category: "Lecture" },
-  { value: "sessions_count", label: "Effectuer X sessions de lecture", category: "Lecture" },
-  { value: "read_author", label: "Lire X livres de {filter}", category: "Lecture", needsFilter: "author" },
-  { value: "read_genre", label: "Lire X livres en {filter}", category: "Lecture", needsFilter: "genre" },
-  { value: "read_format", label: "Lire X livres en {filter}", category: "Lecture", needsFilter: "format" },
-  { value: "read_publisher", label: "Lire X livres chez {filter}", category: "Lecture", needsFilter: "publisher" },
-  { value: "read_series", label: "Lire X livres de la série {filter}", category: "Lecture", needsFilter: "series" },
-  { value: "read_big_book", label: "Terminer un livre de plus de X pages", category: "Lecture" },
-  // Bibliothèque
-  { value: "buy_books", label: "Acheter X livres", category: "Bibliothèque" },
-  { value: "add_wishlist", label: "Ajouter X livres à la wishlist", category: "Bibliothèque" },
-  { value: "add_pal", label: "Ajouter X livres dans ma PAL", category: "Bibliothèque" },
-  { value: "clear_pal", label: "Vider X livres de ma PAL", category: "Bibliothèque" },
-  { value: "loan_books", label: "Prêter X livres", category: "Bibliothèque" },
-  { value: "borrow_books", label: "Emprunter X livres", category: "Bibliothèque" },
-  { value: "collections_count", label: "Créer X collections", category: "Bibliothèque" },
-  { value: "add_to_collections", label: "Ajouter X livres dans des collections", category: "Bibliothèque" },
-  { value: "write_reviews", label: "Rédiger X avis", category: "Bibliothèque" },
-  { value: "add_citations", label: "Ajouter X citations", category: "Bibliothèque" },
-  { value: "budget_max", label: "Dépenser moins de X € en livres", category: "Bibliothèque", inverted: true },
-  // Qualité / Engagement
-  { value: "coups_de_coeur", label: "Avoir X coups de cœur", category: "Qualité" },
-  { value: "rate_books", label: "Noter X livres", category: "Qualité" },
-  { value: "avg_rating_above", label: "Atteindre une note moyenne ≥ X", category: "Qualité" },
-  { value: "recommend_books", label: "Recommander X livres du mois", category: "Qualité" },
-  { value: "fav_characters", label: "Renseigner X personnages préférés", category: "Qualité" },
-  { value: "fav_passages", label: "Renseigner X passages préférés", category: "Qualité" },
-  // Sessions de lecture
-  { value: "reading_days", label: "Lire X jours différents", category: "Sessions" },
-  { value: "long_session", label: "Faire une session de plus de X minutes", category: "Sessions" },
-  { value: "pages_in_session", label: "Atteindre X pages lues en une session", category: "Sessions" },
-  // Communauté
-  { value: "attend_literary_events", label: "Participer à X évènements littéraires", category: "Communauté" },
-  { value: "attend_book_clubs", label: "Participer à X clubs de lecteurs", category: "Communauté" },
+  // 📖 LECTURE (PAGES & TEMPS)
+  { value: "read_pages_period", label: "Lire X pages", category: "Lecture", description: "Pages lues (sessions) sur la période choisie." },
+  { value: "read_pages_session", label: "Lire X pages pendant une session", category: "Lecture", noPeriod: true, description: "Atteint dès qu'une session enregistre X pages lues." },
+  { value: "read_duration", label: "Lire pendant X minutes/heures", category: "Lecture", noPeriod: true, timeUnit: true, description: "Atteint dès qu'une session dure X minutes/heures." },
+  { value: "read_duration_day", label: "Lire X min/h par jour", category: "Lecture", periodLocked: "day", timeUnit: true, description: "Temps de lecture cumulé aujourd'hui." },
+  { value: "read_duration_week", label: "Lire X min/h par semaine", category: "Lecture", periodLocked: "week", timeUnit: true, description: "Temps de lecture cumulé cette semaine." },
+  { value: "read_duration_month", label: "Lire X min/h par mois", category: "Lecture", periodLocked: "month", timeUnit: true, description: "Temps de lecture cumulé ce mois." },
+  { value: "read_duration_streak", label: "Atteindre X min/jour pendant Y jours d'affilée", category: "Lecture", needsSecondTarget: true, timeUnit: true, noPeriod: true, description: "Nombre de jours consécutifs où le temps de lecture dépasse X minutes." },
+
+  // 📚 LIVRES TERMINÉS
+  { value: "finish_books", label: "Finir X livres", category: "Livres terminés", description: "Livres marqués comme terminés sur la période." },
+  { value: "finish_books_month", label: "Finir X livres dans le mois", category: "Livres terminés", periodLocked: "month", description: "Livres terminés ce mois-ci." },
+  { value: "finish_books_year", label: "Finir X livres dans l'année", category: "Livres terminés", periodLocked: "year", description: "Livres terminés cette année." },
+  { value: "read_big_book", label: "Lire un livre de plus de X pages", category: "Livres terminés", binary: false, noPeriod: true, description: "Atteint dès qu'un livre terminé dépasse X pages." },
+  { value: "finish_book_fast", label: "Finir un livre en moins de X jours", category: "Livres terminés", binary: true, noPeriod: true, description: "Atteint si un livre a été lu (début → fin) en moins de X jours." },
+
+  // ⏱️ SESSIONS
+  { value: "sessions_count", label: "Réaliser X sessions de lecture", category: "Sessions", description: "Nombre total de sessions enregistrées." },
+  { value: "session_per_day", label: "Lire au moins une session par jour", category: "Sessions", periodLocked: "day", binary: true, description: "Atteint si au moins une session est enregistrée aujourd'hui." },
+  { value: "sessions_per_week", label: "Lire X sessions par semaine", category: "Sessions", periodLocked: "week", description: "Sessions enregistrées cette semaine." },
+
+  // 🎯 DIVERSITÉ & DÉCOUVERTE
+  { value: "read_genre", label: "Lire X livres d'un genre", category: "Diversité", needsFilter: "genre", description: "Livres terminés du genre sélectionné." },
+  { value: "read_author", label: "Lire X livres d'un auteur", category: "Diversité", needsFilter: "author", description: "Livres terminés de l'auteur sélectionné." },
+  { value: "read_format", label: "Lire X livres d'un format", category: "Diversité", needsFilter: "format", description: "Livres terminés dans le format sélectionné." },
+  { value: "finish_series", label: "Finir une saga/série", category: "Diversité", needsFilter: "series", binary: true, noPeriod: true, description: "Tous les livres de la série sélectionnée sont terminés." },
+  { value: "read_new_language", label: "Lire un livre dans une autre langue", category: "Diversité", binary: true, noPeriod: true, description: "Objectif à valider manuellement." },
+  { value: "read_new_genre", label: "Lire un livre d'un genre jamais lu", category: "Diversité", binary: true, noPeriod: true, description: "Atteint si un livre est terminé dans un genre nouveau pour vous." },
+  { value: "read_old_book", label: "Lire un livre commencé depuis longtemps", category: "Diversité", binary: true, noPeriod: true, description: "Atteint si un livre « En cours » depuis plus de 6 mois est terminé." },
+
+  // 🔥 RÉGULARITÉ & STREAKS
+  { value: "read_daily_streak", label: "Lire tous les jours pendant X jours", category: "Régularité", noPeriod: true, description: "Nombre de jours consécutifs avec au moins une session." },
+  { value: "read_weekly_streak", label: "Lire chaque semaine pendant X semaines", category: "Régularité", noPeriod: true, description: "Nombre de semaines consécutives avec au moins une session." },
+  { value: "max_gap_one_day", label: "Ne pas sauter plus d'un jour entre deux lectures", category: "Régularité", description: "Suivi sur la période : aucun écart de plus d'un jour." },
+  { value: "read_every_weekday", label: "Lire chaque jour de la semaine", category: "Régularité", periodLocked: "week", binary: true, description: "Au moins une session chaque jour de la semaine en cours." },
+
+  // 📦 BIBLIOTHÈQUE & FICHES
+  { value: "finish_in_progress", label: "Finir les livres en cours", category: "Bibliothèque", binary: true, noPeriod: true, description: "Atteint quand vous n'avez plus de livres « En cours de lecture »." },
+  { value: "clear_pal", label: "Vider X livres de ma PAL", category: "Bibliothèque", description: "Livres sortis de votre PAL (terminés) sur la période." },
+  { value: "write_reviews", label: "Rédiger X avis", category: "Bibliothèque", description: "Livres avec un avis rédigé." },
+  { value: "add_citations", label: "Ajouter X citations", category: "Bibliothèque", description: "Nombre total de citations enregistrées." },
+  { value: "fill_book_sheets", label: "Remplir X fiches de lecture complètes", category: "Bibliothèque", description: "Fiches avec synopsis, note, avis, citations, passages et personnages remplis." },
+  { value: "buy_from_wishlist", label: "Acheter X livres de ma wishlist", category: "Bibliothèque", description: "Livres passés de la wishlist à un autre statut." },
+  { value: "budget_max", label: "Dépenser moins de X € en livres", category: "Bibliothèque", inverted: true, description: "Total dépensé en livres sur la période (ne pas dépasser)." },
+
+  // 🏆 RECORDS & DÉFIS
+  { value: "beat_daily_pages", label: "Battre son record de pages en un jour", category: "Records", binary: true, noPeriod: true, description: "Atteint si vous lisez plus de pages en un jour que votre meilleur record." },
+  { value: "beat_reading_minutes", label: "Battre son record de minutes lues", category: "Records", binary: true, noPeriod: true, description: "Atteint si une session bat votre record de durée." },
+  { value: "read_more_than_last_month", label: "Lire plus que le mois précédent", category: "Records", periodLocked: "month", binary: true, description: "Plus de pages lues ce mois que le mois dernier." },
+  { value: "read_more_than_last_year", label: "Lire plus de livres que l'an dernier", category: "Records", periodLocked: "year", binary: true, description: "Plus de livres terminés cette année que l'an dernier." },
+  { value: "cumulative_pages", label: "Atteindre X pages cumulées", category: "Records", noPeriod: true, description: "Total de pages lues depuis la création du compte." },
+  { value: "cumulative_books", label: "Atteindre X livres finis", category: "Records", noPeriod: true, description: "Total de livres terminés depuis la création du compte." },
 ];
 
 /* ───────── DB row type ───────── */
@@ -114,6 +136,70 @@ function inRange(dateStr: string | undefined | null, range: { start: Date; end: 
   } catch { return false; }
 }
 
+/* ───────── helper: parse filter_value JSON ───────── */
+function parseFilterJson(fv: string | null): Record<string, any> {
+  if (!fv) return {};
+  try { return JSON.parse(fv); } catch { return {}; }
+}
+
+/* ───────── helper: calculate pages read per session ───────── */
+function getPagesPerSession(session: any, allSessions: any[]): number {
+  const sorted = [...allSessions]
+    .filter((s) => s.last_page_reached != null)
+    .sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
+  const idx = sorted.findIndex((s) => s.id === session.id);
+  let prevPage = 0;
+  for (let i = idx - 1; i >= 0; i--) {
+    if (sorted[i].book_id === session.book_id && sorted[i].reread_number === session.reread_number) {
+      prevPage = sorted[i].last_page_reached ?? 0;
+      break;
+    }
+  }
+  return (session.last_page_reached ?? 0) - prevPage;
+}
+
+/* ───────── helper: current daily streak ───────── */
+function currentDailyStreak(sessions: any[]): number {
+  if (sessions.length === 0) return 0;
+  const days = new Set(sessions.map((s) => s.session_date?.slice(0, 10)).filter(Boolean));
+  const sortedDays = [...days].sort().reverse();
+  const today = fmtDate(new Date(), "yyyy-MM-dd");
+  const yesterday = fmtDate(new Date(Date.now() - 86400000), "yyyy-MM-dd");
+  if (!sortedDays.includes(today) && !sortedDays.includes(yesterday)) return 0;
+  let streak = 0;
+  let checkDate = sortedDays.includes(today) ? new Date() : new Date(Date.now() - 86400000);
+  while (true) {
+    const dateStr = fmtDate(checkDate, "yyyy-MM-dd");
+    if (days.has(dateStr)) {
+      streak++;
+      checkDate = new Date(checkDate.getTime() - 86400000);
+    } else break;
+  }
+  return streak;
+}
+
+/* ───────── helper: current weekly streak ───────── */
+function currentWeeklyStreak(sessions: any[]): number {
+  if (sessions.length === 0) return 0;
+  const weeks = new Set(sessions.map((s) => {
+    const d = parseISO(s.session_date);
+    const ws = startOfWeek(d, { weekStartsOn: 1 });
+    return fmtDate(ws, "yyyy-MM-dd");
+  }));
+  const sortedWeeks = [...weeks].sort().reverse();
+  let streak = 0;
+  const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  let checkWeek = currentWeekStart;
+  while (true) {
+    const weekStr = fmtDate(checkWeek, "yyyy-MM-dd");
+    if (sortedWeeks.includes(weekStr)) {
+      streak++;
+      checkWeek = new Date(checkWeek.getTime() - 7 * 86400000);
+    } else break;
+  }
+  return streak;
+}
+
 /* ───────── hook ───────── */
 
 export function usePersonalObjectives() {
@@ -121,65 +207,6 @@ export function usePersonalObjectives() {
   const { books } = useBooks();
   const { data: sessions = [] } = useReadingSessions();
   const qc = useQueryClient();
-
-  // Fetch collections count
-  const { data: collections = [] } = useQuery({
-    queryKey: ["collections-for-objectives", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("collections")
-        .select("id, created_at")
-        .eq("user_id", user!.id);
-      if (error) throw error;
-      return data ?? [];
-    },
-    enabled: !!user,
-    staleTime: 5 * 60_000,
-  });
-
-  // Fetch collection_books count
-  const { data: collectionBooks = [] } = useQuery({
-    queryKey: ["collection-books-for-objectives", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("collection_books")
-        .select("id, added_at, collection_id");
-      if (error) throw error;
-      return data ?? [];
-    },
-    enabled: !!user,
-    staleTime: 5 * 60_000,
-  });
-
-  // Fetch literary events
-  const { data: literaryEvents = [] } = useQuery({
-    queryKey: ["literary-events-for-objectives", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("literary_events")
-        .select("id, event_date")
-        .eq("user_id", user!.id);
-      if (error) throw error;
-      return data ?? [];
-    },
-    enabled: !!user,
-    staleTime: 5 * 60_000,
-  });
-
-  // Fetch book club events
-  const { data: bookClubEvents = [] } = useQuery({
-    queryKey: ["book-club-events-for-objectives", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("book_club_events")
-        .select("id, event_date")
-        .eq("user_id", user!.id);
-      if (error) throw error;
-      return data ?? [];
-    },
-    enabled: !!user,
-    staleTime: 5 * 60_000,
-  });
 
   const queryKey = ["personal-objectives", user?.id];
 
@@ -257,163 +284,321 @@ export function usePersonalObjectives() {
 
   const objectivesWithProgress: ObjectiveWithProgress[] = useMemo(() => {
     return objectives.map((obj) => {
-      const range = periodRange(obj);
       const typeMeta = OBJECTIVE_TYPES.find((t) => t.value === obj.objective_type);
+      // For periodLocked types, use the locked period; for noPeriod, null
+      const effectivePeriod = typeMeta?.periodLocked ?? (typeMeta?.noPeriod ? null : obj.period_type);
+      const range = effectivePeriod ? periodRange({ ...obj, period_type: effectivePeriod }) : null;
       let currentValue = 0;
 
-      // Helper: finished books in period
-      const finishedInRange = books.filter(
-        (b) => ["Lu", "Lecture terminée"].includes(b.status) && inRange(b.endDate, range)
-      );
+      // Parse filter_value as JSON if applicable
+      const filterJson = parseFilterJson(obj.filter_value);
+      const simpleFilter = filterJson.filter ?? obj.filter_value;
+      const timeUnitVal = filterJson.unit ?? "minutes";
+      const secondTarget = filterJson.secondTarget ?? obj.target_value;
+
+      // Effective target in minutes for timeUnit types
+      const targetInMinutes = typeMeta?.timeUnit
+        ? (timeUnitVal === "hours" ? obj.target_value * 60 : obj.target_value)
+        : obj.target_value;
+
+      // Helper: finished books
+      const allFinished = books.filter((b) => ["Lu", "Lecture terminée"].includes(b.status));
+      const finishedInRange = allFinished.filter((b) => inRange(b.endDate, range));
+
+      // Helper: sessions in range
+      const sessionsInRange = sessions.filter((s) => inRange(s.session_date, range));
 
       switch (obj.objective_type) {
-        case "read_books":
+        // ── LECTURE ──
+        case "read_pages_period": {
+          // Sum pages read from sessions in range
+          const pagesFromSessions = sessionsInRange.reduce((sum, s) => sum + getPagesPerSession(s, sessions), 0);
+          currentValue = Math.max(0, pagesFromSessions);
+          break;
+        }
+        case "read_pages_session":
+          currentValue = sessions.some((s) => {
+            const pages = getPagesPerSession(s, sessions);
+            return pages >= obj.target_value;
+          }) ? 1 : 0;
+          break;
+        case "read_duration":
+          currentValue = sessions.some((s) => s.duration_minutes >= targetInMinutes) ? 1 : 0;
+          break;
+        case "read_duration_day":
+        case "read_duration_week":
+        case "read_duration_month":
+          currentValue = sessionsInRange.reduce((s, ss) => s + ss.duration_minutes, 0);
+          // Display in same unit as target
+          if (timeUnitVal === "hours") {
+            currentValue = Math.round(currentValue / 6) / 10; // 1 decimal
+          }
+          break;
+        case "read_duration_streak": {
+          // Count consecutive days where total >= targetInMinutes
+          const dayMinutes = new Map<string, number>();
+          sessions.forEach((s) => {
+            const day = s.session_date?.slice(0, 10);
+            if (day) dayMinutes.set(day, (dayMinutes.get(day) ?? 0) + s.duration_minutes);
+          });
+          // Current streak of days >= targetInMinutes
+          let streak = 0;
+          let checkDate = new Date();
+          const todayStr = fmtDate(checkDate, "yyyy-MM-dd");
+          const yesterdayStr = fmtDate(new Date(Date.now() - 86400000), "yyyy-MM-dd");
+          const startFrom = (dayMinutes.get(todayStr) ?? 0) >= targetInMinutes ? checkDate
+            : (dayMinutes.get(yesterdayStr) ?? 0) >= targetInMinutes ? new Date(Date.now() - 86400000)
+            : null;
+          if (startFrom) {
+            let d = startFrom;
+            while (true) {
+              const ds = fmtDate(d, "yyyy-MM-dd");
+              if ((dayMinutes.get(ds) ?? 0) >= targetInMinutes) {
+                streak++;
+                d = new Date(d.getTime() - 86400000);
+              } else break;
+            }
+          }
+          currentValue = streak;
+          // Target is the second target (Y days)
+          break;
+        }
+
+        // ── LIVRES TERMINÉS ──
+        case "finish_books":
+        case "finish_books_month":
+        case "finish_books_year":
           currentValue = finishedInRange.length;
           break;
-        case "read_pages":
-          currentValue = finishedInRange.reduce((s, b) => s + (b.pages ?? 0), 0);
+        case "read_big_book":
+          currentValue = allFinished.some((b) => (b.pages ?? 0) > obj.target_value) ? 1 : 0;
           break;
-        case "read_minutes":
-          currentValue = sessions
-            .filter((s) => inRange(s.session_date, range))
-            .reduce((s, ss) => s + ss.duration_minutes, 0);
+        case "finish_book_fast":
+          currentValue = allFinished.some((b) => {
+            if (!b.startDate || !b.endDate) return false;
+            const days = differenceInDays(parseISO(b.endDate), parseISO(b.startDate));
+            return days < obj.target_value && days >= 0;
+          }) ? 1 : 0;
           break;
+
+        // ── SESSIONS ──
         case "sessions_count":
-          currentValue = sessions.filter((s) => inRange(s.session_date, range)).length;
+          currentValue = sessionsInRange.length;
+          break;
+        case "session_per_day":
+          currentValue = sessionsInRange.length > 0 ? 1 : 0;
+          break;
+        case "sessions_per_week":
+          currentValue = sessionsInRange.length;
+          break;
+
+        // ── DIVERSITÉ ──
+        case "read_genre":
+          currentValue = finishedInRange.filter((b) => b.genre === simpleFilter).length;
           break;
         case "read_author":
-          currentValue = finishedInRange.filter((b) => b.author === obj.filter_value).length;
-          break;
-        case "read_genre":
-          currentValue = finishedInRange.filter((b) => b.genre === obj.filter_value).length;
+          currentValue = finishedInRange.filter((b) => b.author === simpleFilter).length;
           break;
         case "read_format":
-          currentValue = finishedInRange.filter((b) => b.format === obj.filter_value).length;
+          currentValue = finishedInRange.filter((b) => b.format === simpleFilter).length;
           break;
-        case "read_publisher":
-          currentValue = finishedInRange.filter((b) => b.publisher === obj.filter_value).length;
+        case "finish_series": {
+          const seriesBooks = books.filter((b) => b.series === simpleFilter);
+          currentValue = seriesBooks.length > 0 && seriesBooks.every((b) => ["Lu", "Lecture terminée"].includes(b.status)) ? 1 : 0;
           break;
-        case "read_series":
-          currentValue = finishedInRange.filter((b) => b.series === obj.filter_value).length;
+        }
+        case "read_new_language":
+          // Manual - use filter_value to track manual completion
+          currentValue = obj.filter_value === "__completed" ? 1 : 0;
           break;
-        case "read_big_book":
-          currentValue = finishedInRange.filter((b) => (b.pages ?? 0) > obj.target_value).length > 0 ? 1 : 0;
+        case "read_new_genre": {
+          const finishedGenres = allFinished.map((b) => b.genre).filter(Boolean);
+          const genreCounts = new Map<string, number>();
+          finishedGenres.forEach((g) => genreCounts.set(g!, (genreCounts.get(g!) ?? 0) + 1));
+          // A genre is "new" if only 1 book finished in it
+          currentValue = [...genreCounts.values()].some((c) => c === 1) ? 1 : 0;
           break;
-        case "buy_books":
-          currentValue = books.filter((b) => b.status === "Acheté" && inRange(b.startDate ?? (b as any).created_at, range)).length;
+        }
+        case "read_old_book": {
+          const sixMonthsAgo = subMonths(new Date(), 6);
+          currentValue = allFinished.some((b) => {
+            if (!b.startDate || !b.endDate) return false;
+            return isBefore(parseISO(b.startDate), sixMonthsAgo);
+          }) ? 1 : 0;
           break;
-        case "add_wishlist":
-          currentValue = books.filter((b) => b.status === "Wishlist").length;
+        }
+
+        // ── RÉGULARITÉ ──
+        case "read_daily_streak":
+          currentValue = currentDailyStreak(sessions);
           break;
-        case "add_pal":
-          currentValue = books.filter((b) => b.status === "Dans ma PAL").length;
+        case "read_weekly_streak":
+          currentValue = currentWeeklyStreak(sessions);
           break;
+        case "max_gap_one_day": {
+          // Check: within range, no gap > 1 day between sessions
+          const daysInRange = sessionsInRange.map((s) => s.session_date?.slice(0, 10)).filter(Boolean);
+          const uniqueDays = [...new Set(daysInRange)].sort();
+          if (range && uniqueDays.length > 0) {
+            const allDays = eachDayOfInterval({ start: range.start, end: new Date() > range.end ? range.end : new Date() });
+            let maxGap = 0;
+            let lastSessionDay = -1;
+            const daySet = new Set(uniqueDays);
+            for (let i = 0; i < allDays.length; i++) {
+              const ds = fmtDate(allDays[i], "yyyy-MM-dd");
+              if (daySet.has(ds)) {
+                if (lastSessionDay >= 0) {
+                  maxGap = Math.max(maxGap, i - lastSessionDay - 1);
+                }
+                lastSessionDay = i;
+              }
+            }
+            // Also check gap from last session to today
+            if (lastSessionDay >= 0) {
+              maxGap = Math.max(maxGap, allDays.length - 1 - lastSessionDay);
+            }
+            currentValue = maxGap <= 1 ? 1 : 0;
+          } else {
+            currentValue = 0;
+          }
+          break;
+        }
+        case "read_every_weekday": {
+          const weekDays = sessionsInRange.map((s) => {
+            const d = parseISO(s.session_date);
+            return d.getDay(); // 0=Sun, 1=Mon...
+          });
+          const uniqueWeekDays = new Set(weekDays);
+          // Check Mon-Fri (1-5)
+          currentValue = [1, 2, 3, 4, 5].every((d) => uniqueWeekDays.has(d)) ? 1 : 0;
+          break;
+        }
+
+        // ── BIBLIOTHÈQUE ──
+        case "finish_in_progress": {
+          const inProgress = books.filter((b) => b.status === "En cours de lecture");
+          currentValue = inProgress.length === 0 ? 1 : 0;
+          break;
+        }
         case "clear_pal":
-          currentValue = finishedInRange.length; // books that went from PAL to read
-          break;
-        case "loan_books":
-          currentValue = books.filter((b) => b.secondaryStatus === "Prêté").length;
-          break;
-        case "borrow_books":
-          currentValue = books.filter((b) => b.secondaryStatus === "Emprunté").length;
-          break;
-        case "collections_count":
-          currentValue = collections.filter((c) => inRange(c.created_at, range)).length;
-          break;
-        case "add_to_collections":
-          currentValue = collectionBooks.filter((cb) => inRange(cb.added_at, range)).length;
+          currentValue = finishedInRange.length;
           break;
         case "write_reviews":
-          currentValue = books.filter((b) => b.avis && b.avis.trim().length > 0 && inRange(b.endDate, range)).length;
+          currentValue = books.filter((b) => b.avis && b.avis.trim().length > 0).length;
           break;
         case "add_citations":
           currentValue = books.reduce((s, b) => s + (b.citations?.length ?? 0), 0);
           break;
+        case "fill_book_sheets": {
+          currentValue = books.filter((b) =>
+            b.synopsis && b.synopsis.trim().length > 0 &&
+            b.rating != null &&
+            b.avis && b.avis.trim().length > 0 &&
+            b.citations && b.citations.length > 0 &&
+            b.passagesPreferes && b.passagesPreferes.trim().length > 0 &&
+            b.personnagesPreferes && b.personnagesPreferes.trim().length > 0
+          ).length;
+          break;
+        }
+        case "buy_from_wishlist": {
+          // Books that have status != Wishlist but were presumably from wishlist
+          // We approximate: books with status "Acheté" that have been recently changed
+          currentValue = books.filter((b) => b.status === "Acheté" && inRange(b.startDate ?? (b as any).created_at, range)).length;
+          break;
+        }
         case "budget_max":
           currentValue = books
             .filter((b) => inRange(b.startDate ?? (b as any).created_at, range))
             .reduce((s, b) => s + (b.price ?? 0), 0);
           break;
-        case "coups_de_coeur":
-          currentValue = books.filter((b) => b.coupDeCoeur && inRange(b.endDate, range)).length;
-          break;
-        case "rate_books":
-          currentValue = books.filter((b) => b.rating != null && inRange(b.endDate, range)).length;
-          break;
-        case "avg_rating_above": {
-          const rated = books.filter((b) => b.rating != null);
-          currentValue = rated.length > 0
-            ? Math.round((rated.reduce((s, b) => s + (b.rating ?? 0), 0) / rated.length) * 10) / 10
-            : 0;
-          break;
-        }
-        case "recommend_books":
-          currentValue = books.filter((b) => b.recommandationDuMois).length;
-          break;
-        case "fav_characters":
-          currentValue = books.filter((b) => b.personnagesPreferes && b.personnagesPreferes.trim().length > 0).length;
-          break;
-        case "fav_passages":
-          currentValue = books.filter((b) => b.passagesPreferes && b.passagesPreferes.trim().length > 0).length;
-          break;
-        case "reading_days": {
-          const uniqueDays = new Set(
-            sessions.filter((s) => inRange(s.session_date, range)).map((s) => s.session_date.slice(0, 10))
-          );
-          currentValue = uniqueDays.size;
-          break;
-        }
-        case "long_session":
-          currentValue = sessions
-            .filter((s) => inRange(s.session_date, range))
-            .some((s) => s.duration_minutes > obj.target_value) ? 1 : 0;
-          break;
-        case "pages_in_session": {
-          // Calculate actual pages read per session by comparing with previous session
-          const sessionsInRange = sessions
-            .filter((s) => inRange(s.session_date, range) && s.last_page_reached != null);
-          const allSessionsSorted = [...sessions]
-            .filter((s) => s.last_page_reached != null)
-            .sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
-          
-          currentValue = sessionsInRange.some((s) => {
-            const idx = allSessionsSorted.findIndex((as) => as.id === s.id);
-            // Find previous session for the same book and reread_number
-            let prevPage = 0;
-            for (let i = idx - 1; i >= 0; i--) {
-              if (allSessionsSorted[i].book_id === s.book_id && allSessionsSorted[i].reread_number === s.reread_number) {
-                prevPage = allSessionsSorted[i].last_page_reached ?? 0;
-                break;
-              }
+
+        // ── RECORDS ──
+        case "beat_daily_pages": {
+          const dayPages = new Map<string, number>();
+          sessions.forEach((s) => {
+            const day = s.session_date?.slice(0, 10);
+            if (day && s.last_page_reached != null) {
+              const pages = getPagesPerSession(s, sessions);
+              dayPages.set(day, (dayPages.get(day) ?? 0) + pages);
             }
-            const pagesRead = (s.last_page_reached ?? 0) - prevPage;
-            return pagesRead >= obj.target_value;
-          }) ? 1 : 0;
+          });
+          const values = [...dayPages.values()];
+          if (values.length >= 2) {
+            const sorted = [...values].sort((a, b) => b - a);
+            const today = fmtDate(new Date(), "yyyy-MM-dd");
+            const todayPages = dayPages.get(today) ?? 0;
+            const previousRecord = sorted.find((v) => v !== todayPages) ?? sorted[1] ?? 0;
+            currentValue = todayPages > previousRecord ? 1 : 0;
+          }
           break;
         }
-        case "attend_literary_events":
-          currentValue = literaryEvents.filter((e) => inRange(e.event_date, range)).length;
+        case "beat_reading_minutes": {
+          const maxMinutes = Math.max(0, ...sessions.slice(1).map((s) => s.duration_minutes));
+          const latestSession = sessions[0];
+          currentValue = latestSession && latestSession.duration_minutes > maxMinutes ? 1 : 0;
           break;
-        case "attend_book_clubs":
-          currentValue = bookClubEvents.filter((e) => inRange(e.event_date, range)).length;
+        }
+        case "read_more_than_last_month": {
+          const now = new Date();
+          const thisMonthRange = { start: startOfMonth(now), end: endOfMonth(now) };
+          const lastMonth = subMonths(now, 1);
+          const lastMonthRange = { start: startOfMonth(lastMonth), end: endOfMonth(lastMonth) };
+          const thisMonthPages = sessions.filter((s) => inRange(s.session_date, thisMonthRange))
+            .reduce((sum, s) => sum + getPagesPerSession(s, sessions), 0);
+          const lastMonthPages = sessions.filter((s) => inRange(s.session_date, lastMonthRange))
+            .reduce((sum, s) => sum + getPagesPerSession(s, sessions), 0);
+          currentValue = thisMonthPages > lastMonthPages ? 1 : 0;
           break;
+        }
+        case "read_more_than_last_year": {
+          const now = new Date();
+          const thisYear = now.getFullYear();
+          const lastYear = thisYear - 1;
+          const thisYearBooks = allFinished.filter((b) => b.endDate && parseISO(b.endDate).getFullYear() === thisYear).length;
+          const lastYearBooks = allFinished.filter((b) => b.endDate && parseISO(b.endDate).getFullYear() === lastYear).length;
+          currentValue = thisYearBooks > lastYearBooks ? 1 : 0;
+          break;
+        }
+        case "cumulative_pages":
+          currentValue = sessions.reduce((sum, s) => sum + getPagesPerSession(s, sessions), 0);
+          break;
+        case "cumulative_books":
+          currentValue = allFinished.length;
+          break;
+
         default:
           currentValue = 0;
       }
 
-      const periodLabel = obj.period_type === "day" ? " (aujourd'hui)"
-        : obj.period_type === "week" ? " (cette semaine)"
-        : obj.period_type === "month" ? " (ce mois)"
-        : obj.period_type === "year" ? " (cette année)"
+      // Build label
+      const periodLabel = effectivePeriod === "day" ? " (aujourd'hui)"
+        : effectivePeriod === "week" ? " (cette semaine)"
+        : effectivePeriod === "month" ? " (ce mois)"
+        : effectivePeriod === "year" ? " (cette année)"
         : obj.period_type === "custom" && obj.start_date && obj.end_date
           ? ` (${obj.start_date} → ${obj.end_date})`
           : "";
 
       const rawLabel = typeMeta?.label ?? obj.objective_type;
-      const label = rawLabel
-        .replace("X", String(obj.target_value))
-        .replace("{filter}", obj.filter_value ?? "…")
-        + periodLabel;
+      let label = rawLabel.replace("X", String(obj.target_value));
+
+      // Handle second target for streak
+      if (typeMeta?.needsSecondTarget && filterJson.secondTarget) {
+        label = label.replace("Y", String(filterJson.secondTarget));
+      }
+
+      // Replace filter display (only for filter types)
+      if (simpleFilter && typeMeta?.needsFilter) {
+        // filter info is NOT shown in label per user request
+      }
+
+      // Append time unit
+      if (typeMeta?.timeUnit) {
+        label = label.replace("min/h", timeUnitVal === "hours" ? "h" : "min")
+                     .replace("minutes/heures", timeUnitVal === "hours" ? "heures" : "minutes");
+      }
+
+      label += periodLabel;
 
       return {
         ...obj,
@@ -421,7 +606,7 @@ export function usePersonalObjectives() {
         label,
       };
     });
-  }, [objectives, books, sessions, collections, collectionBooks, literaryEvents, bookClubEvents]);
+  }, [objectives, books, sessions]);
 
   const pinnedObjectives = useMemo(
     () => objectivesWithProgress.filter((o) => o.pinned).slice(0, 3),

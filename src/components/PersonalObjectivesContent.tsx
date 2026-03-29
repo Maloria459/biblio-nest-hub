@@ -15,10 +15,12 @@ import { toast } from "sonner";
 const CATEGORY_OPTIONS = [
   { value: "all", label: "Toutes les catégories" },
   { value: "Lecture", label: "Lecture" },
+  { value: "Livres terminés", label: "Livres terminés" },
+  { value: "Sessions", label: "Sessions" },
+  { value: "Diversité", label: "Diversité" },
+  { value: "Régularité", label: "Régularité" },
   { value: "Bibliothèque", label: "Bibliothèque" },
-  { value: "Qualité", label: "Qualité / Engagement" },
-  { value: "Sessions", label: "Sessions de lecture" },
-  { value: "Communauté", label: "Communauté" },
+  { value: "Records", label: "Records" },
 ];
 
 const STATUS_OPTIONS = [
