@@ -551,7 +551,7 @@ export function usePersonalObjectives() {
         label = label.replace("Y", String(filterJson.secondTarget));
       }
 
-      // Replace filter display for genre/author/format
+      // Replace filter display for genre/author/format/series
       if (simpleFilter && typeMeta?.needsFilter) {
         const targetNum = obj.target_value;
         const plural = targetNum > 1 ? "s" : "";
@@ -561,6 +561,8 @@ export function usePersonalObjectives() {
           label = `Lire ${targetNum} livre${plural} de ${simpleFilter}`;
         } else if (typeMeta.needsFilter === "format") {
           label = `Lire ${targetNum} livre${plural} en format ${simpleFilter}`;
+        } else if (typeMeta.needsFilter === "series") {
+          label = `Finir ${simpleFilter}`;
         }
       }
 
