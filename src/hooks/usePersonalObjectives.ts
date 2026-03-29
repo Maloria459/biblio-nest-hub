@@ -34,45 +34,43 @@ export const OBJECTIVE_TYPES: ObjectiveTypeOption[] = [
   { value: "read_pages_period", label: "Lire X pages", category: "Lecture", description: "Pages lues (sessions) sur la période choisie." },
   { value: "read_pages_session", label: "Lire X pages pendant une session", category: "Lecture", noPeriod: true, description: "Atteint dès qu'une session enregistre X pages lues." },
   { value: "read_duration", label: "Lire pendant X minutes/heures", category: "Lecture", noPeriod: true, timeUnit: true, description: "Atteint dès qu'une session dure X minutes/heures." },
-  { value: "read_duration_day", label: "Lire X min/h par jour", category: "Lecture", periodLocked: "day", timeUnit: true, description: "Temps de lecture cumulé aujourd'hui." },
-  { value: "read_duration_week", label: "Lire X min/h par semaine", category: "Lecture", periodLocked: "week", timeUnit: true, description: "Temps de lecture cumulé cette semaine." },
-  { value: "read_duration_month", label: "Lire X min/h par mois", category: "Lecture", periodLocked: "month", timeUnit: true, description: "Temps de lecture cumulé ce mois." },
+  { value: "read_duration_day", label: "Lire X min/h par jour", category: "Lecture", timeUnit: true, description: "Temps de lecture cumulé par jour sur la période choisie." },
+  { value: "read_duration_week", label: "Lire X min/h par semaine", category: "Lecture", timeUnit: true, description: "Temps de lecture cumulé par semaine sur la période choisie." },
+  { value: "read_duration_month", label: "Lire X min/h par mois", category: "Lecture", timeUnit: true, description: "Temps de lecture cumulé par mois sur la période choisie." },
   { value: "read_duration_streak", label: "Atteindre X min/jour pendant Y jours d'affilée", category: "Lecture", needsSecondTarget: true, timeUnit: true, noPeriod: true, description: "Nombre de jours consécutifs où le temps de lecture dépasse X minutes." },
 
   // 📚 LIVRES TERMINÉS
-  { value: "finish_books", label: "Finir X livres", category: "Livres terminés", description: "Livres marqués comme terminés sur la période." },
+  { value: "finish_books", label: "Finir X livres", category: "Livres terminés", noPeriod: true, description: "Nombre total de livres terminés." },
   { value: "finish_books_month", label: "Finir X livres dans le mois", category: "Livres terminés", periodLocked: "month", description: "Livres terminés ce mois-ci." },
   { value: "finish_books_year", label: "Finir X livres dans l'année", category: "Livres terminés", periodLocked: "year", description: "Livres terminés cette année." },
   { value: "read_big_book", label: "Lire un livre de plus de X pages", category: "Livres terminés", binary: false, noPeriod: true, description: "Atteint dès qu'un livre terminé dépasse X pages." },
-  { value: "finish_book_fast", label: "Finir un livre en moins de X jours", category: "Livres terminés", binary: true, noPeriod: true, description: "Atteint si un livre a été lu (début → fin) en moins de X jours." },
+  { value: "finish_book_fast", label: "Finir un livre en moins de X jours", category: "Livres terminés", binary: false, noPeriod: true, description: "Atteint si un livre a été lu (début → fin) en moins de X jours." },
 
   // ⏱️ SESSIONS
   { value: "sessions_count", label: "Réaliser X sessions de lecture", category: "Sessions", description: "Nombre total de sessions enregistrées." },
-  { value: "session_per_day", label: "Lire au moins une session par jour", category: "Sessions", periodLocked: "day", binary: true, description: "Atteint si au moins une session est enregistrée aujourd'hui." },
-  { value: "sessions_per_week", label: "Lire X sessions par semaine", category: "Sessions", periodLocked: "week", description: "Sessions enregistrées cette semaine." },
+  { value: "session_per_day", label: "Lire au moins une session par jour", category: "Sessions", binary: true, description: "Atteint si au moins une session est enregistrée chaque jour sur la période." },
+  { value: "sessions_per_week", label: "Lire X sessions par semaine", category: "Sessions", description: "Sessions enregistrées par semaine sur la période choisie." },
+  { value: "sessions_per_month", label: "Lire X sessions par mois", category: "Sessions", description: "Sessions enregistrées par mois sur la période choisie." },
 
   // 🎯 DIVERSITÉ & DÉCOUVERTE
-  { value: "read_genre", label: "Lire X livres d'un genre", category: "Diversité", needsFilter: "genre", description: "Livres terminés du genre sélectionné." },
-  { value: "read_author", label: "Lire X livres d'un auteur", category: "Diversité", needsFilter: "author", description: "Livres terminés de l'auteur sélectionné." },
-  { value: "read_format", label: "Lire X livres d'un format", category: "Diversité", needsFilter: "format", description: "Livres terminés dans le format sélectionné." },
+  { value: "read_genre", label: "Lire X livres d'un genre", category: "Diversité", needsFilter: "genre", noPeriod: true, description: "Livres terminés du genre sélectionné." },
+  { value: "read_author", label: "Lire X livres d'un auteur", category: "Diversité", needsFilter: "author", noPeriod: true, description: "Livres terminés de l'auteur sélectionné." },
+  { value: "read_format", label: "Lire X livres d'un format", category: "Diversité", needsFilter: "format", noPeriod: true, description: "Livres terminés dans le format sélectionné." },
   { value: "finish_series", label: "Finir une saga/série", category: "Diversité", needsFilter: "series", binary: true, noPeriod: true, description: "Tous les livres de la série sélectionnée sont terminés." },
-  { value: "read_new_language", label: "Lire un livre dans une autre langue", category: "Diversité", binary: true, noPeriod: true, description: "Objectif à valider manuellement." },
   { value: "read_new_genre", label: "Lire un livre d'un genre jamais lu", category: "Diversité", binary: true, noPeriod: true, description: "Atteint si un livre est terminé dans un genre nouveau pour vous." },
-  { value: "read_old_book", label: "Lire un livre commencé depuis longtemps", category: "Diversité", binary: true, noPeriod: true, description: "Atteint si un livre « En cours » depuis plus de 6 mois est terminé." },
+  { value: "read_old_book", label: "Lire un livre commencé depuis longtemps", category: "Diversité", binary: true, noPeriod: true, description: "Atteint si un livre « En cours » depuis plus de 2 mois est terminé." },
 
   // 🔥 RÉGULARITÉ & STREAKS
   { value: "read_daily_streak", label: "Lire tous les jours pendant X jours", category: "Régularité", noPeriod: true, description: "Nombre de jours consécutifs avec au moins une session." },
   { value: "read_weekly_streak", label: "Lire chaque semaine pendant X semaines", category: "Régularité", noPeriod: true, description: "Nombre de semaines consécutives avec au moins une session." },
-  { value: "max_gap_one_day", label: "Ne pas sauter plus d'un jour entre deux lectures", category: "Régularité", description: "Suivi sur la période : aucun écart de plus d'un jour." },
-  { value: "read_every_weekday", label: "Lire chaque jour de la semaine", category: "Régularité", periodLocked: "week", binary: true, description: "Au moins une session chaque jour de la semaine en cours." },
 
   // 📦 BIBLIOTHÈQUE & FICHES
   { value: "finish_in_progress", label: "Finir les livres en cours", category: "Bibliothèque", binary: true, noPeriod: true, description: "Atteint quand vous n'avez plus de livres « En cours de lecture »." },
   { value: "clear_pal", label: "Vider X livres de ma PAL", category: "Bibliothèque", description: "Livres sortis de votre PAL (terminés) sur la période." },
-  { value: "write_reviews", label: "Rédiger X avis", category: "Bibliothèque", description: "Livres avec un avis rédigé." },
-  { value: "add_citations", label: "Ajouter X citations", category: "Bibliothèque", description: "Nombre total de citations enregistrées." },
-  { value: "fill_book_sheets", label: "Remplir X fiches de lecture complètes", category: "Bibliothèque", description: "Fiches avec synopsis, note, avis, citations, passages et personnages remplis." },
-  { value: "buy_from_wishlist", label: "Acheter X livres de ma wishlist", category: "Bibliothèque", description: "Livres passés de la wishlist à un autre statut." },
+  { value: "write_reviews", label: "Rédiger X avis", category: "Bibliothèque", noPeriod: true, description: "Livres avec un avis rédigé." },
+  { value: "add_citations", label: "Ajouter X citations", category: "Bibliothèque", noPeriod: true, description: "Nombre total de citations enregistrées." },
+  { value: "fill_book_sheets", label: "Remplir X fiches de lecture complètes", category: "Bibliothèque", noPeriod: true, description: "Fiches avec synopsis, note, avis, citations, passages et personnages remplis." },
+  { value: "buy_from_wishlist", label: "Acheter X livres de ma wishlist", category: "Bibliothèque", noPeriod: true, description: "Livres passés de la wishlist à un autre statut." },
   { value: "budget_max", label: "Dépenser moins de X € en livres", category: "Bibliothèque", inverted: true, description: "Total dépensé en livres sur la période (ne pas dépasser)." },
 
   // 🏆 RECORDS & DÉFIS
@@ -81,7 +79,6 @@ export const OBJECTIVE_TYPES: ObjectiveTypeOption[] = [
   { value: "read_more_than_last_month", label: "Lire plus que le mois précédent", category: "Records", periodLocked: "month", binary: true, description: "Plus de pages lues ce mois que le mois dernier." },
   { value: "read_more_than_last_year", label: "Lire plus de livres que l'an dernier", category: "Records", periodLocked: "year", binary: true, description: "Plus de livres terminés cette année que l'an dernier." },
   { value: "cumulative_pages", label: "Atteindre X pages cumulées", category: "Records", noPeriod: true, description: "Total de pages lues depuis la création du compte." },
-  { value: "cumulative_books", label: "Atteindre X livres finis", category: "Records", noPeriod: true, description: "Total de livres terminés depuis la création du compte." },
 ];
 
 /* ───────── DB row type ───────── */
@@ -373,22 +370,35 @@ export function usePersonalObjectives() {
         case "read_big_book":
           currentValue = allFinished.some((b) => (b.pages ?? 0) > obj.target_value) ? 1 : 0;
           break;
-        case "finish_book_fast":
-          currentValue = allFinished.some((b) => {
+        case "finish_book_fast": {
+          const booksFinishedFast = allFinished.filter((b) => {
             if (!b.startDate || !b.endDate) return false;
             const days = differenceInDays(parseISO(b.endDate), parseISO(b.startDate));
             return days < obj.target_value && days >= 0;
-          }) ? 1 : 0;
+          });
+          currentValue = booksFinishedFast.length > 0 ? 1 : 0;
           break;
+        }
 
         // ── SESSIONS ──
         case "sessions_count":
           currentValue = sessionsInRange.length;
           break;
-        case "session_per_day":
-          currentValue = sessionsInRange.length > 0 ? 1 : 0;
+        case "session_per_day": {
+          // Check if every day in range has at least one session
+          if (range) {
+            const endDate = new Date() < range.end ? new Date() : range.end;
+            const allDays = eachDayOfInterval({ start: range.start, end: endDate });
+            const sessionDays = new Set(sessionsInRange.map((s) => s.session_date?.slice(0, 10)));
+            const allDaysHaveSessions = allDays.every((d) => sessionDays.has(fmtDate(d, "yyyy-MM-dd")));
+            currentValue = allDaysHaveSessions && allDays.length > 0 ? 1 : 0;
+          } else {
+            currentValue = 0;
+          }
           break;
+        }
         case "sessions_per_week":
+        case "sessions_per_month":
           currentValue = sessionsInRange.length;
           break;
 
@@ -407,23 +417,18 @@ export function usePersonalObjectives() {
           currentValue = seriesBooks.length > 0 && seriesBooks.every((b) => ["Lu", "Lecture terminée"].includes(b.status)) ? 1 : 0;
           break;
         }
-        case "read_new_language":
-          // Manual - use filter_value to track manual completion
-          currentValue = obj.filter_value === "__completed" ? 1 : 0;
-          break;
         case "read_new_genre": {
           const finishedGenres = allFinished.map((b) => b.genre).filter(Boolean);
           const genreCounts = new Map<string, number>();
           finishedGenres.forEach((g) => genreCounts.set(g!, (genreCounts.get(g!) ?? 0) + 1));
-          // A genre is "new" if only 1 book finished in it
           currentValue = [...genreCounts.values()].some((c) => c === 1) ? 1 : 0;
           break;
         }
         case "read_old_book": {
-          const sixMonthsAgo = subMonths(new Date(), 6);
+          const twoMonthsAgo = subMonths(new Date(), 2);
           currentValue = allFinished.some((b) => {
             if (!b.startDate || !b.endDate) return false;
-            return isBefore(parseISO(b.startDate), sixMonthsAgo);
+            return isBefore(parseISO(b.startDate), twoMonthsAgo);
           }) ? 1 : 0;
           break;
         }
@@ -435,44 +440,6 @@ export function usePersonalObjectives() {
         case "read_weekly_streak":
           currentValue = currentWeeklyStreak(sessions);
           break;
-        case "max_gap_one_day": {
-          // Check: within range, no gap > 1 day between sessions
-          const daysInRange = sessionsInRange.map((s) => s.session_date?.slice(0, 10)).filter(Boolean);
-          const uniqueDays = [...new Set(daysInRange)].sort();
-          if (range && uniqueDays.length > 0) {
-            const allDays = eachDayOfInterval({ start: range.start, end: new Date() > range.end ? range.end : new Date() });
-            let maxGap = 0;
-            let lastSessionDay = -1;
-            const daySet = new Set(uniqueDays);
-            for (let i = 0; i < allDays.length; i++) {
-              const ds = fmtDate(allDays[i], "yyyy-MM-dd");
-              if (daySet.has(ds)) {
-                if (lastSessionDay >= 0) {
-                  maxGap = Math.max(maxGap, i - lastSessionDay - 1);
-                }
-                lastSessionDay = i;
-              }
-            }
-            // Also check gap from last session to today
-            if (lastSessionDay >= 0) {
-              maxGap = Math.max(maxGap, allDays.length - 1 - lastSessionDay);
-            }
-            currentValue = maxGap <= 1 ? 1 : 0;
-          } else {
-            currentValue = 0;
-          }
-          break;
-        }
-        case "read_every_weekday": {
-          const weekDays = sessionsInRange.map((s) => {
-            const d = parseISO(s.session_date);
-            return d.getDay(); // 0=Sun, 1=Mon...
-          });
-          const uniqueWeekDays = new Set(weekDays);
-          // Check Mon-Fri (1-5)
-          currentValue = [1, 2, 3, 4, 5].every((d) => uniqueWeekDays.has(d)) ? 1 : 0;
-          break;
-        }
 
         // ── BIBLIOTHÈQUE ──
         case "finish_in_progress": {
@@ -562,21 +529,18 @@ export function usePersonalObjectives() {
         case "cumulative_pages":
           currentValue = sessions.reduce((sum, s) => sum + getPagesPerSession(s, sessions), 0);
           break;
-        case "cumulative_books":
-          currentValue = allFinished.length;
-          break;
 
         default:
           currentValue = 0;
       }
 
       // Build label
-      const periodLabel = effectivePeriod === "day" ? " (aujourd'hui)"
-        : effectivePeriod === "week" ? " (cette semaine)"
-        : effectivePeriod === "month" ? " (ce mois)"
-        : effectivePeriod === "year" ? " (cette année)"
+      const periodLabel = effectivePeriod === "day" ? " — aujourd'hui"
+        : effectivePeriod === "week" ? " — cette semaine"
+        : effectivePeriod === "month" ? " — ce mois"
+        : effectivePeriod === "year" ? " — cette année"
         : obj.period_type === "custom" && obj.start_date && obj.end_date
-          ? ` (${obj.start_date} → ${obj.end_date})`
+          ? ` — ${obj.start_date} → ${obj.end_date}`
           : "";
 
       const rawLabel = typeMeta?.label ?? obj.objective_type;
@@ -587,9 +551,17 @@ export function usePersonalObjectives() {
         label = label.replace("Y", String(filterJson.secondTarget));
       }
 
-      // Replace filter display (only for filter types)
+      // Replace filter display for genre/author/format
       if (simpleFilter && typeMeta?.needsFilter) {
-        // filter info is NOT shown in label per user request
+        const targetNum = obj.target_value;
+        const plural = targetNum > 1 ? "s" : "";
+        if (typeMeta.needsFilter === "genre") {
+          label = `Lire ${targetNum} livre${plural} de ${simpleFilter}`;
+        } else if (typeMeta.needsFilter === "author") {
+          label = `Lire ${targetNum} livre${plural} de ${simpleFilter}`;
+        } else if (typeMeta.needsFilter === "format") {
+          label = `Lire ${targetNum} livre${plural} en format ${simpleFilter}`;
+        }
       }
 
       // Append time unit

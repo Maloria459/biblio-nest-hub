@@ -136,23 +136,35 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
   const previewLabel = useMemo(() => {
     if (!typeMeta) return null;
     const val = typeMeta.binary ? "1" : (targetValue || "…");
-    const pLabel = effectivePeriod === "day" ? " (aujourd'hui)"
-      : effectivePeriod === "week" ? " (cette semaine)"
-      : effectivePeriod === "month" ? " (ce mois)"
-      : effectivePeriod === "year" ? " (cette année)"
+    const pLabel = effectivePeriod === "day" ? " — aujourd'hui"
+      : effectivePeriod === "week" ? " — cette semaine"
+      : effectivePeriod === "month" ? " — ce mois"
+      : effectivePeriod === "year" ? " — cette année"
       : effectivePeriod === "custom" && startDate && endDate
-        ? ` (${startDate} → ${endDate})`
+        ? ` — ${startDate} → ${endDate}`
         : "";
     let label = typeMeta.label.replace("X", val);
     if (typeMeta.needsSecondTarget) {
       label = label.replace("Y", secondTarget || "…");
+    }
+    // Filter-based labels for genre/author/format
+    if (filterValue && typeMeta.needsFilter) {
+      const numVal = Number(val) || 0;
+      const plural = numVal > 1 ? "s" : "";
+      if (typeMeta.needsFilter === "genre") {
+        label = `Lire ${val} livre${plural} de ${filterValue}`;
+      } else if (typeMeta.needsFilter === "author") {
+        label = `Lire ${val} livre${plural} de ${filterValue}`;
+      } else if (typeMeta.needsFilter === "format") {
+        label = `Lire ${val} livre${plural} en format ${filterValue}`;
+      }
     }
     if (typeMeta.timeUnit) {
       label = label.replace("min/h", timeUnit === "hours" ? "h" : "min")
                    .replace("minutes/heures", timeUnit === "hours" ? "heures" : "minutes");
     }
     return label + pLabel;
-  }, [typeMeta, targetValue, effectivePeriod, startDate, endDate, timeUnit, secondTarget]);
+  }, [typeMeta, targetValue, effectivePeriod, startDate, endDate, timeUnit, secondTarget, filterValue]);
 
   const handleClose = () => { reset(); onClose(); };
 
