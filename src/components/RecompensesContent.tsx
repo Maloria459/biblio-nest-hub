@@ -1,65 +1,70 @@
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Coins, Palette } from "lucide-react";
-import { useState } from "react";
 
-const rewardTypes = [
+const rewardTabs = [
   {
     key: "badges",
     icon: Award,
     label: "Badges",
-    desc: "Débloquer des badges en accomplissant des défis et objectifs",
+    desc: "Débloquez des badges en accomplissant des défis et objectifs. Chaque badge représente une étape franchie dans votre parcours de lecteur.",
   },
   {
     key: "virtual_currency",
     icon: Coins,
     label: "Monnaie virtuelle",
-    desc: "Gagner de la monnaie virtuelle pour vos accomplissements",
+    desc: "Gagnez de la monnaie virtuelle pour vos accomplissements. Utilisez-la pour débloquer du contenu exclusif et des fonctionnalités bonus.",
   },
   {
     key: "customization",
     icon: Palette,
-    label: "Personnalisation de l'application",
-    desc: "Débloquer des options de personnalisation pour votre interface",
+    label: "Personnalisation",
+    desc: "Débloquez des options de personnalisation pour votre interface : thèmes, icônes et bien plus encore.",
   },
 ] as const;
 
 export function RecompensesContent() {
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({
-    badges: true,
-    virtual_currency: true,
-    customization: true,
-  });
-
-  const toggle = (key: string) =>
-    setEnabled((prev) => ({ ...prev, [key]: !prev[key] }));
+  const [activeTab, setActiveTab] = useState<string>(rewardTabs[0].key);
+  const current = rewardTabs.find((t) => t.key === activeTab)!;
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6">
       <div className="max-w-2xl mx-auto space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Récompenses</h2>
-        <p className="text-sm text-muted-foreground">
-          Choisissez les types de récompenses que vous souhaitez activer.
-        </p>
+        {/* Segmented toggle */}
+        <div className="flex gap-1 bg-muted rounded-lg p-1">
+          {rewardTabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 flex items-center justify-center gap-2 text-sm font-medium py-2 rounded-md transition-colors ${
+                activeTab === tab.key
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <tab.icon className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          ))}
+        </div>
 
+        {/* Content for active tab */}
         <Card>
-          <CardContent className="pt-6 space-y-6">
-            {rewardTypes.map((rt) => (
-              <div key={rt.key} className="flex items-center justify-between gap-4">
-                <div className="flex items-start gap-3 min-w-0">
-                  <rt.icon className="h-5 w-5 mt-0.5 shrink-0 text-muted-foreground" />
-                  <div className="space-y-0.5 min-w-0">
-                    <Label className="text-base font-normal">{rt.label}</Label>
-                    <p className="text-sm text-muted-foreground">{rt.desc}</p>
-                  </div>
-                </div>
-                <Switch
-                  checked={enabled[rt.key]}
-                  onCheckedChange={() => toggle(rt.key)}
-                />
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <current.icon className="h-6 w-6 mt-0.5 shrink-0 text-primary" />
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-foreground">{current.label}</h3>
+                <p className="text-sm text-muted-foreground">{current.desc}</p>
               </div>
-            ))}
+            </div>
+
+            <div className="mt-6 flex flex-col items-center justify-center py-8 text-center">
+              <p className="text-sm text-muted-foreground">Aucune récompense pour le moment</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Complétez des défis pour débloquer vos premières récompenses
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
