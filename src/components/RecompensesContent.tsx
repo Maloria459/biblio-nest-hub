@@ -24,7 +24,7 @@ const rewardTabs = [
 ] as const;
 
 export function RecompensesContent() {
-  const [activeTab, setActiveTab] = useState(rewardTabs[0].key);
+  const [activeTab, setActiveTab] = useState<string>(rewardTabs[0].key);
   const current = rewardTabs.find((t) => t.key === activeTab)!;
 
   return (
