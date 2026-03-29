@@ -157,6 +157,8 @@ export function CreateObjectiveModal({ open, onClose, onCreate, onUpdate, isCrea
         label = `Lire ${val} livre${plural} de ${filterValue}`;
       } else if (typeMeta.needsFilter === "format") {
         label = `Lire ${val} livre${plural} en format ${filterValue}`;
+      } else if (typeMeta.needsFilter === "series") {
+        label = `Finir ${filterValue || "…"}`;
       }
     }
     if (typeMeta.timeUnit) {
