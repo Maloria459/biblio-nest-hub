@@ -97,47 +97,45 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col flex-1">
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4 space-y-4 sm:space-y-6">
-        {/* ── Profile Banner + Calendar (equal width & height) ── */}
+        {/* ── Profile + Streak (left) | Calendar (right) ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card className="h-full flex flex-col sm:flex-row items-center gap-4 sm:gap-5 border-border bg-card p-4 sm:p-5">
-            <Avatar className="h-16 w-16 shrink-0">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt={pseudo} /> : null}
-              <AvatarFallback className="bg-muted text-muted-foreground">
-                <User className="h-7 w-7" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-1 min-w-0 flex-1 text-center sm:text-left">
-              <span className="font-display text-lg font-bold text-foreground truncate">
-                {pseudo || "—"}
-              </span>
-              <span className="text-sm text-muted-foreground">Novice des Pages</span>
-              <div className="flex items-center gap-3 mt-1">
-                <Progress value={0} className="h-2 flex-1 max-w-xs" />
-                <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
-                  0 / 500 points avant le prochain rang
+          <div className="flex flex-col gap-4">
+            <Card className="flex flex-row items-center gap-4 border-border bg-card p-4">
+              <Avatar className="h-14 w-14 shrink-0">
+                {avatarUrl ? <AvatarImage src={avatarUrl} alt={pseudo} /> : null}
+                <AvatarFallback className="bg-muted text-muted-foreground">
+                  <User className="h-6 w-6" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                <span className="font-display text-base font-bold text-foreground truncate">
+                  {pseudo || "—"}
                 </span>
+                <span className="text-xs text-muted-foreground">Novice des Pages</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <Progress value={0} className="h-1.5 flex-1 max-w-[140px]" />
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">0 / 500 pts</span>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col items-center gap-1 shrink-0">
-              <div className="relative h-14 w-14 shrink-0">
-                <div className="absolute inset-0 rounded-full bg-muted" />
-                <img
-                  src={eclatEncreSrc}
-                  alt="Éclat d'Encre"
-                  className="relative h-14 w-14 object-contain"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="sync"
-                />
+              <div className="flex flex-col items-center gap-1 shrink-0">
+                <div className="relative h-11 w-11 shrink-0">
+                  <div className="absolute inset-0 rounded-full bg-muted" />
+                  <img
+                    src={eclatEncreSrc}
+                    alt="Éclat d'Encre"
+                    className="relative h-11 w-11 object-contain"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="sync"
+                  />
+                </div>
+                <span className="text-[10px] font-medium text-foreground whitespace-nowrap">0 Éclat d'Encre</span>
               </div>
-              <span className="text-xs font-medium text-foreground whitespace-nowrap">0 Éclat d'Encre</span>
-            </div>
-          </Card>
+            </Card>
+            <ReadingStreakCard />
+          </div>
           <DashboardCalendar />
         </div>
-
-        {/* ── Reading Streak ── */}
-        <ReadingStreakCard />
 
         {/* ── Quick stats ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

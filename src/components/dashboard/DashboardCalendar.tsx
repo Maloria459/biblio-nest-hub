@@ -170,11 +170,11 @@ export function DashboardCalendar() {
                   <img
                     src={dayReleases[0].coverUrl}
                     alt=""
-                    className="absolute inset-0 h-full w-full object-cover opacity-30 rounded"
+                    className="absolute inset-0 h-full w-full object-cover rounded"
                   />
                 )}
                 {/* Day number */}
-                <span className={`relative z-10 font-medium ${isToday ? "text-foreground font-bold" : "text-foreground"}`}>
+                <span className={`relative z-10 font-medium ${hasRelease && dayReleases[0].coverUrl ? "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : ""} ${isToday ? "text-foreground font-bold" : "text-foreground"} ${hasRelease && dayReleases[0].coverUrl && isToday ? "text-white font-bold" : ""}`}>
                   {day}
                 </span>
                 {/* Event dots */}
