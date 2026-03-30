@@ -145,13 +145,14 @@ export function DashboardCalendar() {
 
       {/* Calendar cells */}
       <TooltipProvider delayDuration={200}>
-        <div className="grid grid-cols-7 gap-0.5 flex-1">
+        <div className="grid grid-cols-7 gap-x-0.5 gap-y-1 flex-1">
           {cells.map((day, i) => {
             if (day === null) return <div key={i} />;
 
             const dayReleases = releases.filter((r) => r.date === day);
             const dayEvents = allEvents.filter((e) => e.date === day);
             const hasRelease = dayReleases.length > 0;
+            const hasContent = hasRelease || dayEvents.length > 0;
             const isToday = isCurrentMonth && day === today;
 
             const tooltipLines = [
@@ -160,39 +161,39 @@ export function DashboardCalendar() {
             ];
 
             const cell = (
-              <div
-                className={`relative flex flex-col items-center justify-center rounded text-xs aspect-square overflow-hidden ${
-                  isToday ? "ring-1 ring-foreground" : ""
-                }`}
-              >
-                {/* Cover background */}
-                {hasRelease && dayReleases[0].coverUrl && (
-                  <img
-                    src={dayReleases[0].coverUrl}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover rounded"
-                  />
-                )}
-                {/* Day number */}
-                <span className={`relative z-10 font-medium ${hasRelease && dayReleases[0].coverUrl ? "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : ""} ${isToday ? "text-foreground font-bold" : "text-foreground"} ${hasRelease && dayReleases[0].coverUrl && isToday ? "text-white font-bold" : ""}`}>
+              <div className="flex flex-col items-center gap-0.5">
+                {/* Date number */}
+                <div
+                  className={`w-full flex items-center justify-center rounded text-[11px] h-5 ${
+                    isToday ? "bg-foreground text-background font-bold" : "text-foreground font-medium"
+                  }`}
+                >
                   {day}
-                </span>
-                {/* Event dots */}
-                {dayEvents.length > 0 && (
-                  <div className="flex gap-0.5 mt-0.5 relative z-10">
-                    {dayEvents.slice(0, 3).map((e, j) => (
-                      <div
-                        key={j}
-                        className={`h-1 w-1 rounded-full ${
-                          e.type === "literary" ? "bg-foreground" : "bg-muted-foreground"
-                        }`}
+                </div>
+                {/* Content box below the date */}
+                {hasContent && (
+                  <div className="w-full rounded overflow-hidden bg-muted/50 flex items-center justify-center" style={{ minHeight: 24 }}>
+                    {hasRelease && dayReleases[0].coverUrl ? (
+                      <img
+                        src={dayReleases[0].coverUrl}
+                        alt={dayReleases[0].title}
+                        className="w-full h-6 object-cover rounded"
                       />
-                    ))}
+                    ) : dayEvents.length > 0 ? (
+                      <div className="flex gap-0.5 py-1">
+                        {dayEvents.slice(0, 3).map((e, j) => (
+                          <div
+                            key={j}
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              e.type === "literary" ? "bg-foreground" : "bg-muted-foreground"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    ) : hasRelease ? (
+                      <div className="h-1.5 w-1.5 rounded-full bg-foreground" />
+                    ) : null}
                   </div>
-                )}
-                {/* Release indicator (small book icon dot) */}
-                {hasRelease && !dayReleases[0].coverUrl && (
-                  <div className="h-1 w-1 rounded-full bg-foreground mt-0.5 relative z-10" />
                 )}
               </div>
             );

@@ -7,7 +7,7 @@ function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim", "Auj."];
+const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 export function ReadingStreakCard() {
   const { data: sessions = [] } = useReadingSessions();
@@ -34,18 +34,18 @@ export function ReadingStreakCard() {
     return streak;
   }, [sessionDates]);
 
-  // Last 8 days (7 previous days + today)
+  // Last 7 days (6 previous days + today)
   const weekDays = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return Array.from({ length: 8 }, (_, i) => {
+    return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(today);
-      d.setDate(today.getDate() - (7 - i));
+      d.setDate(today.getDate() - (6 - i));
       const key = dateKey(d);
       const isToday = key === dateKey(today);
       return {
-        label: isToday ? "Auj." : DAY_LABELS[(d.getDay() + 6) % 7],
+        label: DAY_LABELS[(d.getDay() + 6) % 7],
         active: sessionDates.has(key),
         isFuture: false,
         isToday,

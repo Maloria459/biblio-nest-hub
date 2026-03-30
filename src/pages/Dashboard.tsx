@@ -97,52 +97,50 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col flex-1">
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4 space-y-4 sm:space-y-6">
-        {/* ── Profile + Streak (left) | Calendar (right) ── */}
+        {/* ── Profile + Streak + Stats (left) | Calendar (right) ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-4">
-            <Card className="flex flex-row items-center gap-4 border-border bg-card p-4">
-              <Avatar className="h-14 w-14 shrink-0">
+          <div className="flex flex-col gap-3">
+            <Card className="flex flex-row items-center gap-4 border-border bg-card p-3">
+              <Avatar className="h-12 w-12 shrink-0">
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={pseudo} /> : null}
                 <AvatarFallback className="bg-muted text-muted-foreground">
-                  <User className="h-6 w-6" />
+                  <User className="h-5 w-5" />
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                <span className="font-display text-base font-bold text-foreground truncate">
+                <span className="font-display text-sm font-bold text-foreground truncate">
                   {pseudo || "—"}
                 </span>
-                <span className="text-xs text-muted-foreground">Novice des Pages</span>
-                <div className="flex items-center gap-2 mt-1">
-                  <Progress value={0} className="h-1.5 flex-1 max-w-[140px]" />
+                <span className="text-[11px] text-muted-foreground">Novice des Pages</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Progress value={0} className="h-1.5 flex-1 max-w-[120px]" />
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap">0 / 500 pts</span>
                 </div>
               </div>
-              <div className="flex flex-col items-center gap-1 shrink-0">
-                <div className="relative h-11 w-11 shrink-0">
+              <div className="flex flex-col items-center gap-0.5 shrink-0">
+                <div className="relative h-9 w-9 shrink-0">
                   <div className="absolute inset-0 rounded-full bg-muted" />
                   <img
                     src={eclatEncreSrc}
                     alt="Éclat d'Encre"
-                    className="relative h-11 w-11 object-contain"
+                    className="relative h-9 w-9 object-contain"
                     loading="eager"
                     fetchPriority="high"
                     decoding="sync"
                   />
                 </div>
-                <span className="text-[10px] font-medium text-foreground whitespace-nowrap">0 Éclat d'Encre</span>
+                <span className="text-[9px] font-medium text-foreground whitespace-nowrap">0 Éclat d'Encre</span>
               </div>
             </Card>
             <ReadingStreakCard />
+            <div className="grid grid-cols-2 gap-3 flex-1">
+              <StatCard icon={<Library className="h-4 w-4" />} label="Bibliothèque" value={libraryCount} />
+              <StatCard icon={<BookMarked className="h-4 w-4" />} label="Pile à lire" value={palCount} />
+              <StatCard icon={<Gift className="h-4 w-4" />} label="Wishlist" value={wishlistCount} />
+              <StatCard icon={<CheckCircle2 className="h-4 w-4" />} label="Terminés" value={finishedCount} />
+            </div>
           </div>
           <DashboardCalendar />
-        </div>
-
-        {/* ── Quick stats ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard icon={<Library className="h-5 w-5" />} label="Dans la bibliothèque" value={libraryCount} />
-          <StatCard icon={<BookMarked className="h-5 w-5" />} label="Dans la pile à lire" value={palCount} />
-          <StatCard icon={<Gift className="h-5 w-5" />} label="Dans la wishlist" value={wishlistCount} />
-          <StatCard icon={<CheckCircle2 className="h-5 w-5" />} label="Lectures terminées" value={finishedCount} />
         </div>
 
         {/* ── Currently reading + Last session ── */}
@@ -252,14 +250,14 @@ function RatingDisplay({ rating }: { rating?: number }) {
   );
 }
 
-/* ─── Stat Card ─── */
+/* ─── Stat Card (compact) ─── */
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
-    <Card className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
-      <div className="flex items-center justify-center h-10 w-10 rounded-md bg-muted text-muted-foreground shrink-0">{icon}</div>
+    <Card className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center justify-center h-8 w-8 rounded-md bg-muted text-muted-foreground shrink-0">{icon}</div>
       <div className="flex flex-col min-w-0">
-        <span className="text-xl font-bold text-foreground leading-tight">{value}</span>
-        <span className="text-xs text-muted-foreground truncate">{label}</span>
+        <span className="text-lg font-bold text-foreground leading-tight">{value}</span>
+        <span className="text-[10px] text-muted-foreground truncate">{label}</span>
       </div>
     </Card>
   );
