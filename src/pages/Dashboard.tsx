@@ -251,12 +251,14 @@ function RatingDisplay({ rating }: { rating?: number }) {
 }
 
 /* ─── Stat Card (compact) ─── */
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function StatCard({ icon, label, value, suffix = "livre" }: { icon: React.ReactNode; label: string; value: number; suffix?: string }) {
   return (
     <Card className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3">
       <div className="flex items-center justify-center h-8 w-8 rounded-md bg-muted text-muted-foreground shrink-0">{icon}</div>
       <div className="flex flex-col min-w-0">
-        <span className="text-lg font-bold text-foreground leading-tight">{value}</span>
+        <span className="text-lg font-bold text-foreground leading-tight">
+          {value} {suffix}{value > 1 ? "s" : ""}
+        </span>
         <span className="text-[10px] text-muted-foreground truncate">{label}</span>
       </div>
     </Card>
