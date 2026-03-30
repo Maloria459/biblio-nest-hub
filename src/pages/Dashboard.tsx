@@ -134,10 +134,10 @@ const Dashboard = () => {
             </Card>
             <ReadingStreakCard />
             <div className="grid grid-cols-2 gap-3 flex-1">
-              <StatCard icon={<Library className="h-4 w-4" />} label="Bibliothèque" value={libraryCount} />
-              <StatCard icon={<BookMarked className="h-4 w-4" />} label="Pile à lire" value={palCount} />
-              <StatCard icon={<Gift className="h-4 w-4" />} label="Wishlist" value={wishlistCount} />
-              <StatCard icon={<CheckCircle2 className="h-4 w-4" />} label="Terminés" value={finishedCount} />
+              <StatCard icon={<Library className="h-4 w-4" />} label="Dans ma bibliothèque" value={libraryCount} />
+              <StatCard icon={<BookMarked className="h-4 w-4" />} label="Dans ma pile à lire" value={palCount} />
+              <StatCard icon={<Gift className="h-4 w-4" />} label="Dans ma wishlist" value={wishlistCount} />
+              <StatCard icon={<CheckCircle2 className="h-4 w-4" />} label="Terminé" value={finishedCount} suffix="livre" />
             </div>
           </div>
           <DashboardCalendar />
