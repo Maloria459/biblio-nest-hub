@@ -172,12 +172,13 @@ export function DashboardCalendar() {
                 </div>
                 {/* Content box below the date */}
                 {hasContent && (
-                  <div className="w-full rounded overflow-hidden bg-muted/50 flex items-center justify-center" style={{ minHeight: 24 }}>
+                  <div className="w-full rounded overflow-hidden bg-muted/30 flex items-center justify-center">
                     {hasRelease && dayReleases[0].coverUrl ? (
                       <img
                         src={dayReleases[0].coverUrl}
                         alt={dayReleases[0].title}
-                        className="w-full h-6 object-cover rounded"
+                        className="w-full object-contain rounded"
+                        style={{ maxHeight: 32 }}
                       />
                     ) : dayEvents.length > 0 ? (
                       <div className="flex gap-0.5 py-1">
