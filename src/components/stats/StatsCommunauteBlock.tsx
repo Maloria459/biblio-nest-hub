@@ -1,4 +1,5 @@
 import { Calendar, Users, MessageSquare } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Props {
   literaryEventsCount: number;
@@ -20,13 +21,17 @@ function StatItem({ icon: Icon, label, value }: { icon: React.ElementType; label
 
 export function StatsCommunauteBlock(props: Props) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-base font-semibold text-foreground">🤝 Communauté</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <StatItem icon={Calendar} label="Événements littéraires" value={String(props.literaryEventsCount)} />
-        <StatItem icon={Users} label="Événements du club" value={String(props.clubEventsCount)} />
-        <StatItem icon={MessageSquare} label="Publications" value={String(props.publicationsCount)} />
-      </div>
-    </div>
+    <Card className="border-border/60">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold">🤝 Communauté</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <StatItem icon={Calendar} label="Événements littéraires" value={String(props.literaryEventsCount)} />
+          <StatItem icon={Users} label="Événements du club" value={String(props.clubEventsCount)} />
+          <StatItem icon={MessageSquare} label="Publications" value={String(props.publicationsCount)} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
