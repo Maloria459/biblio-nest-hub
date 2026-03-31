@@ -34,21 +34,25 @@ export function ReadingStreakCard() {
     return streak;
   }, [sessionDates]);
 
-  // Last 7 days (6 previous days + today)
+  // Current week Mon–Sun
   const weekDays = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayKey = dateKey(today);
+    // Find Monday of current week
+    const dayOfWeek = today.getDay(); // 0=Sun
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
 
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(today.getDate() - (6 - i));
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
       const key = dateKey(d);
-      const isToday = key === dateKey(today);
       return {
-        label: DAY_LABELS[(d.getDay() + 6) % 7],
+        label: DAY_LABELS[i],
         active: sessionDates.has(key),
-        isFuture: false,
-        isToday,
+        isFuture: d > today,
+        isToday: key === todayKey,
       };
     });
   }, [sessionDates]);

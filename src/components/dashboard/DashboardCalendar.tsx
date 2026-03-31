@@ -172,7 +172,7 @@ export function DashboardCalendar() {
                 </div>
                 {/* Content box below the date */}
                 {hasContent && (
-                  <div className="w-full rounded overflow-hidden bg-muted/30 flex items-center justify-center">
+                  <div className="w-full rounded overflow-hidden flex items-center justify-center">
                     {hasRelease && dayReleases[0].coverUrl ? (
                       <img
                         src={dayReleases[0].coverUrl}
