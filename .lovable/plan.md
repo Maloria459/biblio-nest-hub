@@ -1,30 +1,56 @@
 
 
-## Plan révisé : Tableau de bord + Statistiques
+## Refonte visuelle et fonctionnelle de "Mes statistiques"
 
-Deux corrections par rapport au plan approuvé :
+### 1. Filtres avancés avec sélection libre de période
 
-1. **Calendrier** : Les jours avec une sortie littéraire affichent le numéro du jour ET la couverture miniature en arrière-plan (ou en vignette sous le numéro), au lieu de remplacer le numéro.
+Remplacer les 4 boutons actuels (Semaine / Mois / Année / Depuis mon inscription) par un système plus flexible :
 
-2. **Layout banner** : Le bloc profil (avatar, pseudo, club, rang, Éclats d'Encre) et le calendrier occupent chacun exactement 50% de la largeur et partagent la même hauteur (via `grid grid-cols-2` avec `items-stretch` ou hauteur min commune).
+- **Boutons de mode** : Semaine, Mois, Année, Global
+- **Navigation dans la période** : Quand Semaine, Mois ou Année est sélectionné, afficher des flèches gauche/droite + le label de la période (ex: "Semaine du 24 mars 2026", "Mars 2026", "2025") pour naviguer librement
+- **Bouton "Réinitialiser"** : Ramène au mode "Global" (depuis l'inscription)
+- Le mode "Global" n'a pas de navigation, il affiche tout
 
-Tout le reste du plan approuvé reste inchangé (streak, suppression des 3 cartes événements, refonte statistiques avec les 5 blocs catégorisés, filtre Semaine/Mois/Année/Global).
+**Fichier** : `StatistiquesContent.tsx` (refonte du bloc filtres + state `periodOffset` pour naviguer)
 
-### Détail technique du calendrier
+### 2. Amélioration visuelle : Cards distinctes par bloc
 
-- Grille 7 colonnes (Lun→Dim), chaque cellule contient le numéro du jour
-- Si une sortie littéraire tombe ce jour : la couverture du livre s'affiche en fond de la cellule (petit `img` positionné en absolute, opacité réduite ou taille réduite) avec le numéro par-dessus
-- Événements littéraires et club : petit point coloré sous le numéro
-- Tooltip au survol pour le détail
-
-### Layout banner (CSS)
+Chaque bloc sera encadré dans une `Card` avec bordure et padding pour bien les séparer visuellement :
 
 ```text
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <Card class="h-full">  ← Profil  </Card>
-  <Card class="h-full">  ← Calendrier  </Card>
-</div>
+┌─ Card ─────────────────────────────┐
+│ 📖 Lecture                         │
+│ ┌──────┐ ┌──────┐ ┌──────┐ ...    │
+│ │ Stat │ │ Stat │ │ Stat │        │
+│ └──────┘ └──────┘ └──────┘        │
+│ ┌─────────────┐ ┌─────────────┐   │
+│ │ Chart       │ │ Chart       │   │
+│ └─────────────┘ └─────────────┘   │
+└────────────────────────────────────┘
 ```
 
-Les deux cartes s'étirent à la même hauteur grâce à `items-stretch` (défaut de CSS grid).
+**Modifications par bloc** :
+
+- **StatsLectureBlock** : Wrapper `Card` avec titre en `CardHeader`. Sous-sections "Chiffres clés", "Records" et "Graphiques" séparées par des sous-titres légers. Ajouter la distribution des notes (rating chart) et la note moyenne dans ce bloc.
+- **StatsBibliothequeBlock** : Wrapper `Card`. Ajouter des icônes aux StatItems (ShoppingCart, Wallet). Les graphiques genre/format restent en grille 2 colonnes.
+- **StatsObjectifsBlock** : Wrapper `Card`. Ajouter le nombre total d'objectifs créés et le taux de complétion en plus du nombre réalisé.
+- **StatsGamificationBlock** : Wrapper `Card`. Les 5 items restent en grille.
+- **StatsCommunauteBlock** : Wrapper `Card`. Les 3 items restent en grille.
+
+### 3. Améliorations de cohérence des données
+
+- **Ajouter la note moyenne et la distribution des notes** dans le bloc Lecture (déjà un composant `StatsRatingChart` existant mais non utilisé)
+- **Bibliothèque** : Renommer "Livres achetés" en "Livres acquis" (plus cohérent car inclut les cadeaux), ajouter "Nombre total de livres" comme stat
+- **Objectifs** : Ajouter "Objectifs en cours" et "Objectifs créés" en plus de "réalisés"
+
+### 4. Fichiers modifiés
+
+| Fichier | Changement |
+|---------|-----------|
+| `StatistiquesContent.tsx` | Filtres avec navigation libre + ajout rating data + objectifs enrichis |
+| `StatsLectureBlock.tsx` | Wrapper Card, sous-sections, ajout rating chart |
+| `StatsBibliothequeBlock.tsx` | Wrapper Card, icônes, stat "Total livres" |
+| `StatsObjectifsBlock.tsx` | Wrapper Card, stats enrichies (en cours, créés, réalisés) |
+| `StatsGamificationBlock.tsx` | Wrapper Card |
+| `StatsCommunauteBlock.tsx` | Wrapper Card |
 
