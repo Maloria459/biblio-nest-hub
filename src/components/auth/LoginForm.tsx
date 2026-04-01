@@ -17,6 +17,23 @@ export function LoginForm({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleAppleSignIn = async () => {
+    setAppleLoading(true);
+    setError("");
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      toast({ variant: "destructive", title: "Erreur", description: "La connexion avec Apple a échoué." });
+    }
+    if (result.redirected) {
+      return;
+    }
+    setAppleLoading(false);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
