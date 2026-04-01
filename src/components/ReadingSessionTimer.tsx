@@ -62,8 +62,13 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
     }
   }, [open]);
 
+  const handlePauseToggle = useCallback(() => {
+    setPaused(p => !p);
+  }, []);
+
   const handleStop = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    setPaused(false);
     setPhase("record");
   }, []);
 
