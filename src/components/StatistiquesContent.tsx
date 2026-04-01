@@ -3,24 +3,18 @@ import { useBooks } from "@/contexts/BooksContext";
 import { useReadingSessions, type ReadingSession } from "@/hooks/useReadingSessions";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isAfter, isBefore, parseISO, format, getDay, addWeeks, addMonths, addYears, subWeeks, subMonths, subYears } from "date-fns";
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isAfter, isBefore, parseISO, format, getDay, getISOWeek, addWeeks, addMonths, addYears, subWeeks, subMonths, subYears, eachDayOfInterval, eachWeekOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { StatsLectureBlock } from "@/components/stats/StatsLectureBlock";
 import { StatsBibliothequeBlock } from "@/components/stats/StatsBibliothequeBlock";
 import { StatsObjectifsBlock } from "@/components/stats/StatsObjectifsBlock";
 import { StatsGamificationBlock } from "@/components/stats/StatsGamificationBlock";
 import { StatsCommunauteBlock } from "@/components/stats/StatsCommunauteBlock";
-
-const PERIOD_MODES = [
-  { value: "week", label: "Semaine" },
-  { value: "month", label: "Mois" },
-  { value: "year", label: "Année" },
-  { value: "all", label: "Global" },
-];
 
 function useMemberSince() {
   const { user } = useAuth();
@@ -53,56 +47,93 @@ function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function getPeriodRange(mode: string, offset: number) {
-  const base = new Date();
-  if (mode === "week") {
-    const shifted = addWeeks(base, offset);
-    return { rangeStart: startOfWeek(shifted, { weekStartsOn: 1 }), rangeEnd: endOfWeek(shifted, { weekStartsOn: 1 }) };
+// Generate week options for current year
+function getWeekOptions() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const weeks: { value: string; label: string }[] = [];
+  let d = startOfWeek(new Date(year, 0, 4), { weekStartsOn: 1 }); // first ISO week
+  for (let w = 1; w <= 53; w++) {
+    const wStart = startOfWeek(d, { weekStartsOn: 1 });
+    if (wStart.getFullYear() > year && w > 1) break;
+    weeks.push({
+      value: `${year}-W${String(w).padStart(2, "0")}`,
+      label: `Sem. ${w} (${format(wStart, "dd/MM", { locale: fr })})`,
+    });
+    d = addWeeks(d, 1);
   }
-  if (mode === "month") {
-    const shifted = addMonths(base, offset);
-    return { rangeStart: startOfMonth(shifted), rangeEnd: endOfMonth(shifted) };
-  }
-  if (mode === "year") {
-    const shifted = addYears(base, offset);
-    return { rangeStart: startOfYear(shifted), rangeEnd: endOfYear(shifted) };
-  }
-  return { rangeStart: null, rangeEnd: null };
+  return weeks;
 }
 
-function getPeriodLabel(mode: string, offset: number): string {
-  const base = new Date();
-  if (mode === "week") {
-    const shifted = addWeeks(base, offset);
-    const start = startOfWeek(shifted, { weekStartsOn: 1 });
-    return `Semaine du ${format(start, "d MMMM yyyy", { locale: fr })}`;
+function getMonthOptions() {
+  return Array.from({ length: 12 }, (_, i) => ({
+    value: String(i),
+    label: format(new Date(2024, i, 1), "MMMM", { locale: fr }),
+  }));
+}
+
+function getYearOptions(memberSince: Date | null) {
+  const now = new Date();
+  const startYear = memberSince ? memberSince.getFullYear() : now.getFullYear() - 5;
+  const years: { value: string; label: string }[] = [];
+  for (let y = startYear; y <= now.getFullYear(); y++) {
+    years.push({ value: String(y), label: String(y) });
   }
-  if (mode === "month") {
-    const shifted = addMonths(base, offset);
-    return format(shifted, "MMMM yyyy", { locale: fr });
-  }
-  if (mode === "year") {
-    const shifted = addYears(base, offset);
-    return format(shifted, "yyyy");
-  }
-  return "Depuis mon inscription";
+  return years;
 }
 
 export function StatistiquesContent() {
-  const [mode, setMode] = useState("all");
-  const [offset, setOffset] = useState(0);
+  const [selectedWeek, setSelectedWeek] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState("all");
+  const [selectedYear, setSelectedYear] = useState("all");
   const { books } = useBooks();
   const { data: sessions = [] } = useReadingSessions();
   const { user } = useAuth();
   const memberSince = useMemberSince();
 
-  const handleModeChange = (newMode: string) => {
-    setMode(newMode);
-    setOffset(0);
+  const weekOptions = useMemo(() => getWeekOptions(), []);
+  const monthOptions = useMemo(() => getMonthOptions(), []);
+  const yearOptions = useMemo(() => getYearOptions(memberSince), [memberSince]);
+
+  const handleReset = () => {
+    setSelectedWeek("all");
+    setSelectedMonth("all");
+    setSelectedYear("all");
   };
 
-  const { rangeStart, rangeEnd } = useMemo(() => getPeriodRange(mode, offset), [mode, offset]);
-  const periodLabel = useMemo(() => getPeriodLabel(mode, offset), [mode, offset]);
+  const hasFilter = selectedWeek !== "all" || selectedMonth !== "all" || selectedYear !== "all";
+
+  // Compute range from selections
+  const { rangeStart, rangeEnd, filterMode } = useMemo(() => {
+    const now = new Date();
+    const year = selectedYear !== "all" ? parseInt(selectedYear) : null;
+
+    if (selectedWeek !== "all") {
+      // Week selected: extract year and week number
+      const parts = selectedWeek.split("-W");
+      const wYear = parseInt(parts[0]);
+      const wNum = parseInt(parts[1]);
+      let d = startOfWeek(new Date(wYear, 0, 4), { weekStartsOn: 1 });
+      d = addWeeks(d, wNum - 1);
+      return { rangeStart: startOfWeek(d, { weekStartsOn: 1 }), rangeEnd: endOfWeek(d, { weekStartsOn: 1 }), filterMode: "week" as const };
+    }
+
+    if (selectedMonth !== "all" && year) {
+      const m = parseInt(selectedMonth);
+      return { rangeStart: startOfMonth(new Date(year, m, 1)), rangeEnd: endOfMonth(new Date(year, m, 1)), filterMode: "month" as const };
+    }
+
+    if (selectedMonth !== "all") {
+      const m = parseInt(selectedMonth);
+      return { rangeStart: startOfMonth(new Date(now.getFullYear(), m, 1)), rangeEnd: endOfMonth(new Date(now.getFullYear(), m, 1)), filterMode: "month" as const };
+    }
+
+    if (year) {
+      return { rangeStart: startOfYear(new Date(year, 0, 1)), rangeEnd: endOfYear(new Date(year, 0, 1)), filterMode: "year" as const };
+    }
+
+    return { rangeStart: null, rangeEnd: null, filterMode: "all" as const };
+  }, [selectedWeek, selectedMonth, selectedYear]);
 
   const filteredBooks = useMemo(() => books.filter((b) => dateInRange(b.endDate || b.startDate, rangeStart, rangeEnd)), [books, rangeStart, rangeEnd]);
   const filteredSessions = useMemo(() => sessions.filter((s) => dateInRange(s.session_date, rangeStart, rangeEnd)), [sessions, rangeStart, rangeEnd]);
@@ -170,24 +201,69 @@ export function StatistiquesContent() {
     return max;
   }, [filteredSessions]);
 
-  // Evolution chart
+  // Evolution chart — labels by day for week/month, by month for year/all
   const evolutionData = useMemo(() => {
     if (filteredSessions.length === 0) return [];
     const byKey = new Map<string, number>();
-    const useWeeks = mode === "month" || mode === "week";
-    filteredSessions.forEach((s) => {
-      const d = new Date(s.session_date);
-      const key = useWeeks ? `S${Math.ceil(d.getDate() / 7)}` : format(d, "MMM yy", { locale: fr });
-      byKey.set(key, (byKey.get(key) ?? 0) + (s.last_page_reached ?? 0));
-    });
+
+    if (filterMode === "week") {
+      // By day of week
+      const days = rangeStart && rangeEnd ? eachDayOfInterval({ start: rangeStart, end: rangeEnd }) : [];
+      days.forEach(d => {
+        const label = format(d, "EEE dd", { locale: fr });
+        byKey.set(label, 0);
+      });
+      filteredSessions.forEach((s) => {
+        const d = new Date(s.session_date);
+        const label = format(d, "EEE dd", { locale: fr });
+        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+      });
+    } else if (filterMode === "month") {
+      // By day
+      const days = rangeStart && rangeEnd ? eachDayOfInterval({ start: rangeStart, end: rangeEnd }) : [];
+      days.forEach(d => {
+        const label = format(d, "dd", { locale: fr });
+        byKey.set(label, 0);
+      });
+      filteredSessions.forEach((s) => {
+        const d = new Date(s.session_date);
+        const label = format(d, "dd", { locale: fr });
+        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+      });
+    } else if (filterMode === "year") {
+      // By month
+      for (let m = 0; m < 12; m++) {
+        const label = format(new Date(2024, m, 1), "MMM", { locale: fr });
+        byKey.set(label, 0);
+      }
+      filteredSessions.forEach((s) => {
+        const d = new Date(s.session_date);
+        const label = format(d, "MMM", { locale: fr });
+        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+      });
+    } else {
+      // all: by month
+      filteredSessions.forEach((s) => {
+        const d = new Date(s.session_date);
+        const label = format(d, "MMM yy", { locale: fr });
+        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+      });
+    }
+
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, mode]);
+  }, [filteredSessions, filterMode, rangeStart, rangeEnd]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
     const arr = [0, 0, 0, 0, 0, 0, 0];
-    filteredSessions.forEach((s) => { arr[toMondayIndex(new Date(s.session_date))] += s.duration_minutes; });
-    return arr;
+    const countArr = [0, 0, 0, 0, 0, 0, 0];
+    filteredSessions.forEach((s) => {
+      const idx = toMondayIndex(new Date(s.session_date));
+      arr[idx] += s.duration_minutes;
+      countArr[idx]++;
+    });
+    // Return averages
+    return arr.map((total, i) => countArr[i] > 0 ? total / countArr[i] : 0);
   }, [filteredSessions]);
 
   // ── Rating data ──
@@ -243,7 +319,7 @@ export function StatistiquesContent() {
     staleTime: 5 * 60 * 1000,
   });
   const objectivesCreated = objectives.length;
-  const objectivesCompleted = 0; // TODO: compute when progress tracking is available
+  const objectivesCompleted = 0;
   const objectivesInProgress = objectivesCreated - objectivesCompleted;
 
   // ── Gamification ──
@@ -284,44 +360,59 @@ export function StatistiquesContent() {
   return (
     <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-6">
       {/* Period filter */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="flex gap-1 bg-muted rounded-lg p-1">
-          {PERIOD_MODES.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => handleModeChange(opt.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                mode === opt.value
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Select value={selectedWeek} onValueChange={(v) => setSelectedWeek(v)}>
+          <SelectTrigger className="w-[200px] h-9 text-xs">
+            <SelectValue placeholder="Semaine" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes les semaines</SelectItem>
+            {weekOptions.map((w) => (
+              <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        {mode !== "all" && (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOffset((o) => o - 1)}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-medium text-foreground min-w-[180px] text-center capitalize">
-              {periodLabel}
-            </span>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOffset((o) => o + 1)}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
+        <Select value={selectedMonth} onValueChange={(v) => setSelectedMonth(v)}>
+          <SelectTrigger className="w-[180px] h-9 text-xs">
+            <SelectValue placeholder="Mois" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les mois</SelectItem>
+            {monthOptions.map((m) => (
+              <SelectItem key={m.value} value={m.value} className="capitalize">{m.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        {(mode !== "all" || offset !== 0) && (
-          <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => { setMode("all"); setOffset(0); }}>
+        <Select value={selectedYear} onValueChange={(v) => setSelectedYear(v)}>
+          <SelectTrigger className="w-[140px] h-9 text-xs">
+            <SelectValue placeholder="Année" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes les années</SelectItem>
+            {yearOptions.map((y) => (
+              <SelectItem key={y.value} value={y.value}>{y.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {hasFilter && (
+          <Button variant="outline" size="sm" className="text-xs h-9" onClick={handleReset}>
             <RotateCcw className="h-3 w-3 mr-1" />
             Réinitialiser
           </Button>
         )}
       </div>
+
+      {/* Gamification (moved to top) */}
+      <StatsGamificationBlock
+        challengesCompleted={challengesCompleted}
+        totalEclats={0}
+        totalXpPages={0}
+        totalBadges={0}
+        currentRank="Novice des Pages"
+      />
 
       {/* Lecture */}
       <StatsLectureBlock
@@ -360,15 +451,6 @@ export function StatistiquesContent() {
         objectivesCompleted={objectivesCompleted}
         objectivesCreated={objectivesCreated}
         objectivesInProgress={objectivesInProgress}
-      />
-
-      {/* Gamification */}
-      <StatsGamificationBlock
-        challengesCompleted={challengesCompleted}
-        totalEclats={0}
-        totalXpPages={0}
-        totalBadges={0}
-        currentRank="Novice des Pages"
       />
 
       {/* Communauté */}

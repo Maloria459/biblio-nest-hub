@@ -53,7 +53,7 @@ export function StatsLectureBlock(props: Props) {
             <StatItem icon={CalendarCheck} label="Sessions" value={String(props.totalSessions)} />
             <StatItem icon={Clock} label="Temps total" value={formatTotalReadingTime(props.totalReadingMinutes)} />
             <StatItem icon={Clock} label="Temps moyen / session" value={props.avgReadingMinutes != null ? formatTotalReadingTime(props.avgReadingMinutes) : "—"} />
-            <StatItem icon={TrendingUp} label="Pages / jour" value={props.avgPagesPerDay.toFixed(1)} />
+            <StatItem icon={TrendingUp} label="Moy. pages / jour" value={props.avgPagesPerDay.toFixed(1)} />
             <StatItem icon={Heart} label="Coups de cœur" value={String(props.coupsDeCoeur)} />
             <StatItem icon={Flame} label="Plus long streak" value={`${props.longestStreak} jour${props.longestStreak !== 1 ? "s" : ""}`} />
           </div>
@@ -72,10 +72,14 @@ export function StatsLectureBlock(props: Props) {
         {/* Graphiques */}
         <div>
           <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Graphiques</h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            {/* Evolution: full width */}
             <StatsReadingEvolution data={props.evolutionData} />
-            <StatsWeekdayChart minutesByDay={props.weekdayMinutes} />
-            <StatsRatingChart distribution={props.ratingDistribution} average={props.ratingAverage} />
+            {/* Weekday + Rating side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <StatsWeekdayChart minutesByDay={props.weekdayMinutes} />
+              <StatsRatingChart distribution={props.ratingDistribution} average={props.ratingAverage} />
+            </div>
           </div>
         </div>
       </CardContent>

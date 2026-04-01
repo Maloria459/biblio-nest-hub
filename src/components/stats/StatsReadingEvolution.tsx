@@ -29,7 +29,7 @@ export function StatsReadingEvolution({ data }: Props) {
             <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" />
               <XAxis dataKey="label" tick={{ fontSize: 11 }} className="text-muted-foreground" />
-              <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" />
+              <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" label={{ value: "Pages", angle: -90, position: "insideLeft", style: { fontSize: 10, fill: "hsl(var(--muted-foreground))" } }} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Area
                 type="monotone"
