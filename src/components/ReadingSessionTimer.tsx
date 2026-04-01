@@ -26,6 +26,7 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
 
   const [seconds, setSeconds] = useState(0);
   const [phase, setPhase] = useState<"timer" | "record">("timer");
+  const [paused, setPaused] = useState(false);
   const [abandonConfirm, setAbandonConfirm] = useState(false);
   const [pageInput, setPageInput] = useState("");
   const [pageError, setPageError] = useState("");
