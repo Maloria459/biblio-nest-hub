@@ -42,14 +42,25 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
 
   const totalPages = book.pages ?? 0;
 
-  // Start timer
+  // Start/pause timer
+  useEffect(() => {
+    if (open && phase === "timer" && !paused) {
+      if (!intervalRef.current) {
+        intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      }
+    } else {
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    }
+    return () => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } };
+  }, [open, phase, paused]);
+
+  // Reset seconds only when opening fresh
   useEffect(() => {
     if (open && phase === "timer") {
       setSeconds(0);
-      intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      setPaused(false);
     }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [open, phase]);
+  }, [open]);
 
   const handleStop = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
