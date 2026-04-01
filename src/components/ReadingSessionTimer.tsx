@@ -9,7 +9,7 @@ import { useBooks } from "@/contexts/BooksContext";
 import { useInvalidateSessions, formatDurationHMS, useReadingSessions } from "@/hooks/useReadingSessions";
 import { toast } from "sonner";
 import type { Book } from "@/data/mockBooks";
-import { Square, CheckCircle } from "lucide-react";
+import { Square, CheckCircle, Pause, Play } from "lucide-react";
 
 interface ReadingSessionTimerProps {
   book: Book;
