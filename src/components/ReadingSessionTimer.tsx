@@ -181,11 +181,17 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
                 {formatDurationHMS(seconds)}
               </div>
 
-              {/* Stop button */}
-              <Button className="w-full" onClick={handleStop}>
-                <Square className="h-4 w-4 mr-2" />
-                Terminer ma session de lecture
-              </Button>
+              {/* Pause + Stop buttons */}
+              <div className="flex gap-3 w-full">
+                <Button variant="outline" className="flex-1" onClick={handlePauseToggle}>
+                  {paused ? <Play className="h-4 w-4 mr-2" /> : <Pause className="h-4 w-4 mr-2" />}
+                  {paused ? "Reprendre" : "Pause"}
+                </Button>
+                <Button className="flex-1" onClick={handleStop}>
+                  <Square className="h-4 w-4 mr-2" />
+                  Terminer
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-5">
