@@ -27,7 +27,7 @@ export function StatsRatingChart({ distribution, average }: Props) {
           <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+            <YAxis tick={{ fontSize: 11 }} allowDecimals={false} label={{ value: "Livres", angle: -90, position: "insideLeft", style: { fontSize: 10, fill: "hsl(var(--muted-foreground))" } }} />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="count" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} />
           </BarChart>

@@ -9,7 +9,7 @@ import { useBooks } from "@/contexts/BooksContext";
 import { useInvalidateSessions, formatDurationHMS, useReadingSessions } from "@/hooks/useReadingSessions";
 import { toast } from "sonner";
 import type { Book } from "@/data/mockBooks";
-import { Square, CheckCircle } from "lucide-react";
+import { Square, CheckCircle, Pause, Play } from "lucide-react";
 
 interface ReadingSessionTimerProps {
   book: Book;
@@ -26,6 +26,7 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
 
   const [seconds, setSeconds] = useState(0);
   const [phase, setPhase] = useState<"timer" | "record">("timer");
+  const [paused, setPaused] = useState(false);
   const [abandonConfirm, setAbandonConfirm] = useState(false);
   const [pageInput, setPageInput] = useState("");
   const [pageError, setPageError] = useState("");
@@ -41,17 +42,33 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
 
   const totalPages = book.pages ?? 0;
 
-  // Start timer
+  // Start/pause timer
+  useEffect(() => {
+    if (open && phase === "timer" && !paused) {
+      if (!intervalRef.current) {
+        intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      }
+    } else {
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    }
+    return () => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } };
+  }, [open, phase, paused]);
+
+  // Reset seconds only when opening fresh
   useEffect(() => {
     if (open && phase === "timer") {
       setSeconds(0);
-      intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      setPaused(false);
     }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [open, phase]);
+  }, [open]);
+
+  const handlePauseToggle = useCallback(() => {
+    setPaused(p => !p);
+  }, []);
 
   const handleStop = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    setPaused(false);
     setPhase("record");
   }, []);
 
@@ -59,6 +76,7 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
   const handleAbandon = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setAbandonConfirm(false);
+    setPaused(false);
     setPhase("timer");
     setSeconds(0);
     setPageInput("");
@@ -163,11 +181,17 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
                 {formatDurationHMS(seconds)}
               </div>
 
-              {/* Stop button */}
-              <Button className="w-full" onClick={handleStop}>
-                <Square className="h-4 w-4 mr-2" />
-                Terminer ma session de lecture
-              </Button>
+              {/* Pause + Stop buttons */}
+              <div className="flex gap-3 w-full">
+                <Button variant="outline" className="flex-1" onClick={handlePauseToggle}>
+                  {paused ? <Play className="h-4 w-4 mr-2" /> : <Pause className="h-4 w-4 mr-2" />}
+                  {paused ? "Reprendre" : "Pause"}
+                </Button>
+                <Button className="flex-1" onClick={handleStop}>
+                  <Square className="h-4 w-4 mr-2" />
+                  Terminer
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-5">
