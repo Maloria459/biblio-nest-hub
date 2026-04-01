@@ -76,6 +76,7 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved }: Rea
   const handleAbandon = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setAbandonConfirm(false);
+    setPaused(false);
     setPhase("timer");
     setSeconds(0);
     setPageInput("");
