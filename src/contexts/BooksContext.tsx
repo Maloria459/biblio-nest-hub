@@ -125,7 +125,8 @@ function bookToRow(book: Book, userId: string) {
     lender_name: book.lenderName ?? null,
     reread_count: book.rereadCount ?? 0,
     synopsis: book.synopsis ?? null,
-  };
+    isbn: book.isbn ?? null,
+  } as any;
 }
 
 export function BooksProvider({ children }: { children: ReactNode }) {
