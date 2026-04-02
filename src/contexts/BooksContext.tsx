@@ -56,6 +56,7 @@ function rowToBook(row: any): Book {
     format: row.format ?? undefined,
     publisher: row.publisher ?? undefined,
     series: row.series ?? undefined,
+    isbn: (row as any).isbn ?? undefined,
     pages: row.pages ?? undefined,
     pagesRead: row.pages_read ?? undefined,
     chapters: row.chapters ?? undefined,
