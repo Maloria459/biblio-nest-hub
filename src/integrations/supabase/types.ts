@@ -58,6 +58,7 @@ export type Database = {
           format: string | null
           genre: string | null
           id: string
+          isbn: string | null
           lender_name: string | null
           loan_date: string | null
           mature_content: boolean | null
@@ -100,6 +101,7 @@ export type Database = {
           format?: string | null
           genre?: string | null
           id?: string
+          isbn?: string | null
           lender_name?: string | null
           loan_date?: string | null
           mature_content?: boolean | null
@@ -142,6 +144,7 @@ export type Database = {
           format?: string | null
           genre?: string | null
           id?: string
+          isbn?: string | null
           lender_name?: string | null
           loan_date?: string | null
           mature_content?: boolean | null

@@ -56,6 +56,7 @@ function rowToBook(row: any): Book {
     format: row.format ?? undefined,
     publisher: row.publisher ?? undefined,
     series: row.series ?? undefined,
+    isbn: (row as any).isbn ?? undefined,
     pages: row.pages ?? undefined,
     pagesRead: row.pages_read ?? undefined,
     chapters: row.chapters ?? undefined,
@@ -124,7 +125,8 @@ function bookToRow(book: Book, userId: string) {
     lender_name: book.lenderName ?? null,
     reread_count: book.rereadCount ?? 0,
     synopsis: book.synopsis ?? null,
-  };
+    isbn: book.isbn ?? null,
+  } as any;
 }
 
 export function BooksProvider({ children }: { children: ReactNode }) {

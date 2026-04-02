@@ -35,6 +35,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [series, setSeries] = useState("");
+  const [isbn, setIsbn] = useState("");
   const [publisher, setPublisher] = useState("");
   const [pubDate, setPubDate] = useState("");
   const [price, setPrice] = useState("");
@@ -55,7 +56,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
 
   const reset = () => {
     setCoverMode("upload"); setCoverUrl(""); setCoverPreview(""); setCoverFileObj(null); setCoverFileName("");
-    setTitle(""); setAuthor(""); setSeries(""); setPublisher(""); setPubDate("");
+    setTitle(""); setAuthor(""); setSeries(""); setIsbn(""); setPublisher(""); setPubDate("");
     setPrice(""); setGenre(""); setFormat(""); setStatus(""); setSecondaryStatus(""); setPages("");
     setChapters(""); setSpicy(0); setMature(false);
     setLoanDate(""); setBorrowerName(""); setBorrowDate(""); setReturnDate(""); setLenderName("");
@@ -116,6 +117,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
       format: format || undefined,
       publisher: publisher || undefined,
       series: series || undefined,
+      isbn: isbn || undefined,
       pages: pages ? parseInt(pages) : undefined,
       chapters: chapters ? parseInt(chapters) : undefined,
       publicationDate: pubDate || undefined,
@@ -160,6 +162,16 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               if (book.publisher) setPublisher(book.publisher);
               if (book.publishedDate) setPubDate(book.publishedDate);
               if (book.pageCount) setPages(String(book.pageCount));
+              if (book.isbn) setIsbn(book.isbn);
+              if (book.series) setSeries(book.series);
+              if (book.genre) {
+                // Try to match with existing genres
+                const matchedGenre = genres.find(g => 
+                  book.genre!.toLowerCase().includes(g.toLowerCase()) ||
+                  g.toLowerCase().includes(book.genre!.toLowerCase())
+                );
+                if (matchedGenre) setGenre(matchedGenre);
+              }
               if (book.coverUrl) {
                 setCoverMode("url");
                 setCoverUrl(book.coverUrl);
@@ -219,9 +231,15 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
             </div>
 
             {/* Series */}
-            <div className="space-y-1">
-              <Label className="text-xs">Série</Label>
-              <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Série</Label>
+                <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">ISBN</Label>
+                <Input value={isbn} onChange={(e) => setIsbn(e.target.value)} placeholder="978-..." />
+              </div>
             </div>
 
             {/* Publisher, Date, Price */}
