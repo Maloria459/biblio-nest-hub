@@ -49,18 +49,38 @@ export function AccountSettings() {
   const handleSaveProfile = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase
+
+    // Check pseudo uniqueness if changed
+    const trimmedPseudo = pseudo.trim();
+    if (trimmedPseudo) {
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("pseudo", trimmedPseudo)
+        .neq("user_id", user.id)
+        .maybeSingle();
+      if (existing) {
+        setSaving(false);
+        toast({ title: "Erreur", description: "Ce pseudo est déjà utilisé par un autre utilisateur.", variant: "destructive" });
+        return;
+      }
+    }
+
+    const { data, error } = await supabase
       .from("profiles")
       .update({
-        pseudo: pseudo.trim(),
+        pseudo: trimmedPseudo,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         date_of_birth: dateOfBirth || null,
       })
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .select();
     setSaving(false);
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else if (!data || data.length === 0) {
+      toast({ title: "Erreur", description: "Impossible de mettre à jour le profil.", variant: "destructive" });
     } else {
       toast({ title: "Profil mis à jour" });
     }
