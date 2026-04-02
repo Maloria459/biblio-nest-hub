@@ -31,8 +31,22 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const { toast } = useToast();
   const pseudoTimer = useRef<ReturnType<typeof setTimeout>>();
   const emailTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleOAuthSignIn = async (provider: "google" | "apple") => {
+    setSocialLoading(provider);
+    const result = await lovable.auth.signInWithOAuth(provider, {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      toast({ variant: "destructive", title: "Erreur", description: `La connexion avec ${provider === "google" ? "Google" : "Apple"} a échoué.` });
+    }
+    if (result.redirected) return;
+    setSocialLoading(null);
+  };
 
   const allCriteriaMet = useMemo(
     () => passwordCriteria.every((c) => c.test(password)),
