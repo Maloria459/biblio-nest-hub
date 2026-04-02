@@ -117,7 +117,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
       format: format || undefined,
       publisher: publisher || undefined,
       series: series || undefined,
-      pages: pages ? parseInt(pages) : undefined,
+      isbn: isbn || undefined,
       chapters: chapters ? parseInt(chapters) : undefined,
       publicationDate: pubDate || undefined,
       price: price ? parseFloat(price) : undefined,
