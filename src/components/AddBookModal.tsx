@@ -161,6 +161,16 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               if (book.publisher) setPublisher(book.publisher);
               if (book.publishedDate) setPubDate(book.publishedDate);
               if (book.pageCount) setPages(String(book.pageCount));
+              if (book.isbn) setIsbn(book.isbn);
+              if (book.series) setSeries(book.series);
+              if (book.genre) {
+                // Try to match with existing genres
+                const matchedGenre = genres.find(g => 
+                  book.genre!.toLowerCase().includes(g.toLowerCase()) ||
+                  g.toLowerCase().includes(book.genre!.toLowerCase())
+                );
+                if (matchedGenre) setGenre(matchedGenre);
+              }
               if (book.coverUrl) {
                 setCoverMode("url");
                 setCoverUrl(book.coverUrl);
