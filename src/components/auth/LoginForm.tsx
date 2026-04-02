@@ -17,22 +17,20 @@ export function LoginForm({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [appleLoading, setAppleLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleAppleSignIn = async () => {
-    setAppleLoading(true);
+  const handleOAuthSignIn = async (provider: "google" | "apple") => {
+    setSocialLoading(provider);
     setError("");
-    const result = await lovable.auth.signInWithOAuth("apple", {
+    const result = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      toast({ variant: "destructive", title: "Erreur", description: "La connexion avec Apple a échoué." });
+      toast({ variant: "destructive", title: "Erreur", description: `La connexion avec ${provider === "google" ? "Google" : "Apple"} a échoué.` });
     }
-    if (result.redirected) {
-      return;
-    }
-    setAppleLoading(false);
+    if (result.redirected) return;
+    setSocialLoading(null);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
