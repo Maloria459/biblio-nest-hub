@@ -43,6 +43,7 @@ export interface Book {
   lenderName?: string;
   rereadCount?: number;
   synopsis?: string;
+  isbn?: string;
 }
 
 export const mockBooks: Book[] = [

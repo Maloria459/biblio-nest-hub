@@ -12,6 +12,10 @@ export interface GoogleBookResult {
   publishedDate?: string;
   pageCount?: number;
   coverUrl?: string;
+  isbn?: string;
+  genre?: string;
+  series?: string;
+  synopsis?: string;
 }
 
 interface Props {
@@ -39,6 +43,16 @@ export function GoogleBooksSearch({ onSelect }: Props) {
       const data = await res.json();
       const items: GoogleBookResult[] = (data.items || []).map((item: any) => {
         const vol = item.volumeInfo || {};
+        // Extract ISBN-13 or ISBN-10
+        const identifiers = vol.industryIdentifiers || [];
+        const isbn13 = identifiers.find((id: any) => id.type === "ISBN_13");
+        const isbn10 = identifiers.find((id: any) => id.type === "ISBN_10");
+        const isbn = isbn13?.identifier || isbn10?.identifier || undefined;
+        // Extract first category as genre
+        const genre = vol.categories?.[0] || undefined;
+        // Extract series info from subtitle or title
+        const series = vol.subtitle || undefined;
+
         return {
           title: vol.title || "",
           author: (vol.authors || []).join(", "),
@@ -46,6 +60,10 @@ export function GoogleBooksSearch({ onSelect }: Props) {
           publishedDate: vol.publishedDate,
           pageCount: vol.pageCount,
           coverUrl: vol.imageLinks?.thumbnail?.replace("http://", "https://"),
+          isbn,
+          genre,
+          series,
+          synopsis: vol.description || undefined,
         };
       });
       setResults(items);
@@ -87,7 +105,10 @@ export function GoogleBooksSearch({ onSelect }: Props) {
                 )}
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{book.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{book.author}{book.publisher ? ` · ${book.publisher}` : ""}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {book.author}{book.publisher ? ` · ${book.publisher}` : ""}
+                    {book.isbn ? ` · ISBN: ${book.isbn}` : ""}
+                  </p>
                 </div>
               </button>
             ))}
