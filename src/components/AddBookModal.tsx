@@ -55,7 +55,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
 
   const reset = () => {
     setCoverMode("upload"); setCoverUrl(""); setCoverPreview(""); setCoverFileObj(null); setCoverFileName("");
-    setTitle(""); setAuthor(""); setSeries(""); setPublisher(""); setPubDate("");
+    setTitle(""); setAuthor(""); setSeries(""); setIsbn(""); setPublisher(""); setPubDate("");
     setPrice(""); setGenre(""); setFormat(""); setStatus(""); setSecondaryStatus(""); setPages("");
     setChapters(""); setSpicy(0); setMature(false);
     setLoanDate(""); setBorrowerName(""); setBorrowDate(""); setReturnDate(""); setLenderName("");
