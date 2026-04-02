@@ -230,9 +230,15 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
             </div>
 
             {/* Series */}
-            <div className="space-y-1">
-              <Label className="text-xs">Série</Label>
-              <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Série</Label>
+                <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">ISBN</Label>
+                <Input value={isbn} onChange={(e) => setIsbn(e.target.value)} placeholder="978-..." />
+              </div>
             </div>
 
             {/* Publisher, Date, Price */}
