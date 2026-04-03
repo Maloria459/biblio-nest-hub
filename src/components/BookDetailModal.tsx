@@ -335,24 +335,33 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 ) : null}
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Éditeur</p>
-                    <p className="text-sm font-medium">{eb.publisher || "—"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Date de publication</p>
-                    <p className="text-sm font-medium">{eb.publicationDate || "—"}</p>
-                  </div>
-                </div>
-
-                {/* ISBN next to publication date when no series */}
-                {!eb.series && eb.isbn && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div />
-                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 -mt-1">
+                {!eb.series ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Éditeur</p>
+                      <p className="text-sm font-medium">{eb.publisher || "—"}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Date de publication</p>
+                      <p className="text-sm font-medium">{eb.publicationDate || "—"}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
                       <p className="text-[11px] uppercase tracking-wider text-muted-foreground">ISBN</p>
-                      <p className="text-sm font-medium">{eb.isbn}</p>
+                      <p className="text-sm font-medium">{eb.isbn || "—"}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Éditeur</p>
+                      <p className="text-sm font-medium">{eb.publisher || "—"}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Date de publication</p>
+                      <p className="text-sm font-medium">{eb.publicationDate || "—"}</p>
+                    </div>
+                  </div>
+                )}
                     </div>
                   </div>
                 )}
