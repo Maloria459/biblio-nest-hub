@@ -42,7 +42,7 @@ export function WishlistContent() {
     (id: string) => {
       const book = books.find((b) => b.id === id);
       if (book) {
-        updateBook({ ...book, status: "Acheté" });
+        updateBook({ ...book, status: "Acheté", acquiredFromWishlist: true });
       }
     },
     [books, updateBook],

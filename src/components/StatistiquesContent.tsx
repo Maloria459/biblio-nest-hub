@@ -305,8 +305,8 @@ export function StatistiquesContent() {
   }, [readBooks]);
 
   const totalBooksOwned = books.length;
-  const booksAcquired = useMemo(() => filteredBooks.filter((b) => b.price != null && b.price > 0).length, [filteredBooks]);
-  const totalSpent = useMemo(() => filteredBooks.reduce((s, b) => s + (b.price ?? 0), 0), [filteredBooks]);
+  const booksAcquired = useMemo(() => filteredBooks.filter((b) => b.acquiredFromWishlist).length, [filteredBooks]);
+  const totalSpent = useMemo(() => filteredBooks.filter((b) => b.acquiredFromWishlist).reduce((s, b) => s + (b.price ?? 0), 0), [filteredBooks]);
 
   // ── Objectifs ──
   const { data: objectives = [] } = useQuery({
