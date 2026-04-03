@@ -362,9 +362,8 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                     </div>
                   </div>
                 )}
-                    </div>
-                  </div>
-                )}
+
+
 
                 <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
