@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { type Book, type Citation } from "@/data/mockBooks";
+import { type Book, type Citation, type ChapterNoteEntry, type PassageEntry, type PersonnageEntry } from "@/data/mockBooks";
 import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librarySettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
