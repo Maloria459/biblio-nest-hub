@@ -235,10 +235,16 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
               </div>
             </div>
 
-            {/* Series */}
-            <div className="space-y-1">
-              <Label className="text-xs">Série</Label>
-              <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+            {/* Series + ISBN */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Série</Label>
+                <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">ISBN</Label>
+                <Input value={isbn} onChange={(e) => setIsbn(e.target.value)} />
+              </div>
             </div>
 
             {/* Publisher, Date, Price */}
