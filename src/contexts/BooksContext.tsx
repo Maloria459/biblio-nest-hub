@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { type Book, type Citation } from "@/data/mockBooks";
+import { type Book, type Citation, type ChapterNoteEntry, type PassageEntry, type PersonnageEntry } from "@/data/mockBooks";
 import { DEFAULT_GENRES, DEFAULT_FORMATS, DEFAULT_STATUSES } from "@/data/librarySettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +42,46 @@ interface BooksContextType {
 
 const BooksContext = createContext<BooksContextType | null>(null);
 
+// Parse helpers for migrated data formats
+function parsePassages(raw: any): PassageEntry[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    if (raw.trim()) return [{ id: '1', text: raw }];
+  }
+  return [];
+}
+
+function parsePersonnages(raw: any): PersonnageEntry[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    if (raw.trim()) return [{ id: '1', text: raw }];
+  }
+  return [];
+}
+
+function parseChapterNotes(raw: any): ChapterNoteEntry[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'object') {
+    return Object.entries(raw).map(([key, value]) => ({
+      id: Date.now().toString() + key,
+      text: value as string,
+      chapter: parseInt(key) || undefined,
+    }));
+  }
+  return [];
+}
+
 // Convert DB row to Book
 function rowToBook(row: any): Book {
   return {
@@ -69,11 +109,12 @@ function rowToBook(row: any): Book {
     startDate: row.start_date ?? undefined,
     endDate: row.end_date ?? undefined,
     avis: row.avis ?? undefined,
-    citations: row.citations as Citation[] ?? undefined,
-    passagesPreferes: row.passages_preferes ?? undefined,
-    personnagesPreferes: row.personnages_preferes ?? undefined,
-    chapterNotes: row.chapter_notes as Record<number, string> ?? undefined,
+    citations: (Array.isArray(row.citations) ? row.citations : []) as Citation[],
+    passagesPreferes: parsePassages(row.passages_preferes),
+    personnagesPreferes: parsePersonnages(row.personnages_preferes),
+    chapterNotes: parseChapterNotes(row.chapter_notes),
     chapterNotesEnabled: row.chapter_notes_enabled ?? undefined,
+    acquiredFromWishlist: (row as any).acquired_from_wishlist ?? false,
     secondaryStatus: row.secondary_status ?? undefined,
     loanDate: row.loan_date ?? undefined,
     borrowerName: row.borrower_name ?? undefined,
@@ -113,9 +154,10 @@ function bookToRow(book: Book, userId: string) {
     end_date: book.endDate ?? null,
     avis: book.avis ?? null,
     citations: (book.citations ?? []) as any,
-    passages_preferes: book.passagesPreferes ?? null,
-    personnages_preferes: book.personnagesPreferes ?? null,
-    chapter_notes: (book.chapterNotes ?? {}) as any,
+    passages_preferes: JSON.stringify(book.passagesPreferes ?? []),
+    personnages_preferes: JSON.stringify(book.personnagesPreferes ?? []),
+    chapter_notes: (book.chapterNotes ?? []) as any,
+    acquired_from_wishlist: book.acquiredFromWishlist ?? false,
     chapter_notes_enabled: book.chapterNotesEnabled ?? false,
     secondary_status: book.secondaryStatus ?? null,
     loan_date: book.loanDate ?? null,

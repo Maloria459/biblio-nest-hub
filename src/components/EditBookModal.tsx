@@ -35,6 +35,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [series, setSeries] = useState("");
+  const [isbn, setIsbn] = useState("");
   const [publisher, setPublisher] = useState("");
   const [pubDate, setPubDate] = useState("");
   const [price, setPrice] = useState("");
@@ -58,6 +59,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       setTitle(book.title || "");
       setAuthor(book.author || "");
       setSeries(book.series || "");
+      setIsbn(book.isbn || "");
       setPublisher(book.publisher || "");
       setPubDate(book.publicationDate || "");
       setPrice(book.price != null ? String(book.price) : "");
@@ -146,6 +148,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       format: format || undefined,
       publisher: publisher || undefined,
       series: series || undefined,
+      isbn: isbn || undefined,
       pages: pages ? parseInt(pages) : undefined,
       chapters: chapters ? parseInt(chapters) : undefined,
       publicationDate: pubDate || undefined,
@@ -233,10 +236,16 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
               </div>
             </div>
 
-            {/* Series */}
-            <div className="space-y-1">
-              <Label className="text-xs">Série</Label>
-              <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+            {/* Series + ISBN */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Série</Label>
+                <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">ISBN</Label>
+                <Input value={isbn} onChange={(e) => setIsbn(e.target.value)} />
+              </div>
             </div>
 
             {/* Publisher, Date, Price */}
