@@ -42,6 +42,46 @@ interface BooksContextType {
 
 const BooksContext = createContext<BooksContextType | null>(null);
 
+// Parse helpers for migrated data formats
+function parsePassages(raw: any): PassageEntry[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    if (raw.trim()) return [{ id: '1', text: raw }];
+  }
+  return [];
+}
+
+function parsePersonnages(raw: any): PersonnageEntry[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    if (raw.trim()) return [{ id: '1', text: raw }];
+  }
+  return [];
+}
+
+function parseChapterNotes(raw: any): ChapterNoteEntry[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'object') {
+    return Object.entries(raw).map(([key, value]) => ({
+      id: Date.now().toString() + key,
+      text: value as string,
+      chapter: parseInt(key) || undefined,
+    }));
+  }
+  return [];
+}
+
 // Convert DB row to Book
 function rowToBook(row: any): Book {
   return {
