@@ -59,6 +59,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       setTitle(book.title || "");
       setAuthor(book.author || "");
       setSeries(book.series || "");
+      setIsbn(book.isbn || "");
       setPublisher(book.publisher || "");
       setPubDate(book.publicationDate || "");
       setPrice(book.price != null ? String(book.price) : "");
