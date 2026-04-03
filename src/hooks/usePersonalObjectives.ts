@@ -462,8 +462,8 @@ export function usePersonalObjectives() {
             b.rating != null &&
             b.avis && b.avis.trim().length > 0 &&
             b.citations && b.citations.length > 0 &&
-            b.passagesPreferes && b.passagesPreferes.trim().length > 0 &&
-            b.personnagesPreferes && b.personnagesPreferes.trim().length > 0
+            b.passagesPreferes && b.passagesPreferes.length > 0 &&
+            b.personnagesPreferes && b.personnagesPreferes.length > 0
           ).length;
           break;
         }
