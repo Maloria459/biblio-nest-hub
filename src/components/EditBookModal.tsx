@@ -35,6 +35,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [series, setSeries] = useState("");
+  const [isbn, setIsbn] = useState("");
   const [publisher, setPublisher] = useState("");
   const [pubDate, setPubDate] = useState("");
   const [price, setPrice] = useState("");
