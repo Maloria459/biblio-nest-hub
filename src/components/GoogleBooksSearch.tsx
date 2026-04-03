@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
@@ -27,15 +26,27 @@ export function GoogleBooksSearch({ onSelect }: Props) {
   const [results, setResults] = useState<GoogleBookResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const search = async () => {
-    if (!query.trim()) return;
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!query.trim() || query.trim().length < 3) {
+      setResults([]);
+      setSearched(false);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      search(query.trim());
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query]);
+
+  const search = async (q: string) => {
     setLoading(true);
     setSearched(true);
     try {
-      const trimmed = query.trim();
-      const isIsbn = /^[\d-]{10,17}$/.test(trimmed.replace(/-/g, ""));
-      const searchQuery = isIsbn ? `isbn:${trimmed.replace(/-/g, "")}` : trimmed;
+      const isIsbn = /^[\d-]{10,17}$/.test(q.replace(/-/g, ""));
+      const searchQuery = isIsbn ? `isbn:${q.replace(/-/g, "")}` : q;
       const res = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=8&langRestrict=fr`
       );
@@ -43,16 +54,12 @@ export function GoogleBooksSearch({ onSelect }: Props) {
       const data = await res.json();
       const items: GoogleBookResult[] = (data.items || []).map((item: any) => {
         const vol = item.volumeInfo || {};
-        // Extract ISBN-13 or ISBN-10
         const identifiers = vol.industryIdentifiers || [];
         const isbn13 = identifiers.find((id: any) => id.type === "ISBN_13");
         const isbn10 = identifiers.find((id: any) => id.type === "ISBN_10");
         const isbn = isbn13?.identifier || isbn10?.identifier || undefined;
-        // Extract first category as genre
         const genre = vol.categories?.[0] || undefined;
-        // Extract series info from subtitle or title
         const series = vol.subtitle || undefined;
-
         return {
           title: vol.title || "",
           author: (vol.authors || []).join(", "),
@@ -76,17 +83,18 @@ export function GoogleBooksSearch({ onSelect }: Props) {
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2">
+      <div className="relative">
         <Input
           placeholder="Rechercher un livre (titre, auteur, ISBN)..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && search()}
-          className="flex-1"
+          className="pr-10"
         />
-        <Button variant="outline" size="icon" onClick={search} disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-        </Button>
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        )}
       </div>
 
       {results.length > 0 && (
