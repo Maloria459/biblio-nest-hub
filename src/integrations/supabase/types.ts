@@ -43,6 +43,7 @@ export type Database = {
       }
       books: {
         Row: {
+          acquired_from_wishlist: boolean | null
           author: string
           avis: string | null
           borrow_date: string | null
@@ -86,6 +87,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          acquired_from_wishlist?: boolean | null
           author: string
           avis?: string | null
           borrow_date?: string | null
@@ -129,6 +131,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          acquired_from_wishlist?: boolean | null
           author?: string
           avis?: string | null
           borrow_date?: string | null

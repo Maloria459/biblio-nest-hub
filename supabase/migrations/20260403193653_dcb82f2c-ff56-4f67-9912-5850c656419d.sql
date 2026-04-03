@@ -1,0 +1,1 @@
+ALTER TABLE public.books ADD COLUMN IF NOT EXISTS acquired_from_wishlist boolean DEFAULT false;
