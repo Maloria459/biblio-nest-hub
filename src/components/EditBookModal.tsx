@@ -148,6 +148,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       format: format || undefined,
       publisher: publisher || undefined,
       series: series || undefined,
+      isbn: isbn || undefined,
       pages: pages ? parseInt(pages) : undefined,
       chapters: chapters ? parseInt(chapters) : undefined,
       publicationDate: pubDate || undefined,
