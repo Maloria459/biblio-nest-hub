@@ -1,5 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { EditBookModal } from "@/components/EditBookModal";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useInvalidateSessions } from "@/hooks/useReadingSessions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,14 +30,23 @@ function AutoTextarea({ value, onChange, ...props }: React.ComponentProps<typeof
 
 type NoteType = "synopsis" | "avis" | "chapter_note" | "citation" | "passage" | "personnage";
 
+function chapterLabel(ch: number | undefined): string | null {
+  if (ch === undefined || ch === null) return null;
+  if (ch === -1) return "Prologue";
+  if (ch === -2) return "Épilogue";
+  return `Chapitre ${ch}`;
+}
+
 interface NoteFormProps {
   type: NoteType;
   chapters?: number;
+  hasPrologue?: boolean;
+  hasEpilogue?: boolean;
   onSave: (data: { text: string; chapter?: number; page?: number }) => void;
   onCancel: () => void;
 }
 
-function NoteForm({ type, chapters, onSave, onCancel }: NoteFormProps) {
+function NoteForm({ type, chapters, hasPrologue, hasEpilogue, onSave, onCancel }: NoteFormProps) {
   const [text, setText] = useState("");
   const [chapter, setChapter] = useState("");
   const [page, setPage] = useState("");
@@ -55,15 +67,17 @@ function NoteForm({ type, chapters, onSave, onCancel }: NoteFormProps) {
       <Textarea value={text} onChange={e => setText(e.target.value)} placeholder="Saisissez votre texte..." className="min-h-[80px]" />
       {hasChapterAndPage && (
         <>
-          {chapters && chapters > 0 && (
+          {((chapters && chapters > 0) || hasPrologue || hasEpilogue) && (
             <Select value={chapter} onValueChange={setChapter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chapitre (optionnel)" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: chapters }, (_, i) => i + 1).map(n => (
+                {hasPrologue && <SelectItem value="prologue">Prologue</SelectItem>}
+                {Array.from({ length: chapters || 0 }, (_, i) => i + 1).map(n => (
                   <SelectItem key={n} value={String(n)}>Chapitre {n}</SelectItem>
                 ))}
+                {hasEpilogue && <SelectItem value="epilogue">Épilogue</SelectItem>}
               </SelectContent>
             </Select>
           )}
@@ -75,7 +89,7 @@ function NoteForm({ type, chapters, onSave, onCancel }: NoteFormProps) {
           if (!text.trim()) return;
           onSave({
             text: text.trim(),
-            chapter: chapter ? parseInt(chapter) : undefined,
+            chapter: chapter ? (chapter === "prologue" ? -1 : chapter === "epilogue" ? -2 : parseInt(chapter)) as number : undefined,
             page: page ? parseInt(page) : undefined,
           });
         }}>
@@ -101,6 +115,8 @@ interface BookDetailModalProps {
 }
 
 export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, allBooks, genres, formats, statuses }: BookDetailModalProps) {
+  const { user } = useAuth();
+  const invalidateSessions = useInvalidateSessions();
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -110,6 +126,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const [dirty, setDirty] = useState(false);
   const [activeNoteForm, setActiveNoteForm] = useState<NoteType | null>(null);
   const [notePopoverOpen, setNotePopoverOpen] = useState(false);
+  const prevPagesReadRef = useRef<number>(0);
 
   const { data: allSessions = [] } = useReadingSessions();
 
@@ -119,6 +136,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       setEditBook({ ...src, citations: src.citations ? [...src.citations] : [], chapterNotes: src.chapterNotes ? [...src.chapterNotes] : [] });
       setDirty(false);
       setActiveNoteForm(null);
+      prevPagesReadRef.current = src.pagesRead ?? 0;
     } else if (!o) {
       setEditBook(null);
       setDirty(false);
@@ -157,7 +175,22 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const handleDelete = () => { onDelete(eb.id); setDeleteConfirm(false); setEditBook(null); setDirty(false); onOpenChange(false); };
 
   const handleClose = () => {
-    if (dirty) onSave({ ...eb });
+    if (dirty) {
+      onSave({ ...eb });
+      // If pages changed manually (not via a session), record a 0-min session for streak tracking
+      const currentPages = eb.pagesRead ?? 0;
+      if (currentPages !== prevPagesReadRef.current && user) {
+        supabase.from("reading_sessions").insert({
+          book_id: eb.id,
+          user_id: user.id,
+          duration_minutes: 0,
+          last_page_reached: currentPages,
+          reread_number: eb.rereadCount ?? 0,
+        }).then(({ error }) => {
+          if (!error) invalidateSessions();
+        });
+      }
+    }
     setEditBook(null);
     setDirty(false);
     setActiveNoteForm(null);
@@ -455,16 +488,22 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
                 {/* NOTES DISPLAY — only show sections with content */}
                 {eb.synopsis && (
-                  <div className="space-y-1 mt-3">
+                  <div className="space-y-1 mt-3 relative">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Synopsis / Résumé</Label>
                     <AutoTextarea value={eb.synopsis} onChange={e => set({ synopsis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden" />
+                    <button className="absolute top-0 right-0 text-muted-foreground hover:text-foreground" onClick={() => set({ synopsis: undefined })} title="Supprimer">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 )}
 
                 {eb.avis && (
-                  <div className="space-y-1 mt-3">
+                  <div className="space-y-1 mt-3 relative">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
                     <AutoTextarea value={eb.avis} onChange={e => set({ avis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden" />
+                    <button className="absolute top-0 right-0 text-muted-foreground hover:text-foreground" onClick={() => set({ avis: undefined })} title="Supprimer">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 )}
 
@@ -475,7 +514,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                       <div key={note.id} className="border rounded-lg p-3 bg-muted/50 relative">
                         <p className="text-sm">{note.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
-                          {note.chapter && <span>Chapitre {note.chapter}</span>}
+                          {chapterLabel(note.chapter) && <span>{chapterLabel(note.chapter)}</span>}
                           {note.page && <span>Page {note.page}</span>}
                         </div>
                         <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)}>
@@ -493,7 +532,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                       <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative">
                         <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
-                          {cit.chapter && <span>Chapitre {cit.chapter}</span>}
+                          {chapterLabel(cit.chapter) && <span>{chapterLabel(cit.chapter)}</span>}
                           {cit.page && <span>Page {cit.page}</span>}
                         </div>
                         <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deleteCitation(cit.id)}>
@@ -511,7 +550,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                       <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative">
                         <p className="text-sm">{p.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
-                          {p.chapter && <span>Chapitre {p.chapter}</span>}
+                          {chapterLabel(p.chapter) && <span>{chapterLabel(p.chapter)}</span>}
                           {p.page && <span>Page {p.page}</span>}
                         </div>
                         <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deletePassage(p.id)}>
@@ -541,6 +580,8 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <NoteForm
                     type={activeNoteForm}
                     chapters={eb.chapters}
+                    hasPrologue={eb.hasPrologue}
+                    hasEpilogue={eb.hasEpilogue}
                     onSave={(data) => handleNoteSave(activeNoteForm, data)}
                     onCancel={() => setActiveNoteForm(null)}
                   />

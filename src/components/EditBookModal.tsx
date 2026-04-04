@@ -47,6 +47,8 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
   const [chapters, setChapters] = useState("");
   const [spicy, setSpicy] = useState(0);
   const [mature, setMature] = useState(false);
+  const [hasPrologue, setHasPrologue] = useState(false);
+  const [hasEpilogue, setHasEpilogue] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loanDate, setLoanDate] = useState("");
   const [borrowerName, setBorrowerName] = useState("");
@@ -71,6 +73,8 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       setChapters(book.chapters != null ? String(book.chapters) : "");
       setSpicy(book.spicyLevel || 0);
       setMature(book.matureContent || false);
+      setHasPrologue(book.hasPrologue || false);
+      setHasEpilogue(book.hasEpilogue || false);
       setLoanDate(book.loanDate || "");
       setBorrowerName(book.borrowerName || "");
       setBorrowDate(book.borrowDate || "");
@@ -155,6 +159,8 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       price: price ? parseFloat(price) : undefined,
       spicyLevel: spicy || undefined,
       matureContent: mature || undefined,
+      hasPrologue,
+      hasEpilogue,
       loanDate: secondaryStatus === "Prêté" ? loanDate || undefined : undefined,
       borrowerName: secondaryStatus === "Prêté" ? borrowerName || undefined : undefined,
       borrowDate: secondaryStatus === "Emprunté" ? borrowDate || undefined : undefined,
@@ -322,6 +328,30 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
               <div className="space-y-1">
                 <Label className="text-xs">Nombre de chapitres</Label>
                 <Input type="number" value={chapters} onChange={(e) => setChapters(e.target.value)} />
+              </div>
+            </div>
+
+            {/* Prologue + Epilogue */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Prologue</Label>
+                <Select value={hasPrologue ? "oui" : "non"} onValueChange={(v) => setHasPrologue(v === "oui")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="non">Non</SelectItem>
+                    <SelectItem value="oui">Oui</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Épilogue</Label>
+                <Select value={hasEpilogue ? "oui" : "non"} onValueChange={(v) => setHasEpilogue(v === "oui")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="non">Non</SelectItem>
+                    <SelectItem value="oui">Oui</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

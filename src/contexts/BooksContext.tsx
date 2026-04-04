@@ -123,6 +123,8 @@ function rowToBook(row: any): Book {
     lenderName: row.lender_name ?? undefined,
     rereadCount: row.reread_count ?? 0,
     synopsis: row.synopsis ?? undefined,
+    hasPrologue: row.has_prologue ?? false,
+    hasEpilogue: row.has_epilogue ?? false,
   };
 }
 
@@ -168,6 +170,8 @@ function bookToRow(book: Book, userId: string) {
     reread_count: book.rereadCount ?? 0,
     synopsis: book.synopsis ?? null,
     isbn: book.isbn ?? null,
+    has_prologue: book.hasPrologue ?? false,
+    has_epilogue: book.hasEpilogue ?? false,
   } as any;
 }
 

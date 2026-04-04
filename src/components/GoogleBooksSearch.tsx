@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface GoogleBookResult {
   title: string;
@@ -15,6 +16,10 @@ export interface GoogleBookResult {
   genre?: string;
   series?: string;
   synopsis?: string;
+  chapters?: number;
+  hasPrologue?: boolean;
+  hasEpilogue?: boolean;
+  source?: "community" | "google";
 }
 
 interface Props {
@@ -44,8 +49,42 @@ export function GoogleBooksSearch({ onSelect }: Props) {
   const search = async (q: string) => {
     setLoading(true);
     setSearched(true);
+    
+    const isIsbn = /^[\d-]{10,17}$/.test(q.replace(/-/g, ""));
+    const allResults: GoogleBookResult[] = [];
+
+    // 1. Try community search (other users' books) for ISBN
+    if (isIsbn) {
+      try {
+        const { data, error } = await supabase.functions.invoke("search-isbn", {
+          body: { isbn: q },
+        });
+        if (!error && data?.book) {
+          const b = data.book;
+          allResults.push({
+            title: b.title || "",
+            author: b.author || "",
+            publisher: b.publisher || undefined,
+            publishedDate: b.publication_date || undefined,
+            pageCount: b.pages || undefined,
+            coverUrl: b.cover_url || undefined,
+            isbn: b.isbn || undefined,
+            genre: b.genre || undefined,
+            series: b.series || undefined,
+            synopsis: b.synopsis || undefined,
+            chapters: b.chapters || undefined,
+            hasPrologue: b.has_prologue || false,
+            hasEpilogue: b.has_epilogue || false,
+            source: "community",
+          });
+        }
+      } catch {
+        // Silently fail community search
+      }
+    }
+
+    // 2. Google Books search
     try {
-      const isIsbn = /^[\d-]{10,17}$/.test(q.replace(/-/g, ""));
       const searchQuery = isIsbn ? `isbn:${q.replace(/-/g, "")}` : q;
       const res = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=8&langRestrict=fr`
@@ -71,13 +110,17 @@ export function GoogleBooksSearch({ onSelect }: Props) {
           genre,
           series,
           synopsis: vol.description || undefined,
+          source: "google" as const,
         };
       });
-      setResults(items);
+      allResults.push(...items);
     } catch {
-      toast.error("Impossible de rechercher des livres. Réessayez plus tard.");
-      setResults([]);
+      if (allResults.length === 0) {
+        toast.error("Impossible de rechercher des livres. Réessayez plus tard.");
+      }
     }
+
+    setResults(allResults);
     setLoading(false);
   };
 
@@ -111,8 +154,13 @@ export function GoogleBooksSearch({ onSelect }: Props) {
                 ) : (
                   <div className="w-8 h-12 bg-muted rounded shrink-0" />
                 )}
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{book.title}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium truncate">{book.title}</p>
+                    {book.source === "community" && (
+                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full shrink-0">Communauté</span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate">
                     {book.author}{book.publisher ? ` · ${book.publisher}` : ""}
                     {book.isbn ? ` · ISBN: ${book.isbn}` : ""}

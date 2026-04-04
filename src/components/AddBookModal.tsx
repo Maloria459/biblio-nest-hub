@@ -47,6 +47,8 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
   const [chapters, setChapters] = useState("");
   const [spicy, setSpicy] = useState(0);
   const [mature, setMature] = useState(false);
+  const [hasPrologue, setHasPrologue] = useState(false);
+  const [hasEpilogue, setHasEpilogue] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loanDate, setLoanDate] = useState("");
   const [borrowerName, setBorrowerName] = useState("");
@@ -58,7 +60,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
     setCoverMode("upload"); setCoverUrl(""); setCoverPreview(""); setCoverFileObj(null); setCoverFileName("");
     setTitle(""); setAuthor(""); setSeries(""); setIsbn(""); setPublisher(""); setPubDate("");
     setPrice(""); setGenre(""); setFormat(""); setStatus(""); setSecondaryStatus(""); setPages("");
-    setChapters(""); setSpicy(0); setMature(false);
+    setChapters(""); setSpicy(0); setMature(false); setHasPrologue(false); setHasEpilogue(false);
     setLoanDate(""); setBorrowerName(""); setBorrowDate(""); setReturnDate(""); setLenderName("");
   };
 
@@ -124,6 +126,8 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
       price: price ? parseFloat(price) : undefined,
       spicyLevel: spicy || undefined,
       matureContent: mature || undefined,
+      hasPrologue,
+      hasEpilogue,
       loanDate: secondaryStatus === "Prêté" ? loanDate || undefined : undefined,
       borrowerName: secondaryStatus === "Prêté" ? borrowerName || undefined : undefined,
       borrowDate: secondaryStatus === "Emprunté" ? borrowDate || undefined : undefined,
@@ -164,8 +168,10 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               if (book.pageCount) setPages(String(book.pageCount));
               if (book.isbn) setIsbn(book.isbn);
               if (book.series) setSeries(book.series);
+              if (book.chapters) setChapters(String(book.chapters));
+              if (book.hasPrologue) setHasPrologue(true);
+              if (book.hasEpilogue) setHasEpilogue(true);
               if (book.genre) {
-                // Try to match with existing genres
                 const matchedGenre = genres.find(g => 
                   book.genre!.toLowerCase().includes(g.toLowerCase()) ||
                   g.toLowerCase().includes(book.genre!.toLowerCase())
@@ -316,6 +322,30 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               <div className="space-y-1">
                 <Label className="text-xs">Nombre de chapitres</Label>
                 <Input type="number" value={chapters} onChange={(e) => setChapters(e.target.value)} />
+              </div>
+            </div>
+
+            {/* Prologue + Epilogue */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Prologue</Label>
+                <Select value={hasPrologue ? "oui" : "non"} onValueChange={(v) => setHasPrologue(v === "oui")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="non">Non</SelectItem>
+                    <SelectItem value="oui">Oui</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Épilogue</Label>
+                <Select value={hasEpilogue ? "oui" : "non"} onValueChange={(v) => setHasEpilogue(v === "oui")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="non">Non</SelectItem>
+                    <SelectItem value="oui">Oui</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
