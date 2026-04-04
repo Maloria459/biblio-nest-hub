@@ -159,6 +159,8 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       price: price ? parseFloat(price) : undefined,
       spicyLevel: spicy || undefined,
       matureContent: mature || undefined,
+      hasPrologue,
+      hasEpilogue,
       loanDate: secondaryStatus === "Prêté" ? loanDate || undefined : undefined,
       borrowerName: secondaryStatus === "Prêté" ? borrowerName || undefined : undefined,
       borrowDate: secondaryStatus === "Emprunté" ? borrowDate || undefined : undefined,
