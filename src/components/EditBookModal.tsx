@@ -331,6 +331,30 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
               </div>
             </div>
 
+            {/* Prologue + Epilogue */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Prologue</Label>
+                <Select value={hasPrologue ? "oui" : "non"} onValueChange={(v) => setHasPrologue(v === "oui")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="non">Non</SelectItem>
+                    <SelectItem value="oui">Oui</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Épilogue</Label>
+                <Select value={hasEpilogue ? "oui" : "non"} onValueChange={(v) => setHasEpilogue(v === "oui")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="non">Non</SelectItem>
+                    <SelectItem value="oui">Oui</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {/* Spicy + Mature */}
             <div className="flex items-center gap-6">
               <div className="space-y-1">
