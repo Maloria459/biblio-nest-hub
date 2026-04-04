@@ -55,15 +55,17 @@ function NoteForm({ type, chapters, onSave, onCancel }: NoteFormProps) {
       <Textarea value={text} onChange={e => setText(e.target.value)} placeholder="Saisissez votre texte..." className="min-h-[80px]" />
       {hasChapterAndPage && (
         <>
-          {chapters && chapters > 0 && (
+          {((chapters && chapters > 0) || hasPrologue || hasEpilogue) && (
             <Select value={chapter} onValueChange={setChapter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chapitre (optionnel)" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: chapters }, (_, i) => i + 1).map(n => (
+                {hasPrologue && <SelectItem value="prologue">Prologue</SelectItem>}
+                {Array.from({ length: chapters || 0 }, (_, i) => i + 1).map(n => (
                   <SelectItem key={n} value={String(n)}>Chapitre {n}</SelectItem>
                 ))}
+                {hasEpilogue && <SelectItem value="epilogue">Épilogue</SelectItem>}
               </SelectContent>
             </Select>
           )}
