@@ -551,6 +551,8 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <NoteForm
                     type={activeNoteForm}
                     chapters={eb.chapters}
+                    hasPrologue={eb.hasPrologue}
+                    hasEpilogue={eb.hasEpilogue}
                     onSave={(data) => handleNoteSave(activeNoteForm, data)}
                     onCancel={() => setActiveNoteForm(null)}
                   />
