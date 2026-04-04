@@ -469,9 +469,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 )}
 
                 {eb.avis && (
-                  <div className="space-y-1 mt-3">
+                  <div className="space-y-1 mt-3 relative">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
                     <AutoTextarea value={eb.avis} onChange={e => set({ avis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden" />
+                    <button className="absolute top-0 right-0 text-muted-foreground hover:text-foreground" onClick={() => set({ avis: undefined })} title="Supprimer">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 )}
 
