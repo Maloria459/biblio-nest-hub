@@ -28,14 +28,33 @@ function useMemberSince() {
   return since;
 }
 
+function safeParseDate(dateStr: string): Date | null {
+  // Try ISO format
+  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+    const d = parseISO(dateStr);
+    if (!isNaN(d.getTime())) return d;
+  }
+  // Try DD/MM/YYYY
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    const [day, month, year] = dateStr.split("/");
+    const d = new Date(`${year}-${month}-${day}`);
+    if (!isNaN(d.getTime())) return d;
+  }
+  // Try YYYY alone
+  if (/^\d{4}$/.test(dateStr)) {
+    const d = new Date(parseInt(dateStr), 0, 1);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
+}
+
 function dateInRange(dateStr: string | undefined | null, start: Date | null, end: Date | null): boolean {
   if (!dateStr) return !start;
-  try {
-    const d = parseISO(dateStr);
-    if (start && isBefore(d, start)) return false;
-    if (end && isAfter(d, end)) return false;
-    return true;
-  } catch { return true; }
+  const d = safeParseDate(dateStr);
+  if (!d) return true;
+  if (start && isBefore(d, start)) return false;
+  if (end && isAfter(d, end)) return false;
+  return true;
 }
 
 function toMondayIndex(d: Date) {
