@@ -36,7 +36,7 @@ interface NoteFormProps {
   onCancel: () => void;
 }
 
-function NoteForm({ type, chapters, onSave, onCancel }: NoteFormProps) {
+function NoteForm({ type, chapters, hasPrologue, hasEpilogue, onSave, onCancel }: NoteFormProps) {
   const [text, setText] = useState("");
   const [chapter, setChapter] = useState("");
   const [page, setPage] = useState("");
