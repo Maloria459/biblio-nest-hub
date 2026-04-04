@@ -136,6 +136,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       setEditBook({ ...src, citations: src.citations ? [...src.citations] : [], chapterNotes: src.chapterNotes ? [...src.chapterNotes] : [] });
       setDirty(false);
       setActiveNoteForm(null);
+      prevPagesReadRef.current = src.pagesRead ?? 0;
     } else if (!o) {
       setEditBook(null);
       setDirty(false);
