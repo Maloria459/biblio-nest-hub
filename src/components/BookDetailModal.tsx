@@ -459,9 +459,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
                 {/* NOTES DISPLAY — only show sections with content */}
                 {eb.synopsis && (
-                  <div className="space-y-1 mt-3">
+                  <div className="space-y-1 mt-3 relative">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Synopsis / Résumé</Label>
                     <AutoTextarea value={eb.synopsis} onChange={e => set({ synopsis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden" />
+                    <button className="absolute top-0 right-0 text-muted-foreground hover:text-foreground" onClick={() => set({ synopsis: undefined })} title="Supprimer">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 )}
 
