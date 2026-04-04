@@ -30,7 +30,9 @@ type NoteType = "synopsis" | "avis" | "chapter_note" | "citation" | "passage" | 
 interface NoteFormProps {
   type: NoteType;
   chapters?: number;
-  onSave: (data: { text: string; chapter?: number; page?: number }) => void;
+  hasPrologue?: boolean;
+  hasEpilogue?: boolean;
+  onSave: (data: { text: string; chapter?: number | string; page?: number }) => void;
   onCancel: () => void;
 }
 
