@@ -58,6 +58,8 @@ export type Database = {
           end_date: string | null
           format: string | null
           genre: string | null
+          has_epilogue: boolean | null
+          has_prologue: boolean | null
           id: string
           isbn: string | null
           lender_name: string | null
@@ -102,6 +104,8 @@ export type Database = {
           end_date?: string | null
           format?: string | null
           genre?: string | null
+          has_epilogue?: boolean | null
+          has_prologue?: boolean | null
           id?: string
           isbn?: string | null
           lender_name?: string | null
@@ -146,6 +150,8 @@ export type Database = {
           end_date?: string | null
           format?: string | null
           genre?: string | null
+          has_epilogue?: boolean | null
+          has_prologue?: boolean | null
           id?: string
           isbn?: string | null
           lender_name?: string | null
