@@ -123,6 +123,8 @@ function rowToBook(row: any): Book {
     lenderName: row.lender_name ?? undefined,
     rereadCount: row.reread_count ?? 0,
     synopsis: row.synopsis ?? undefined,
+    hasPrologue: row.has_prologue ?? false,
+    hasEpilogue: row.has_epilogue ?? false,
   };
 }
 
