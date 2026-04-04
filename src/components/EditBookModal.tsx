@@ -73,6 +73,8 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
       setChapters(book.chapters != null ? String(book.chapters) : "");
       setSpicy(book.spicyLevel || 0);
       setMature(book.matureContent || false);
+      setHasPrologue(book.hasPrologue || false);
+      setHasEpilogue(book.hasEpilogue || false);
       setLoanDate(book.loanDate || "");
       setBorrowerName(book.borrowerName || "");
       setBorrowDate(book.borrowDate || "");
