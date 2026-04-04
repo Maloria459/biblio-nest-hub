@@ -27,6 +27,13 @@ function AutoTextarea({ value, onChange, ...props }: React.ComponentProps<typeof
 
 type NoteType = "synopsis" | "avis" | "chapter_note" | "citation" | "passage" | "personnage";
 
+function chapterLabel(ch: number | undefined): string | null {
+  if (ch === undefined || ch === null) return null;
+  if (ch === -1) return "Prologue";
+  if (ch === -2) return "Épilogue";
+  return `Chapitre ${ch}`;
+}
+
 interface NoteFormProps {
   type: NoteType;
   chapters?: number;
