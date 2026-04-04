@@ -492,7 +492,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                       <div key={note.id} className="border rounded-lg p-3 bg-muted/50 relative">
                         <p className="text-sm">{note.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
-                          {note.chapter && <span>Chapitre {note.chapter}</span>}
+                          {chapterLabel(note.chapter) && <span>{chapterLabel(note.chapter)}</span>}
                           {note.page && <span>Page {note.page}</span>}
                         </div>
                         <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)}>
