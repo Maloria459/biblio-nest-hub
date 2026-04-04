@@ -47,6 +47,8 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
   const [chapters, setChapters] = useState("");
   const [spicy, setSpicy] = useState(0);
   const [mature, setMature] = useState(false);
+  const [hasPrologue, setHasPrologue] = useState(false);
+  const [hasEpilogue, setHasEpilogue] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loanDate, setLoanDate] = useState("");
   const [borrowerName, setBorrowerName] = useState("");
