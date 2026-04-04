@@ -195,7 +195,9 @@ export function StatistiquesContent() {
   const bestPeriod = useMemo(() => {
     const monthMap = new Map<string, number>();
     readBooks.filter((b) => b.endDate).forEach((b) => {
-      const key = format(parseISO(b.endDate!), "MMMM yyyy", { locale: fr });
+      const d = safeParseDate(b.endDate!);
+      if (!d) return;
+      const key = format(d, "MMMM yyyy", { locale: fr });
       monthMap.set(key, (monthMap.get(key) ?? 0) + 1);
     });
     let best: string | null = null;
