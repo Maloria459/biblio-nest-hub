@@ -175,7 +175,22 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const handleDelete = () => { onDelete(eb.id); setDeleteConfirm(false); setEditBook(null); setDirty(false); onOpenChange(false); };
 
   const handleClose = () => {
-    if (dirty) onSave({ ...eb });
+    if (dirty) {
+      onSave({ ...eb });
+      // If pages changed manually (not via a session), record a 0-min session for streak tracking
+      const currentPages = eb.pagesRead ?? 0;
+      if (currentPages !== prevPagesReadRef.current && user) {
+        supabase.from("reading_sessions").insert({
+          book_id: eb.id,
+          user_id: user.id,
+          duration_minutes: 0,
+          last_page_reached: currentPages,
+          reread_number: eb.rereadCount ?? 0,
+        }).then(({ error }) => {
+          if (!error) invalidateSessions();
+        });
+      }
+    }
     setEditBook(null);
     setDirty(false);
     setActiveNoteForm(null);
