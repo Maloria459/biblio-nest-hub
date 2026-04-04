@@ -168,8 +168,10 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               if (book.pageCount) setPages(String(book.pageCount));
               if (book.isbn) setIsbn(book.isbn);
               if (book.series) setSeries(book.series);
+              if (book.chapters) setChapters(String(book.chapters));
+              if (book.hasPrologue) setHasPrologue(true);
+              if (book.hasEpilogue) setHasEpilogue(true);
               if (book.genre) {
-                // Try to match with existing genres
                 const matchedGenre = genres.find(g => 
                   book.genre!.toLowerCase().includes(g.toLowerCase()) ||
                   g.toLowerCase().includes(book.genre!.toLowerCase())
