@@ -60,7 +60,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
     setCoverMode("upload"); setCoverUrl(""); setCoverPreview(""); setCoverFileObj(null); setCoverFileName("");
     setTitle(""); setAuthor(""); setSeries(""); setIsbn(""); setPublisher(""); setPubDate("");
     setPrice(""); setGenre(""); setFormat(""); setStatus(""); setSecondaryStatus(""); setPages("");
-    setChapters(""); setSpicy(0); setMature(false);
+    setChapters(""); setSpicy(0); setMature(false); setHasPrologue(false); setHasEpilogue(false);
     setLoanDate(""); setBorrowerName(""); setBorrowDate(""); setReturnDate(""); setLenderName("");
   };
 
