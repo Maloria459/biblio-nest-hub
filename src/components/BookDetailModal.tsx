@@ -115,6 +115,8 @@ interface BookDetailModalProps {
 }
 
 export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, allBooks, genres, formats, statuses }: BookDetailModalProps) {
+  const { user } = useAuth();
+  const invalidateSessions = useInvalidateSessions();
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -124,6 +126,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const [dirty, setDirty] = useState(false);
   const [activeNoteForm, setActiveNoteForm] = useState<NoteType | null>(null);
   const [notePopoverOpen, setNotePopoverOpen] = useState(false);
+  const prevPagesReadRef = useRef<number>(0);
 
   const { data: allSessions = [] } = useReadingSessions();
 
