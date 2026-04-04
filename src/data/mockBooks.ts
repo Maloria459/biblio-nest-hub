@@ -65,6 +65,8 @@ export interface Book {
   synopsis?: string;
   isbn?: string;
   acquiredFromWishlist?: boolean;
+  hasPrologue?: boolean;
+  hasEpilogue?: boolean;
 }
 
 export const mockBooks: Book[] = [

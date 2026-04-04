@@ -170,6 +170,8 @@ function bookToRow(book: Book, userId: string) {
     reread_count: book.rereadCount ?? 0,
     synopsis: book.synopsis ?? null,
     isbn: book.isbn ?? null,
+    has_prologue: book.hasPrologue ?? false,
+    has_epilogue: book.hasEpilogue ?? false,
   } as any;
 }
 
