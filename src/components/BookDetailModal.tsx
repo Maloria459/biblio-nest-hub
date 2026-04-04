@@ -79,7 +79,7 @@ function NoteForm({ type, chapters, hasPrologue, hasEpilogue, onSave, onCancel }
           if (!text.trim()) return;
           onSave({
             text: text.trim(),
-            chapter: chapter ? (chapter === "prologue" ? -1 : chapter === "epilogue" ? -2 : parseInt(chapter)) : undefined,
+            chapter: chapter ? (chapter === "prologue" ? -1 : chapter === "epilogue" ? -2 : parseInt(chapter)) as number : undefined,
             page: page ? parseInt(page) : undefined,
           });
         }}>
