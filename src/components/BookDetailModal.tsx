@@ -32,7 +32,7 @@ interface NoteFormProps {
   chapters?: number;
   hasPrologue?: boolean;
   hasEpilogue?: boolean;
-  onSave: (data: { text: string; chapter?: number | string; page?: number }) => void;
+  onSave: (data: { text: string; chapter?: number; page?: number }) => void;
   onCancel: () => void;
 }
 
