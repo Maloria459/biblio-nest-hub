@@ -1,8 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useReadingSessions } from "@/hooks/useReadingSessions";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, BookOpen, Flame } from "lucide-react";
 
