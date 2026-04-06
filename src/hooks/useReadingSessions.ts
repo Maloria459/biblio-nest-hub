@@ -52,6 +52,7 @@ export function useInvalidateSessions() {
   return () => {
     qc.invalidateQueries({ queryKey: ["reading-sessions", user?.id] });
     qc.invalidateQueries({ queryKey: ["last-reading-session", user?.id] });
+    qc.invalidateQueries({ queryKey: ["reading-activity", user?.id] });
   };
 }
 
