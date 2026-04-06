@@ -30,6 +30,14 @@ function AutoTextarea({ value, onChange, ...props }: React.ComponentProps<typeof
 
 type NoteType = "synopsis" | "avis" | "chapter_note" | "citation" | "passage" | "personnage";
 
+interface EditingNote {
+  type: "chapter_note" | "citation" | "passage" | "personnage";
+  id: string;
+  text: string;
+  chapter?: number;
+  page?: number;
+}
+
 function chapterLabel(ch: number | undefined): string | null {
   if (ch === undefined || ch === null) return null;
   if (ch === -1) return "Prologue";
@@ -42,14 +50,17 @@ interface NoteFormProps {
   chapters?: number;
   hasPrologue?: boolean;
   hasEpilogue?: boolean;
+  initialText?: string;
+  initialChapter?: number;
+  initialPage?: number;
   onSave: (data: { text: string; chapter?: number; page?: number }) => void;
   onCancel: () => void;
 }
 
-function NoteForm({ type, chapters, hasPrologue, hasEpilogue, onSave, onCancel }: NoteFormProps) {
-  const [text, setText] = useState("");
-  const [chapter, setChapter] = useState("");
-  const [page, setPage] = useState("");
+function NoteForm({ type, chapters, hasPrologue, hasEpilogue, initialText, initialChapter, initialPage, onSave, onCancel }: NoteFormProps) {
+  const [text, setText] = useState(initialText || "");
+  const [chapter, setChapter] = useState(initialChapter !== undefined ? (initialChapter === -1 ? "prologue" : initialChapter === -2 ? "epilogue" : String(initialChapter)) : "");
+  const [page, setPage] = useState(initialPage !== undefined ? String(initialPage) : "");
 
   const hasChapterAndPage = type === "chapter_note" || type === "citation" || type === "passage";
   const labels: Record<NoteType, string> = {
@@ -125,6 +136,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const [timerOpen, setTimerOpen] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [activeNoteForm, setActiveNoteForm] = useState<NoteType | null>(null);
+  const [editingNote, setEditingNote] = useState<EditingNote | null>(null);
   const [notePopoverOpen, setNotePopoverOpen] = useState(false);
   const prevPagesReadRef = useRef<number>(0);
 
@@ -177,28 +189,31 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const handleClose = () => {
     if (dirty) {
       onSave({ ...eb });
-      // If pages changed manually (not via a session), record a 0-min session for streak tracking
+      // If pages changed manually, record activity for streak (no fake session)
       const currentPages = eb.pagesRead ?? 0;
       if (currentPages !== prevPagesReadRef.current && user) {
-        supabase.from("reading_sessions").insert({
-          book_id: eb.id,
-          user_id: user.id,
-          duration_minutes: 0,
-          last_page_reached: currentPages,
-          reread_number: eb.rereadCount ?? 0,
-        }).then(({ error }) => {
-          if (!error) invalidateSessions();
-        });
+        supabase.from("reading_activity").upsert(
+          { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
+          { onConflict: "user_id,activity_date" }
+        ).then(() => {});
       }
     }
     setEditBook(null);
     setDirty(false);
     setActiveNoteForm(null);
+    setEditingNote(null);
     onOpenChange(false);
   };
 
   const handleSessionSaved = (updates: Partial<Book>) => {
     setEditBook(prev => prev ? { ...prev, ...updates } : prev);
+    // Also record activity for streak
+    if (user) {
+      supabase.from("reading_activity").upsert(
+        { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
+        { onConflict: "user_id,activity_date" }
+      ).then(() => {});
+    }
   };
 
   // Note save handlers
@@ -225,6 +240,28 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
     }
     setActiveNoteForm(null);
     toast.success("Note enregistrée !");
+  };
+
+  // Note edit handler
+  const handleNoteEdit = (data: { text: string; chapter?: number; page?: number }) => {
+    if (!editingNote) return;
+    const { type, id } = editingNote;
+    switch (type) {
+      case "chapter_note":
+        set({ chapterNotes: (eb.chapterNotes || []).map(n => n.id === id ? { ...n, text: data.text, chapter: data.chapter, page: data.page } : n) });
+        break;
+      case "citation":
+        set({ citations: (eb.citations || []).map(c => c.id === id ? { ...c, text: data.text, chapter: data.chapter, page: data.page } : c) });
+        break;
+      case "passage":
+        set({ passagesPreferes: (eb.passagesPreferes || []).map(p => p.id === id ? { ...p, text: data.text, chapter: data.chapter, page: data.page } : p) });
+        break;
+      case "personnage":
+        set({ personnagesPreferes: (eb.personnagesPreferes || []).map(p => p.id === id ? { ...p, text: data.text } : p) });
+        break;
+    }
+    setEditingNote(null);
+    toast.success("Note modifiée !");
   };
 
   const deleteChapterNote = (id: string) => set({ chapterNotes: (eb.chapterNotes || []).filter(n => n.id !== id) });
@@ -511,15 +548,20 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Notes de chapitre</Label>
                     {(eb.chapterNotes || []).map(note => (
-                      <div key={note.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={note.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm">{note.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                           {chapterLabel(note.chapter) && <span>{chapterLabel(note.chapter)}</span>}
                           {note.page && <span>Page {note.page}</span>}
                         </div>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "chapter_note", id: note.id, text: note.text, chapter: note.chapter, page: note.page }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -529,15 +571,20 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Citations</Label>
                     {(eb.citations || []).map(cit => (
-                      <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                           {chapterLabel(cit.chapter) && <span>{chapterLabel(cit.chapter)}</span>}
                           {cit.page && <span>Page {cit.page}</span>}
                         </div>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deleteCitation(cit.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "citation", id: cit.id, text: cit.text, chapter: cit.chapter, page: cit.page }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteCitation(cit.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -547,15 +594,20 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Passages préférés</Label>
                     {(eb.passagesPreferes || []).map(p => (
-                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm">{p.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                           {chapterLabel(p.chapter) && <span>{chapterLabel(p.chapter)}</span>}
                           {p.page && <span>Page {p.page}</span>}
                         </div>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deletePassage(p.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "passage", id: p.id, text: p.text, chapter: p.chapter, page: p.page }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deletePassage(p.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -565,18 +617,38 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Personnages préférés</Label>
                     {(eb.personnagesPreferes || []).map(p => (
-                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm">{p.text}</p>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deletePersonnage(p.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "personnage", id: p.id, text: p.text }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deletePersonnage(p.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
 
+                {/* Editing note form */}
+                {editingNote && (
+                  <NoteForm
+                    type={editingNote.type}
+                    chapters={eb.chapters}
+                    hasPrologue={eb.hasPrologue}
+                    hasEpilogue={eb.hasEpilogue}
+                    initialText={editingNote.text}
+                    initialChapter={editingNote.chapter}
+                    initialPage={editingNote.page}
+                    onSave={handleNoteEdit}
+                    onCancel={() => setEditingNote(null)}
+                  />
+                )}
+
                 {/* Active note form */}
-                {activeNoteForm && (
+                {activeNoteForm && !editingNote && (
                   <NoteForm
                     type={activeNoteForm}
                     chapters={eb.chapters}

@@ -473,6 +473,27 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_activity: {
+        Row: {
+          activity_date: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_date?: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_date?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reading_sessions: {
         Row: {
           book_id: string
