@@ -189,28 +189,31 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const handleClose = () => {
     if (dirty) {
       onSave({ ...eb });
-      // If pages changed manually (not via a session), record a 0-min session for streak tracking
+      // If pages changed manually, record activity for streak (no fake session)
       const currentPages = eb.pagesRead ?? 0;
       if (currentPages !== prevPagesReadRef.current && user) {
-        supabase.from("reading_sessions").insert({
-          book_id: eb.id,
-          user_id: user.id,
-          duration_minutes: 0,
-          last_page_reached: currentPages,
-          reread_number: eb.rereadCount ?? 0,
-        }).then(({ error }) => {
-          if (!error) invalidateSessions();
-        });
+        supabase.from("reading_activity").upsert(
+          { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
+          { onConflict: "user_id,activity_date" }
+        ).then(() => {});
       }
     }
     setEditBook(null);
     setDirty(false);
     setActiveNoteForm(null);
+    setEditingNote(null);
     onOpenChange(false);
   };
 
   const handleSessionSaved = (updates: Partial<Book>) => {
     setEditBook(prev => prev ? { ...prev, ...updates } : prev);
+    // Also record activity for streak
+    if (user) {
+      supabase.from("reading_activity").upsert(
+        { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
+        { onConflict: "user_id,activity_date" }
+      ).then(() => {});
+    }
   };
 
   // Note save handlers
@@ -237,6 +240,28 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
     }
     setActiveNoteForm(null);
     toast.success("Note enregistrée !");
+  };
+
+  // Note edit handler
+  const handleNoteEdit = (data: { text: string; chapter?: number; page?: number }) => {
+    if (!editingNote) return;
+    const { type, id } = editingNote;
+    switch (type) {
+      case "chapter_note":
+        set({ chapterNotes: (eb.chapterNotes || []).map(n => n.id === id ? { ...n, text: data.text, chapter: data.chapter, page: data.page } : n) });
+        break;
+      case "citation":
+        set({ citations: (eb.citations || []).map(c => c.id === id ? { ...c, text: data.text, chapter: data.chapter, page: data.page } : c) });
+        break;
+      case "passage":
+        set({ passagesPreferes: (eb.passagesPreferes || []).map(p => p.id === id ? { ...p, text: data.text, chapter: data.chapter, page: data.page } : p) });
+        break;
+      case "personnage":
+        set({ personnagesPreferes: (eb.personnagesPreferes || []).map(p => p.id === id ? { ...p, text: data.text } : p) });
+        break;
+    }
+    setEditingNote(null);
+    toast.success("Note modifiée !");
   };
 
   const deleteChapterNote = (id: string) => set({ chapterNotes: (eb.chapterNotes || []).filter(n => n.id !== id) });
