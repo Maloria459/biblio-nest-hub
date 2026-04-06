@@ -192,10 +192,12 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       // If pages changed manually, record activity for streak (no fake session)
       const currentPages = eb.pagesRead ?? 0;
       if (currentPages !== prevPagesReadRef.current && user) {
-        supabase.from("reading_activity").upsert(
+      supabase.from("reading_activity").upsert(
           { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
           { onConflict: "user_id,activity_date" }
-        ).then(() => {});
+        ).then(() => {
+          invalidateSessions();
+        });
       }
     }
     setEditBook(null);
@@ -212,7 +214,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       supabase.from("reading_activity").upsert(
         { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
         { onConflict: "user_id,activity_date" }
-      ).then(() => {});
+      ).then(() => {
+        invalidateSessions();
+      });
     }
   };
 

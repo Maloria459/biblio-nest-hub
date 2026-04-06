@@ -83,15 +83,23 @@ export function GoogleBooksSearch({ onSelect }: Props) {
       }
     }
 
-    // 2. Google Books search
-    try {
-      const searchQuery = isIsbn ? `isbn:${q.replace(/-/g, "")}` : q;
-      const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=8&langRestrict=fr`
-      );
-      if (res.ok) {
+    // 2. Google Books search (with retry)
+    const fetchGoogle = async (attempt = 0): Promise<GoogleBookResult[]> => {
+      try {
+        const searchQuery = isIsbn ? `isbn:${q.replace(/-/g, "")}` : q;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(
+          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=8&langRestrict=fr`,
+          { signal: controller.signal }
+        );
+        clearTimeout(timeout);
+        if (!res.ok) {
+          if (attempt < 2) return fetchGoogle(attempt + 1);
+          return [];
+        }
         const data = await res.json();
-        const items: GoogleBookResult[] = (data.items || []).map((item: any) => {
+        return (data.items || []).map((item: any) => {
           const vol = item.volumeInfo || {};
           const identifiers = vol.industryIdentifiers || [];
           const isbn13 = identifiers.find((id: any) => id.type === "ISBN_13");
@@ -113,11 +121,13 @@ export function GoogleBooksSearch({ onSelect }: Props) {
             source: "google" as const,
           };
         });
-        allResults.push(...items);
+      } catch {
+        if (attempt < 2) return fetchGoogle(attempt + 1);
+        return [];
       }
-    } catch {
-      // Silently fail Google Books - community results may still be available
-    }
+    };
+    const googleItems = await fetchGoogle();
+    allResults.push(...googleItems);
 
     setResults(allResults);
     setLoading(false);
