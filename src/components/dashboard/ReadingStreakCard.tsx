@@ -1,8 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useReadingSessions } from "@/hooks/useReadingSessions";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, BookOpen, Flame } from "lucide-react";
 
@@ -14,6 +14,7 @@ const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 export function ReadingStreakCard() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: sessions = [] } = useReadingSessions();
 
   const { data: activities = [] } = useQuery({
@@ -28,6 +29,21 @@ export function ReadingStreakCard() {
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Realtime subscription for instant streak updates
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("reading-activity-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "reading_activity", filter: `user_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ["reading-activity", user.id] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "reading_sessions", filter: `user_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ["reading-sessions", user.id] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, queryClient]);
 
   // Merge session dates + activity dates
   const activeDates = useMemo(() => {
