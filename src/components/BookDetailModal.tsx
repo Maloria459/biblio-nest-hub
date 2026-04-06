@@ -50,14 +50,17 @@ interface NoteFormProps {
   chapters?: number;
   hasPrologue?: boolean;
   hasEpilogue?: boolean;
+  initialText?: string;
+  initialChapter?: number;
+  initialPage?: number;
   onSave: (data: { text: string; chapter?: number; page?: number }) => void;
   onCancel: () => void;
 }
 
-function NoteForm({ type, chapters, hasPrologue, hasEpilogue, onSave, onCancel }: NoteFormProps) {
-  const [text, setText] = useState("");
-  const [chapter, setChapter] = useState("");
-  const [page, setPage] = useState("");
+function NoteForm({ type, chapters, hasPrologue, hasEpilogue, initialText, initialChapter, initialPage, onSave, onCancel }: NoteFormProps) {
+  const [text, setText] = useState(initialText || "");
+  const [chapter, setChapter] = useState(initialChapter !== undefined ? (initialChapter === -1 ? "prologue" : initialChapter === -2 ? "epilogue" : String(initialChapter)) : "");
+  const [page, setPage] = useState(initialPage !== undefined ? String(initialPage) : "");
 
   const hasChapterAndPage = type === "chapter_note" || type === "citation" || type === "passage";
   const labels: Record<NoteType, string> = {
