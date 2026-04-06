@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { useReadingSessions } from "@/hooks/useReadingSessions";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Book, BookOpen, Flame } from "lucide-react";
 
 function dateKey(d: Date) {
@@ -10,37 +13,51 @@ function dateKey(d: Date) {
 const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 export function ReadingStreakCard() {
+  const { user } = useAuth();
   const { data: sessions = [] } = useReadingSessions();
 
-  // Set of dates that have at least one session
-  const sessionDates = useMemo(() => {
+  const { data: activities = [] } = useQuery({
+    queryKey: ["reading-activity", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reading_activity")
+        .select("activity_date")
+        .eq("user_id", user!.id);
+      return (data || []) as { activity_date: string }[];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Merge session dates + activity dates
+  const activeDates = useMemo(() => {
     const s = new Set<string>();
     sessions.forEach((sess) => {
       const d = new Date(sess.session_date);
       s.add(dateKey(d));
     });
+    activities.forEach((a) => {
+      s.add(a.activity_date);
+    });
     return s;
-  }, [sessions]);
+  }, [sessions, activities]);
 
-  // Current streak (consecutive days going back from today)
   const totalStreak = useMemo(() => {
     let streak = 0;
     const d = new Date();
     d.setHours(0, 0, 0, 0);
-    while (sessionDates.has(dateKey(d))) {
+    while (activeDates.has(dateKey(d))) {
       streak++;
       d.setDate(d.getDate() - 1);
     }
     return streak;
-  }, [sessionDates]);
+  }, [activeDates]);
 
-  // Current week Mon–Sun
   const weekDays = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayKey = dateKey(today);
-    // Find Monday of current week
-    const dayOfWeek = today.getDay(); // 0=Sun
+    const dayOfWeek = today.getDay();
     const monday = new Date(today);
     monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
 
@@ -50,12 +67,12 @@ export function ReadingStreakCard() {
       const key = dateKey(d);
       return {
         label: DAY_LABELS[i],
-        active: sessionDates.has(key),
+        active: activeDates.has(key),
         isFuture: d > today,
         isToday: key === todayKey,
       };
     });
-  }, [sessionDates]);
+  }, [activeDates]);
 
   return (
     <Card className="border-border bg-card p-4">
