@@ -136,6 +136,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const [timerOpen, setTimerOpen] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [activeNoteForm, setActiveNoteForm] = useState<NoteType | null>(null);
+  const [editingNote, setEditingNote] = useState<EditingNote | null>(null);
   const [notePopoverOpen, setNotePopoverOpen] = useState(false);
   const prevPagesReadRef = useRef<number>(0);
 
