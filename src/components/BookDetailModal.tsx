@@ -548,15 +548,20 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Notes de chapitre</Label>
                     {(eb.chapterNotes || []).map(note => (
-                      <div key={note.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={note.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm">{note.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                           {chapterLabel(note.chapter) && <span>{chapterLabel(note.chapter)}</span>}
                           {note.page && <span>Page {note.page}</span>}
                         </div>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "chapter_note", id: note.id, text: note.text, chapter: note.chapter, page: note.page }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -566,15 +571,20 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Citations</Label>
                     {(eb.citations || []).map(cit => (
-                      <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                           {chapterLabel(cit.chapter) && <span>{chapterLabel(cit.chapter)}</span>}
                           {cit.page && <span>Page {cit.page}</span>}
                         </div>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deleteCitation(cit.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "citation", id: cit.id, text: cit.text, chapter: cit.chapter, page: cit.page }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteCitation(cit.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -584,15 +594,20 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Passages préférés</Label>
                     {(eb.passagesPreferes || []).map(p => (
-                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm">{p.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                           {chapterLabel(p.chapter) && <span>{chapterLabel(p.chapter)}</span>}
                           {p.page && <span>Page {p.page}</span>}
                         </div>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deletePassage(p.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "passage", id: p.id, text: p.text, chapter: p.chapter, page: p.page }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deletePassage(p.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -602,18 +617,38 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   <div className="space-y-2 mt-3">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Personnages préférés</Label>
                     {(eb.personnagesPreferes || []).map(p => (
-                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative">
+                      <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
                         <p className="text-sm">{p.text}</p>
-                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground" onClick={() => deletePersonnage(p.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "personnage", id: p.id, text: p.text }); setActiveNoteForm(null); }} title="Modifier">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deletePersonnage(p.id)} title="Supprimer">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
 
+                {/* Editing note form */}
+                {editingNote && (
+                  <NoteForm
+                    type={editingNote.type}
+                    chapters={eb.chapters}
+                    hasPrologue={eb.hasPrologue}
+                    hasEpilogue={eb.hasEpilogue}
+                    initialText={editingNote.text}
+                    initialChapter={editingNote.chapter}
+                    initialPage={editingNote.page}
+                    onSave={handleNoteEdit}
+                    onCancel={() => setEditingNote(null)}
+                  />
+                )}
+
                 {/* Active note form */}
-                {activeNoteForm && (
+                {activeNoteForm && !editingNote && (
                   <NoteForm
                     type={activeNoteForm}
                     chapters={eb.chapters}
