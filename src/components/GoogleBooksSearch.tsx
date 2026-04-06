@@ -89,35 +89,34 @@ export function GoogleBooksSearch({ onSelect }: Props) {
       const res = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=8&langRestrict=fr`
       );
-      if (!res.ok) throw new Error("Erreur réseau");
-      const data = await res.json();
-      const items: GoogleBookResult[] = (data.items || []).map((item: any) => {
-        const vol = item.volumeInfo || {};
-        const identifiers = vol.industryIdentifiers || [];
-        const isbn13 = identifiers.find((id: any) => id.type === "ISBN_13");
-        const isbn10 = identifiers.find((id: any) => id.type === "ISBN_10");
-        const isbn = isbn13?.identifier || isbn10?.identifier || undefined;
-        const genre = vol.categories?.[0] || undefined;
-        const series = vol.subtitle || undefined;
-        return {
-          title: vol.title || "",
-          author: (vol.authors || []).join(", "),
-          publisher: vol.publisher,
-          publishedDate: vol.publishedDate,
-          pageCount: vol.pageCount,
-          coverUrl: vol.imageLinks?.thumbnail?.replace("http://", "https://"),
-          isbn,
-          genre,
-          series,
-          synopsis: vol.description || undefined,
-          source: "google" as const,
-        };
-      });
-      allResults.push(...items);
-    } catch {
-      if (allResults.length === 0) {
-        toast.error("Impossible de rechercher des livres. Réessayez plus tard.");
+      if (res.ok) {
+        const data = await res.json();
+        const items: GoogleBookResult[] = (data.items || []).map((item: any) => {
+          const vol = item.volumeInfo || {};
+          const identifiers = vol.industryIdentifiers || [];
+          const isbn13 = identifiers.find((id: any) => id.type === "ISBN_13");
+          const isbn10 = identifiers.find((id: any) => id.type === "ISBN_10");
+          const isbn = isbn13?.identifier || isbn10?.identifier || undefined;
+          const genre = vol.categories?.[0] || undefined;
+          const series = vol.subtitle || undefined;
+          return {
+            title: vol.title || "",
+            author: (vol.authors || []).join(", "),
+            publisher: vol.publisher,
+            publishedDate: vol.publishedDate,
+            pageCount: vol.pageCount,
+            coverUrl: vol.imageLinks?.thumbnail?.replace("http://", "https://"),
+            isbn,
+            genre,
+            series,
+            synopsis: vol.description || undefined,
+            source: "google" as const,
+          };
+        });
+        allResults.push(...items);
       }
+    } catch {
+      // Silently fail Google Books - community results may still be available
     }
 
     setResults(allResults);
