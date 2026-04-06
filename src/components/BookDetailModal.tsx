@@ -30,6 +30,14 @@ function AutoTextarea({ value, onChange, ...props }: React.ComponentProps<typeof
 
 type NoteType = "synopsis" | "avis" | "chapter_note" | "citation" | "passage" | "personnage";
 
+interface EditingNote {
+  type: "chapter_note" | "citation" | "passage" | "personnage";
+  id: string;
+  text: string;
+  chapter?: number;
+  page?: number;
+}
+
 function chapterLabel(ch: number | undefined): string | null {
   if (ch === undefined || ch === null) return null;
   if (ch === -1) return "Prologue";
