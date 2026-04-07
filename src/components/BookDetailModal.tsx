@@ -139,6 +139,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const [editingNote, setEditingNote] = useState<EditingNote | null>(null);
   const [notePopoverOpen, setNotePopoverOpen] = useState(false);
   const prevPagesReadRef = useRef<number>(0);
+  const pagesManuallyChanged = useRef<boolean>(false);
 
   const { data: allSessions = [] } = useReadingSessions();
 
@@ -149,6 +150,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       setDirty(false);
       setActiveNoteForm(null);
       prevPagesReadRef.current = src.pagesRead ?? 0;
+      pagesManuallyChanged.current = false;
     } else if (!o) {
       setEditBook(null);
       setDirty(false);
@@ -189,10 +191,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const handleClose = () => {
     if (dirty) {
       onSave({ ...eb });
-      // If pages changed manually, record activity for streak (no fake session)
-      const currentPages = eb.pagesRead ?? 0;
-      if (currentPages !== prevPagesReadRef.current && user) {
-      supabase.from("reading_activity").upsert(
+      // Only record activity if pages were manually changed (not notes/ratings/etc.)
+      if (pagesManuallyChanged.current && user) {
+        supabase.from("reading_activity").upsert(
           { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
           { onConflict: "user_id,activity_date" }
         ).then(() => {
@@ -209,7 +210,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   const handleSessionSaved = (updates: Partial<Book>) => {
     setEditBook(prev => prev ? { ...prev, ...updates } : prev);
-    // Also record activity for streak
+    // Record activity for streak (session was saved)
     if (user) {
       supabase.from("reading_activity").upsert(
         { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
@@ -218,6 +219,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
         invalidateSessions();
       });
     }
+    // Reset flag so closing doesn't double-record
+    pagesManuallyChanged.current = false;
+    prevPagesReadRef.current = updates.pagesRead ?? eb.pagesRead ?? 0;
   };
 
   // Note save handlers
@@ -518,6 +522,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                           if (!eb.endDate) updates.endDate = today;
                         }
                         set(updates);
+                        pagesManuallyChanged.current = true;
                       }} />
                       <span className="text-sm text-muted-foreground">/</span>
                       <span className="text-sm w-16 text-center">{totalPages}</span>
