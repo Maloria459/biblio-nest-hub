@@ -1,0 +1,1 @@
+DELETE FROM reading_activity WHERE activity_date = '2026-04-07' AND user_id = 'da6eb578-197f-404d-ae07-8dcebede6c4f';
