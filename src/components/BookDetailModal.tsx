@@ -150,6 +150,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       setDirty(false);
       setActiveNoteForm(null);
       prevPagesReadRef.current = src.pagesRead ?? 0;
+      pagesManuallyChanged.current = false;
     } else if (!o) {
       setEditBook(null);
       setDirty(false);
