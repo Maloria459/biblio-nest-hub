@@ -520,6 +520,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                           if (!eb.endDate) updates.endDate = today;
                         }
                         set(updates);
+                        pagesManuallyChanged.current = true;
                       }} />
                       <span className="text-sm text-muted-foreground">/</span>
                       <span className="text-sm w-16 text-center">{totalPages}</span>
