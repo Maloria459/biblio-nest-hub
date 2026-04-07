@@ -210,7 +210,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
 
   const handleSessionSaved = (updates: Partial<Book>) => {
     setEditBook(prev => prev ? { ...prev, ...updates } : prev);
-    // Also record activity for streak
+    // Record activity for streak (session was saved)
     if (user) {
       supabase.from("reading_activity").upsert(
         { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
@@ -219,6 +219,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
         invalidateSessions();
       });
     }
+    // Reset flag so closing doesn't double-record
+    pagesManuallyChanged.current = false;
+    prevPagesReadRef.current = updates.pagesRead ?? eb.pagesRead ?? 0;
   };
 
   // Note save handlers
