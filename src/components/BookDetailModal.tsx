@@ -553,51 +553,75 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 )}
 
-                {(eb.chapterNotes || []).length > 0 && (
-                  <div className="space-y-2 mt-3">
-                    <Label className="text-xs font-semibold uppercase tracking-wide">Notes de chapitre</Label>
-                    {(eb.chapterNotes || []).map(note => (
-                      <div key={note.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
-                        <p className="text-sm">{note.text}</p>
-                        <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
-                          {chapterLabel(note.chapter) && <span>{chapterLabel(note.chapter)}</span>}
-                          {note.page && <span>Page {note.page}</span>}
+                {(eb.chapterNotes || []).length > 0 && (() => {
+                  const grouped = new Map<number | undefined, typeof eb.chapterNotes>();
+                  (eb.chapterNotes || []).forEach(n => {
+                    const key = n.chapter;
+                    if (!grouped.has(key)) grouped.set(key, []);
+                    grouped.get(key)!.push(n);
+                  });
+                  return (
+                    <div className="space-y-2 mt-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wide">Notes de chapitre</Label>
+                      {Array.from(grouped.entries()).map(([ch, notes]) => (
+                        <div key={ch ?? "none"} className="border rounded-lg p-3 bg-muted/50">
+                          {chapterLabel(ch) && <p className="text-xs font-semibold text-muted-foreground mb-2">{chapterLabel(ch)}</p>}
+                          <div className="space-y-2">
+                            {notes!.map((note, idx) => (
+                              <div key={note.id} className={`relative pr-14 ${idx < notes!.length - 1 ? "border-b border-border pb-2" : ""}`}>
+                                <p className="text-sm">{note.text}</p>
+                                {note.page && <span className="text-xs text-muted-foreground">Page {note.page}</span>}
+                                <div className="absolute top-0 right-0 flex gap-1">
+                                  <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "chapter_note", id: note.id, text: note.text, chapter: note.chapter, page: note.page }); setActiveNoteForm(null); }} title="Modifier">
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)} title="Supprimer">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "chapter_note", id: note.id, text: note.text, chapter: note.chapter, page: note.page }); setActiveNoteForm(null); }} title="Modifier">
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteChapterNote(note.id)} title="Supprimer">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  );
+                })()}
 
-                {(eb.citations || []).length > 0 && (
-                  <div className="space-y-2 mt-3">
-                    <Label className="text-xs font-semibold uppercase tracking-wide">Citations</Label>
-                    {(eb.citations || []).map(cit => (
-                      <div key={cit.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
-                        <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
-                        <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
-                          {chapterLabel(cit.chapter) && <span>{chapterLabel(cit.chapter)}</span>}
-                          {cit.page && <span>Page {cit.page}</span>}
+                {(eb.citations || []).length > 0 && (() => {
+                  const grouped = new Map<number | undefined, typeof eb.citations>();
+                  (eb.citations || []).forEach(c => {
+                    const key = c.chapter;
+                    if (!grouped.has(key)) grouped.set(key, []);
+                    grouped.get(key)!.push(c);
+                  });
+                  return (
+                    <div className="space-y-2 mt-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wide">Citations</Label>
+                      {Array.from(grouped.entries()).map(([ch, cits]) => (
+                        <div key={ch ?? "none"} className="border rounded-lg p-3 bg-muted/50">
+                          {chapterLabel(ch) && <p className="text-xs font-semibold text-muted-foreground mb-2">{chapterLabel(ch)}</p>}
+                          <div className="space-y-2">
+                            {cits!.map((cit, idx) => (
+                              <div key={cit.id} className={`relative pr-14 ${idx < cits!.length - 1 ? "border-b border-border pb-2" : ""}`}>
+                                <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
+                                {cit.page && <span className="text-xs text-muted-foreground">Page {cit.page}</span>}
+                                <div className="absolute top-0 right-0 flex gap-1">
+                                  <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "citation", id: cit.id, text: cit.text, chapter: cit.chapter, page: cit.page }); setActiveNoteForm(null); }} title="Modifier">
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteCitation(cit.id)} title="Supprimer">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "citation", id: cit.id, text: cit.text, chapter: cit.chapter, page: cit.page }); setActiveNoteForm(null); }} title="Modifier">
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          <button className="text-muted-foreground hover:text-foreground" onClick={() => deleteCitation(cit.id)} title="Supprimer">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {(eb.passagesPreferes || []).length > 0 && (
                   <div className="space-y-2 mt-3">
