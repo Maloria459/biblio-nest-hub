@@ -269,9 +269,9 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved, onNot
 
   return (
     <>
-      <div className="absolute inset-0 z-[60] flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/60" onClick={phase === "timer" ? handleAbandonAttempt : undefined} />
-        <div className="relative z-10 w-full max-w-md mx-4 bg-card border border-border rounded-xl shadow-2xl p-6">
+      <div className="fixed top-0 right-0 bottom-0 left-[var(--sidebar-width)] z-[60] flex items-center justify-center py-[3%]">
+        <div className="fixed top-0 right-0 bottom-0 left-[var(--sidebar-width)] bg-black/60" onClick={phase === "timer" ? handleAbandonAttempt : undefined} />
+        <div className="relative z-10 w-full max-w-md mx-4 bg-card border border-border rounded-xl shadow-2xl p-6 max-h-[94%] overflow-y-auto">
           {phase === "timer" ? (
             <div className="flex flex-col items-center gap-6">
               {/* Book context */}
