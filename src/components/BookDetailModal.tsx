@@ -803,6 +803,10 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
         open={timerOpen}
         onClose={() => setTimerOpen(false)}
         onSessionSaved={handleSessionSaved}
+        onNoteAdded={(updates) => {
+          setEditBook(prev => prev ? { ...prev, ...updates } : prev);
+          setDirty(true);
+        }}
       />
     </>
   );
