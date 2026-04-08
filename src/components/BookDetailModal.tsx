@@ -171,7 +171,13 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   }
 
   const eb = editBook;
-  const set = (partial: Partial<Book>) => { setEditBook({ ...eb, ...partial }); setDirty(true); };
+  const set = (partial: Partial<Book>) => {
+    const updated = { ...eb, ...partial };
+    setEditBook(updated);
+    setDirty(true);
+    // Persist immediately so changes survive a page refresh
+    onSave(updated);
+  };
 
   const pagesRead = eb.pagesRead || 0;
   const totalPages = eb.pages || 0;
