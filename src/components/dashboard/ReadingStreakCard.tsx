@@ -60,11 +60,25 @@ export function ReadingStreakCard() {
 
   const totalStreak = useMemo(() => {
     let streak = 0;
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    while (activeDates.has(dateKey(d))) {
-      streak++;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Start checking from today
+    if (activeDates.has(dateKey(today))) {
+      // Today has activity — count from today backwards
+      const d = new Date(today);
+      while (activeDates.has(dateKey(d))) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      }
+    } else {
+      // Today has no activity yet — day is still in progress, check from yesterday
+      const d = new Date(today);
       d.setDate(d.getDate() - 1);
+      while (activeDates.has(dateKey(d))) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      }
     }
     return streak;
   }, [activeDates]);
