@@ -305,7 +305,7 @@ export function ReadingSessionTimer({ book, open, onClose, onSessionSaved, onNot
                       <StickyNote className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-56 p-2" align="center">
+                  <PopoverContent className="w-56 p-2 z-[70]" align="center">
                     <div className="space-y-1">
                       {NOTE_OPTIONS.map(opt => (
                         <button
