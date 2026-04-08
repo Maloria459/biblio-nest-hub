@@ -744,7 +744,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                   </div>
                 </PopoverContent>
               </Popover>
-              <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(true)} title="Supprimer le livre" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+              <Button variant="outline" size="icon" onClick={() => setDeleteConfirm(true)} title="Supprimer le livre" className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
