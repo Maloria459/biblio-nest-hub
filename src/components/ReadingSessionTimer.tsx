@@ -12,7 +12,7 @@ import { useBooks } from "@/contexts/BooksContext";
 import { useInvalidateSessions, formatDurationHMS, useReadingSessions } from "@/hooks/useReadingSessions";
 import { toast } from "sonner";
 import type { Book, Citation, ChapterNoteEntry, PassageEntry, PersonnageEntry } from "@/data/mockBooks";
-import { Square, CheckCircle, Pause, Play, StickyNote, Save } from "lucide-react";
+import { Square, CheckCircle, Pause, Play, StickyNote, Save, Clock, PenLine } from "lucide-react";
 
 type NoteType = "synopsis" | "avis" | "chapter_note" | "citation" | "passage" | "personnage";
 
