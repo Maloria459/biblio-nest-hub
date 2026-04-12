@@ -157,11 +157,43 @@ export function StatistiquesContent() {
   const filteredBooks = useMemo(() => books.filter((b) => dateInRange(b.endDate || b.startDate, rangeStart, rangeEnd)), [books, rangeStart, rangeEnd]);
   const filteredSessions = useMemo(() => sessions.filter((s) => dateInRange(s.session_date, rangeStart, rangeEnd)), [sessions, rangeStart, rangeEnd]);
 
+  // Pre-compute page deltas for each session (pages read = delta from previous session of same book/reread)
+  const sessionPagesMap = useMemo(() => {
+    const map = new Map<string, number>();
+    // Group ALL sessions by book+reread, sorted by date ascending
+    const grouped = new Map<string, ReadingSession[]>();
+    sessions.forEach((s) => {
+      const key = `${s.book_id}__${s.reread_number}`;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)!.push(s);
+    });
+    grouped.forEach((group) => {
+      const sorted = [...group].sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
+      let prevPage = 0;
+      sorted.forEach((s) => {
+        const currentPage = s.last_page_reached ?? 0;
+        const delta = Math.max(0, currentPage - prevPage);
+        map.set(s.id, delta);
+        if (currentPage > 0) prevPage = currentPage;
+      });
+    });
+    return map;
+  }, [sessions]);
+
   const finishedStatuses = ["Lu", "Lecture terminée"];
 
   // ── Lecture block data ──
   const booksFinished = filteredBooks.filter((b) => finishedStatuses.includes(b.status)).length;
-  const totalPagesRead = filteredBooks.reduce((s, b) => s + (b.pagesRead ?? 0), 0);
+  // Total pages read: sum of session deltas + manual pages from books without sessions
+  const totalPagesRead = useMemo(() => {
+    const sessionPages = filteredSessions.reduce((s, se) => s + (sessionPagesMap.get(se.id) ?? 0), 0);
+    // Add pages from books that have pagesRead but no sessions in the period
+    const booksWithSessions = new Set(filteredSessions.map((s) => s.book_id));
+    const manualPages = filteredBooks
+      .filter((b) => !booksWithSessions.has(b.id) && (b.pagesRead ?? 0) > 0)
+      .reduce((s, b) => s + (b.pagesRead ?? 0), 0);
+    return sessionPages + manualPages;
+  }, [filteredSessions, filteredBooks, sessionPagesMap]);
   const totalReadingMinutes = filteredSessions.reduce((s, se) => s + se.duration_minutes, 0);
   const totalSessions = filteredSessions.length;
   const avgReadingMinutes = totalSessions > 0 ? totalReadingMinutes / totalSessions : null;
@@ -237,7 +269,7 @@ export function StatistiquesContent() {
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "EEE dd", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     } else if (filterMode === "month") {
       // By day
@@ -249,7 +281,7 @@ export function StatistiquesContent() {
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "dd", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     } else if (filterMode === "year") {
       // By month
@@ -260,19 +292,19 @@ export function StatistiquesContent() {
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "MMM", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     } else {
       // all: by month
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "MMM yy", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, filterMode, rangeStart, rangeEnd]);
+  }, [filteredSessions, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
