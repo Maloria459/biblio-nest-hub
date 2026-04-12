@@ -304,7 +304,7 @@ export function StatistiquesContent() {
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, filterMode, rangeStart, rangeEnd]);
+  }, [filteredSessions, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
