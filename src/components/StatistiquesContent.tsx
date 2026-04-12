@@ -269,7 +269,7 @@ export function StatistiquesContent() {
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "EEE dd", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     } else if (filterMode === "month") {
       // By day
@@ -281,7 +281,7 @@ export function StatistiquesContent() {
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "dd", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     } else if (filterMode === "year") {
       // By month
@@ -292,14 +292,14 @@ export function StatistiquesContent() {
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "MMM", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     } else {
       // all: by month
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
         const label = format(d, "MMM yy", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (s.last_page_reached ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     }
 
