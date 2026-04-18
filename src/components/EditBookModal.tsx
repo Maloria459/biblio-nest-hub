@@ -11,6 +11,7 @@ import { uploadCover } from "@/lib/uploadCover";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { LoanConditionalFields } from "@/components/LoanConditionalFields";
+import { SeriesAutocomplete } from "@/components/SeriesAutocomplete";
 
 interface EditBookModalProps {
   book: Book;
@@ -246,7 +247,7 @@ export function EditBookModal({ book, open, onOpenChange, genres, formats, statu
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Série</Label>
-                <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+                <SeriesAutocomplete value={series} onChange={setSeries} />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">ISBN</Label>
