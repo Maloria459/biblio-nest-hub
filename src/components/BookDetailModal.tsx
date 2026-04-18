@@ -542,7 +542,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 {eb.synopsis && (
                   <div className="space-y-1 mt-3 relative">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Synopsis / Résumé</Label>
-                    <AutoTextarea value={eb.synopsis} onChange={e => set({ synopsis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden" />
+                    <AutoTextarea value={eb.synopsis} onChange={e => set({ synopsis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden text-justify whitespace-pre-wrap" />
                     <button className="absolute top-0 right-0 text-muted-foreground hover:text-foreground" onClick={() => set({ synopsis: undefined })} title="Supprimer">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -552,7 +552,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                 {eb.avis && (
                   <div className="space-y-1 mt-3 relative">
                     <Label className="text-xs font-semibold uppercase tracking-wide">Avis</Label>
-                    <AutoTextarea value={eb.avis} onChange={e => set({ avis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden" />
+                    <AutoTextarea value={eb.avis} onChange={e => set({ avis: e.target.value })} className="min-h-[80px] resize-none overflow-hidden text-justify whitespace-pre-wrap" />
                     <button className="absolute top-0 right-0 text-muted-foreground hover:text-foreground" onClick={() => set({ avis: undefined })} title="Supprimer">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -575,7 +575,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                           <div className="space-y-2">
                             {notes!.map((note, idx) => (
                               <div key={note.id} className={`relative pr-14 ${idx < notes!.length - 1 ? "border-b border-border pb-2" : ""}`}>
-                                <p className="text-sm">{note.text}</p>
+                                <p className="text-sm text-justify whitespace-pre-wrap">{note.text}</p>
                                 {note.page && <span className="text-xs text-muted-foreground">Page {note.page}</span>}
                                 <div className="absolute top-0 right-0 flex gap-1">
                                   <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "chapter_note", id: note.id, text: note.text, chapter: note.chapter, page: note.page }); setActiveNoteForm(null); }} title="Modifier">
@@ -610,7 +610,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                           <div className="space-y-2">
                             {cits!.map((cit, idx) => (
                               <div key={cit.id} className={`relative pr-14 ${idx < cits!.length - 1 ? "border-b border-border pb-2" : ""}`}>
-                                <p className="text-sm italic">&ldquo;{cit.text}&rdquo;</p>
+                                <p className="text-sm italic text-justify whitespace-pre-wrap">&ldquo;{cit.text}&rdquo;</p>
                                 {cit.page && <span className="text-xs text-muted-foreground">Page {cit.page}</span>}
                                 <div className="absolute top-0 right-0 flex gap-1">
                                   <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "citation", id: cit.id, text: cit.text, chapter: cit.chapter, page: cit.page }); setActiveNoteForm(null); }} title="Modifier">
@@ -634,7 +634,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                     <Label className="text-xs font-semibold uppercase tracking-wide">Passages préférés</Label>
                     {(eb.passagesPreferes || []).map(p => (
                       <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
-                        <p className="text-sm">{p.text}</p>
+                        <p className="text-sm text-justify whitespace-pre-wrap">{p.text}</p>
                         <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                           {chapterLabel(p.chapter) && <span>{chapterLabel(p.chapter)}</span>}
                           {p.page && <span>Page {p.page}</span>}
@@ -657,7 +657,7 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
                     <Label className="text-xs font-semibold uppercase tracking-wide">Personnages préférés</Label>
                     {(eb.personnagesPreferes || []).map(p => (
                       <div key={p.id} className="border rounded-lg p-3 bg-muted/50 relative pr-14">
-                        <p className="text-sm">{p.text}</p>
+                        <p className="text-sm text-justify whitespace-pre-wrap">{p.text}</p>
                         <div className="absolute top-2 right-2 flex gap-1">
                           <button className="text-muted-foreground hover:text-foreground" onClick={() => { setEditingNote({ type: "personnage", id: p.id, text: p.text }); setActiveNoteForm(null); }} title="Modifier">
                             <Pencil className="h-3.5 w-3.5" />
