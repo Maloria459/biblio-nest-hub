@@ -233,7 +233,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Auteur</Label>
-                <Input value={author} onChange={(e) => setAuthor(e.target.value)} />
+                <SeriesAutocomplete value={author} onChange={setAuthor} field="author" />
               </div>
             </div>
 
@@ -253,7 +253,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Éditeur</Label>
-                <Input value={publisher} onChange={(e) => setPublisher(e.target.value)} />
+                <SeriesAutocomplete value={publisher} onChange={setPublisher} field="publisher" />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Date de publication</Label>
