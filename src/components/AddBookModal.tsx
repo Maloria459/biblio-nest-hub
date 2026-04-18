@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { LoanConditionalFields } from "@/components/LoanConditionalFields";
 import { GoogleBooksSearch, type GoogleBookResult } from "@/components/GoogleBooksSearch";
+import { SeriesAutocomplete } from "@/components/SeriesAutocomplete";
 
 interface AddBookModalProps {
   open: boolean;
@@ -240,7 +241,7 @@ export function AddBookModal({ open, onOpenChange, genres, formats, statuses, on
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Série</Label>
-                <Input value={series} onChange={(e) => setSeries(e.target.value)} />
+                <SeriesAutocomplete value={series} onChange={setSeries} />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">ISBN</Label>
