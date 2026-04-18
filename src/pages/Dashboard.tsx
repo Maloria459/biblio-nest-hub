@@ -243,9 +243,22 @@ function RatingDisplay({ rating }: { rating?: number }) {
   if (!rating) return null;
   return (
     <div className="flex items-center gap-1 mt-1.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star key={i} className={`h-3.5 w-3.5 ${i < rating ? "fill-foreground text-foreground" : "text-muted-foreground/30"}`} />
-      ))}
+      {Array.from({ length: 5 }).map((_, i) => {
+        const star = i + 1;
+        const filled = rating >= star;
+        const half = !filled && rating >= star - 0.5;
+        return (
+          <div key={i} className="relative h-3.5 w-3.5">
+            <Star className="absolute inset-0 h-3.5 w-3.5 text-muted-foreground/30" />
+            {filled && <Star className="absolute inset-0 h-3.5 w-3.5 fill-foreground text-foreground" />}
+            {half && (
+              <div className="absolute inset-0 overflow-hidden" style={{ width: "50%" }}>
+                <Star className="h-3.5 w-3.5 fill-foreground text-foreground" />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
