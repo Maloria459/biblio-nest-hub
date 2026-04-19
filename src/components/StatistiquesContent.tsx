@@ -322,15 +322,15 @@ export function StatistiquesContent() {
   // ── Rating data ──
   const ratingDistribution = useMemo(() => {
     const dist = [0, 0, 0, 0, 0];
-    readBooks.forEach((b) => { if (b.rating && b.rating >= 1 && b.rating <= 5) dist[b.rating - 1]++; });
+    filteredBooks.forEach((b) => { if (b.rating && b.rating >= 1 && b.rating <= 5) dist[Math.round(b.rating) - 1]++; });
     return dist;
-  }, [readBooks]);
+  }, [filteredBooks]);
 
   const ratingAverage = useMemo(() => {
-    const rated = readBooks.filter((b) => b.rating && b.rating >= 1);
+    const rated = filteredBooks.filter((b) => b.rating && b.rating >= 1);
     if (rated.length === 0) return null;
     return rated.reduce((s, b) => s + (b.rating ?? 0), 0) / rated.length;
-  }, [readBooks]);
+  }, [filteredBooks]);
 
   // ── Bibliothèque block data ──
   const genreDataOwned = useMemo(() => {
