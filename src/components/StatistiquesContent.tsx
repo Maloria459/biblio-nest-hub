@@ -340,7 +340,7 @@ export function StatistiquesContent() {
   // ── Bibliothèque block data ──
   const genreDataOwned = useMemo(() => {
     const map = new Map<string, number>();
-    books.forEach((b) => { if (b.genre) map.set(b.genre, (map.get(b.genre) ?? 0) + 1); });
+    books.filter((b) => b.status !== "Wishlist").forEach((b) => { if (b.genre) map.set(b.genre, (map.get(b.genre) ?? 0) + 1); });
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [books]);
 
@@ -352,7 +352,7 @@ export function StatistiquesContent() {
 
   const formatDataOwned = useMemo(() => {
     const map = new Map<string, number>();
-    books.forEach((b) => { if (b.format) map.set(b.format, (map.get(b.format) ?? 0) + 1); });
+    books.filter((b) => b.status !== "Wishlist").forEach((b) => { if (b.format) map.set(b.format, (map.get(b.format) ?? 0) + 1); });
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [books]);
 
