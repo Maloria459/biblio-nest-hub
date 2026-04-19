@@ -321,8 +321,13 @@ export function StatistiquesContent() {
 
   // ── Rating data ──
   const ratingDistribution = useMemo(() => {
-    const dist = [0, 0, 0, 0, 0];
-    filteredBooks.forEach((b) => { if (b.rating && b.rating >= 1 && b.rating <= 5) dist[Math.round(b.rating) - 1]++; });
+    const dist = Array(10).fill(0);
+    filteredBooks.forEach((b) => {
+      if (b.rating && b.rating >= 0.5 && b.rating <= 5) {
+        const idx = Math.round(b.rating * 2) - 1;
+        if (idx >= 0 && idx < 10) dist[idx]++;
+      }
+    });
     return dist;
   }, [filteredBooks]);
 
