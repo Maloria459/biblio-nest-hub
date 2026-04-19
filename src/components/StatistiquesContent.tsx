@@ -357,7 +357,7 @@ export function StatistiquesContent() {
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [readBooks]);
 
-  const totalBooksOwned = books.length;
+  const totalBooksOwned = books.filter((b) => b.status !== "Wishlist").length;
   const booksAcquired = useMemo(() => filteredBooks.filter((b) => b.acquiredFromWishlist).length, [filteredBooks]);
   const totalSpent = useMemo(() => filteredBooks.filter((b) => b.acquiredFromWishlist).reduce((s, b) => s + (b.price ?? 0), 0), [filteredBooks]);
 
