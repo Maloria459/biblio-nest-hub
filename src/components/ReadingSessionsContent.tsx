@@ -138,7 +138,7 @@ export function ReadingSessionsContent() {
         {viewToggle}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className={`flex-1 px-6 py-4 min-h-0 ${view === "calendar" ? "overflow-hidden" : "overflow-y-auto"}`}>
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center gap-2">
             <BookOpen className="h-10 w-10 text-muted-foreground/40" />
