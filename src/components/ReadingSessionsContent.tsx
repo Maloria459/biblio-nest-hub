@@ -109,6 +109,13 @@ export function ReadingSessionsContent() {
   const viewToggle = (
     <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1 mr-4">
       <button
+        onClick={() => setView("calendar")}
+        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "calendar" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+      >
+        <CalendarDays className="h-3.5 w-3.5" />
+        <span>Calendrier</span>
+      </button>
+      <button
         onClick={() => setView("list")}
         className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "list" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
       >
@@ -121,13 +128,6 @@ export function ReadingSessionsContent() {
       >
         <Library className="h-3.5 w-3.5" />
         <span>Par livre</span>
-      </button>
-      <button
-        onClick={() => setView("calendar")}
-        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "calendar" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-      >
-        <CalendarDays className="h-3.5 w-3.5" />
-        <span>Calendrier</span>
       </button>
     </div>
   );
