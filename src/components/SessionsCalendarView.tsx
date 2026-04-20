@@ -50,23 +50,25 @@ export function SessionsCalendarView({ sessions, books }: Props) {
   const today = now.getDate();
   const isCurrentMonth = viewYear === now.getFullYear() && viewMonth === now.getMonth();
 
+  const numRows = cells.length / 7;
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => setMonthOffset((o) => o - 1)} className="p-2 rounded hover:bg-muted">
+      <div className="flex items-center justify-between mb-2 shrink-0">
+        <button onClick={() => setMonthOffset((o) => o - 1)} className="p-1.5 rounded hover:bg-muted">
           <ChevronLeft className="h-4 w-4 text-muted-foreground" />
         </button>
         <span className="text-sm font-semibold text-foreground capitalize">{monthLabel}</span>
-        <button onClick={() => setMonthOffset((o) => o + 1)} className="p-2 rounded hover:bg-muted">
+        <button onClick={() => setMonthOffset((o) => o + 1)} className="p-1.5 rounded hover:bg-muted">
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </button>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1 mb-1">
+      <div className="grid grid-cols-7 gap-1 mb-1 shrink-0">
         {DAYS.map((d) => (
-          <div key={d} className="text-xs text-muted-foreground text-center font-medium py-1">
+          <div key={d} className="text-xs text-muted-foreground text-center font-medium">
             {d}
           </div>
         ))}
@@ -74,9 +76,12 @@ export function SessionsCalendarView({ sessions, books }: Props) {
 
       {/* Calendar cells */}
       <TooltipProvider delayDuration={200}>
-        <div className="grid grid-cols-7 gap-1">
+        <div
+          className="grid grid-cols-7 gap-1 flex-1 min-h-0"
+          style={{ gridTemplateRows: `repeat(${numRows}, minmax(0, 1fr))` }}
+        >
           {cells.map((day, i) => {
-            if (day === null) return <div key={i} className="aspect-square" />;
+            if (day === null) return <div key={i} />;
 
             const dayItems = sessionsByDay.get(day) ?? [];
             // Unique books for this day
@@ -95,7 +100,7 @@ export function SessionsCalendarView({ sessions, books }: Props) {
 
             const cell = (
               <div
-                className={`aspect-square rounded-md border p-1 flex flex-col gap-1 ${
+                className={`h-full min-h-0 rounded-md border p-1 flex flex-col gap-1 overflow-hidden ${
                   isToday ? "border-foreground bg-muted/30" : "border-border bg-card"
                 } ${hasContent ? "" : "opacity-70"}`}
               >
