@@ -24,7 +24,11 @@ export function SessionsCalendarView({ sessions, books }: Props) {
   // Group sessions of the visible month by day
   const sessionsByDay = useMemo(() => {
     const map = new Map<number, { book: Book; session: ReadingSession }[]>();
-    for (const s of sessions) {
+    // Sort sessions chronologically (earliest first) so first read of the day comes first
+    const sortedAsc = [...sessions].sort(
+      (a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime(),
+    );
+    for (const s of sortedAsc) {
       const d = new Date(s.session_date);
       if (d.getFullYear() !== viewYear || d.getMonth() !== viewMonth) continue;
       const book = books.find((b) => b.id === s.book_id);
