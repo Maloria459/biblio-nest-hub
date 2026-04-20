@@ -122,6 +122,13 @@ export function ReadingSessionsContent() {
         <Library className="h-3.5 w-3.5" />
         <span>Par livre</span>
       </button>
+      <button
+        onClick={() => setView("calendar")}
+        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "calendar" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+      >
+        <CalendarDays className="h-3.5 w-3.5" />
+        <span>Calendrier</span>
+      </button>
     </div>
   );
 
@@ -144,13 +151,15 @@ export function ReadingSessionsContent() {
             books={books}
             onDelete={setDeleteTarget}
           />
-        ) : (
+        ) : view === "book" ? (
           <BookGroupView
             groups={bookGroups}
             sessions={sessions}
             onDelete={setDeleteTarget}
             onStartSession={setTimerBook}
           />
+        ) : (
+          <SessionsCalendarView sessions={sessions} books={books} />
         )}
       </div>
 
