@@ -10,9 +10,10 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Trash2, BookOpen, ChevronDown, List, Library, Play } from "lucide-react";
+import { Trash2, BookOpen, ChevronDown, List, Library, Play, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
+import { SessionsCalendarView } from "@/components/SessionsCalendarView";
 import type { Book } from "@/data/mockBooks";
 
 function formatDateFR(dateStr: string) {
@@ -35,7 +36,7 @@ export function ReadingSessionsContent() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  const [view, setView] = useState<"list" | "book">("list");
+  const [view, setView] = useState<"list" | "book" | "calendar">("list");
   const [deleteTarget, setDeleteTarget] = useState<ReadingSession | null>(null);
   const [timerBook, setTimerBook] = useState<Book | null>(null);
 
@@ -121,6 +122,13 @@ export function ReadingSessionsContent() {
         <Library className="h-3.5 w-3.5" />
         <span>Par livre</span>
       </button>
+      <button
+        onClick={() => setView("calendar")}
+        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "calendar" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+      >
+        <CalendarDays className="h-3.5 w-3.5" />
+        <span>Calendrier</span>
+      </button>
     </div>
   );
 
@@ -143,13 +151,15 @@ export function ReadingSessionsContent() {
             books={books}
             onDelete={setDeleteTarget}
           />
-        ) : (
+        ) : view === "book" ? (
           <BookGroupView
             groups={bookGroups}
             sessions={sessions}
             onDelete={setDeleteTarget}
             onStartSession={setTimerBook}
           />
+        ) : (
+          <SessionsCalendarView sessions={sessions} books={books} />
         )}
       </div>
 
