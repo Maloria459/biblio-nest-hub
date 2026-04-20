@@ -195,7 +195,7 @@ const MONTH_NAMES_FR = [
   "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
 ];
 
-function SessionRow({ session, book, allBookSessions, onDelete, idx }: {
+function SessionRow({ session, book, allBookSessions, onDelete }: {
   session: ReadingSession;
   book: Book;
   allBookSessions: ReadingSession[];
@@ -204,43 +204,74 @@ function SessionRow({ session, book, allBookSessions, onDelete, idx }: {
 }) {
   const pagesRead = getSessionPagesRead(session, allBookSessions);
   const totalPages = book.pages ?? 0;
+  const sessionDate = new Date(session.session_date);
+  const weekday = sessionDate.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "");
+  const dayNum = sessionDate.toLocaleDateString("fr-FR", { day: "2-digit" });
+  const timeLabel = sessionDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
   return (
-    <div
-      className={`flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50 ${idx % 2 === 1 ? "bg-muted/20" : "bg-card"}`}
-    >
-      <div className="w-9 shrink-0 rounded overflow-hidden bg-secondary" style={{ aspectRatio: "2/3" }}>
+    <div className="group flex items-stretch gap-3 rounded-lg border border-border bg-card p-3 transition-all hover:border-foreground/20 hover:shadow-sm">
+      {/* Date column */}
+      <div className="flex flex-col items-center justify-center w-14 shrink-0 rounded-md bg-muted/60 px-2 py-1">
+        <span className="text-[10px] uppercase font-medium text-muted-foreground tracking-wide leading-tight">
+          {weekday}
+        </span>
+        <span className="text-lg font-bold text-foreground leading-none">{dayNum}</span>
+        <span className="text-[10px] text-muted-foreground leading-tight mt-0.5">{timeLabel}</span>
+      </div>
+
+      {/* Cover */}
+      <div className="w-10 shrink-0 rounded overflow-hidden bg-secondary self-center" style={{ aspectRatio: "2/3" }}>
         {book.coverUrl ? (
           <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover object-center" />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><BookOpen className="h-3 w-3 text-muted-foreground" /></div>
         )}
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold truncate">{book.title}</p>
+
+      {/* Title + Author + reread */}
+      <div className="min-w-0 flex-1 flex flex-col justify-center">
+        <div className="flex items-center gap-2 min-w-0">
+          <p className="text-sm font-semibold truncate">{book.title}</p>
+          {(session.reread_number ?? 0) > 0 && (
+            <span className="text-[10px] font-medium bg-accent text-accent-foreground rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
+              Relecture {session.reread_number}
+            </span>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground truncate">{book.author}</p>
       </div>
-      {(session.reread_number ?? 0) > 0 && (
-        <span className="text-[10px] font-medium bg-accent text-accent-foreground rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
-          Relecture {session.reread_number}
-        </span>
-      )}
-      <span className="text-xs font-medium whitespace-nowrap shrink-0">
-        {formatDurationFull(session.duration_minutes)}
-      </span>
-      {session.last_page_reached != null && totalPages > 0 && (
-        <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-          Page {session.last_page_reached} / {totalPages}
-        </span>
-      )}
-      {pagesRead > 0 && (
-        <span className="text-xs font-medium bg-muted rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
-          +{pagesRead} pages
-        </span>
-      )}
-      <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-        {formatDateFR(session.session_date)}
-      </span>
-      <button onClick={() => onDelete(session)} className="text-muted-foreground hover:text-foreground shrink-0 p-1">
+
+      {/* Metrics */}
+      <div className="flex items-center gap-2 shrink-0 self-center">
+        <div className="flex flex-col items-end px-2.5 py-1 rounded-md bg-muted/50 min-w-[80px]">
+          <span className="text-[9px] uppercase tracking-wide text-muted-foreground font-medium leading-none">Durée</span>
+          <span className="text-xs font-semibold text-foreground mt-1">{formatDurationFull(session.duration_minutes)}</span>
+        </div>
+
+        {session.last_page_reached != null && totalPages > 0 && (
+          <div className="flex flex-col items-end px-2.5 py-1 rounded-md bg-muted/50 min-w-[80px]">
+            <span className="text-[9px] uppercase tracking-wide text-muted-foreground font-medium leading-none">Page</span>
+            <span className="text-xs font-semibold text-foreground mt-1">
+              {session.last_page_reached}<span className="text-muted-foreground font-normal"> / {totalPages}</span>
+            </span>
+          </div>
+        )}
+
+        {pagesRead > 0 && (
+          <div className="flex flex-col items-end px-2.5 py-1 rounded-md bg-foreground/5 min-w-[70px]">
+            <span className="text-[9px] uppercase tracking-wide text-muted-foreground font-medium leading-none">Lues</span>
+            <span className="text-xs font-semibold text-foreground mt-1">+{pagesRead} p.</span>
+          </div>
+        )}
+      </div>
+
+      {/* Delete */}
+      <button
+        onClick={() => onDelete(session)}
+        className="text-muted-foreground hover:text-destructive shrink-0 self-center p-1.5 rounded-md hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Supprimer la session"
+      >
         <Trash2 className="h-3.5 w-3.5" />
       </button>
     </div>
