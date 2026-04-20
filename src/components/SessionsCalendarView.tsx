@@ -100,7 +100,7 @@ export function SessionsCalendarView({ sessions, books }: Props) {
 
             const cell = (
               <div
-                className={`aspect-square rounded-md border p-1 flex flex-col gap-1 ${
+                className={`h-full min-h-0 rounded-md border p-1 flex flex-col gap-1 overflow-hidden ${
                   isToday ? "border-foreground bg-muted/30" : "border-border bg-card"
                 } ${hasContent ? "" : "opacity-70"}`}
               >
