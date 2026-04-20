@@ -36,7 +36,7 @@ export function ReadingSessionsContent() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  const [view, setView] = useState<"list" | "book">("list");
+  const [view, setView] = useState<"list" | "book" | "calendar">("list");
   const [deleteTarget, setDeleteTarget] = useState<ReadingSession | null>(null);
   const [timerBook, setTimerBook] = useState<Book | null>(null);
 
