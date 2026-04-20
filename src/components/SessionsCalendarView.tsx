@@ -24,7 +24,11 @@ export function SessionsCalendarView({ sessions, books }: Props) {
   // Group sessions of the visible month by day
   const sessionsByDay = useMemo(() => {
     const map = new Map<number, { book: Book; session: ReadingSession }[]>();
-    for (const s of sessions) {
+    // Sort sessions chronologically (earliest first) so first read of the day comes first
+    const sortedAsc = [...sessions].sort(
+      (a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime(),
+    );
+    for (const s of sortedAsc) {
       const d = new Date(s.session_date);
       if (d.getFullYear() !== viewYear || d.getMonth() !== viewMonth) continue;
       const book = books.find((b) => b.id === s.book_id);
@@ -84,9 +88,11 @@ export function SessionsCalendarView({ sessions, books }: Props) {
             if (day === null) return <div key={i} />;
 
             const dayItems = sessionsByDay.get(day) ?? [];
-            // Unique books for this day
+            // Unique books, preserving first-read order
             const uniqueBooksMap = new Map<string, Book>();
-            dayItems.forEach((it) => uniqueBooksMap.set(it.book.id, it.book));
+            dayItems.forEach((it) => {
+              if (!uniqueBooksMap.has(it.book.id)) uniqueBooksMap.set(it.book.id, it.book);
+            });
             const uniqueBooks = [...uniqueBooksMap.values()];
             const hasContent = uniqueBooks.length > 0;
             const isToday = isCurrentMonth && day === today;
@@ -110,32 +116,33 @@ export function SessionsCalendarView({ sessions, books }: Props) {
                   >
                     {day}
                   </span>
-                  {dayItems.length > 1 && (
+                  {uniqueBooks.length > 1 && (
                     <span className="text-[9px] font-medium bg-muted rounded-full px-1.5 leading-none py-0.5">
-                      {dayItems.length}
+                      {uniqueBooks.length}
                     </span>
                   )}
                 </div>
 
                 {hasContent && (
-                  <div className="flex-1 flex items-center justify-center gap-0.5 overflow-hidden">
-                    {uniqueBooks.slice(0, 3).map((b) =>
-                      b.coverUrl ? (
-                        <img
-                          key={b.id}
-                          src={b.coverUrl}
-                          alt={b.title}
-                          className="h-full w-auto max-w-full object-contain rounded-sm"
-                        />
-                      ) : (
-                        <div
-                          key={b.id}
-                          className="h-full aspect-[2/3] flex items-center justify-center bg-secondary rounded-sm"
-                        >
-                          <BookOpen className="h-3 w-3 text-muted-foreground" />
-                        </div>
-                      ),
-                    )}
+                  <div className="flex-1 flex items-stretch justify-center gap-0.5 overflow-hidden min-h-0">
+                    {uniqueBooks.map((b) => (
+                      <div
+                        key={b.id}
+                        className="flex-1 min-w-0 flex items-center justify-center"
+                      >
+                        {b.coverUrl ? (
+                          <img
+                            src={b.coverUrl}
+                            alt={b.title}
+                            className="max-h-full max-w-full object-contain rounded-sm"
+                          />
+                        ) : (
+                          <div className="h-full aspect-[2/3] flex items-center justify-center bg-secondary rounded-sm">
+                            <BookOpen className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
