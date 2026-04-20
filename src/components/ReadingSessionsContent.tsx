@@ -190,75 +190,170 @@ export function ReadingSessionsContent() {
 }
 
 /* ─── List View ─── */
+const MONTH_NAMES_FR = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+];
+
+function SessionRow({ session, book, allBookSessions, onDelete, idx }: {
+  session: ReadingSession;
+  book: Book;
+  allBookSessions: ReadingSession[];
+  onDelete: (s: ReadingSession) => void;
+  idx: number;
+}) {
+  const pagesRead = getSessionPagesRead(session, allBookSessions);
+  const totalPages = book.pages ?? 0;
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50 ${idx % 2 === 1 ? "bg-muted/20" : "bg-card"}`}
+    >
+      <div className="w-9 shrink-0 rounded overflow-hidden bg-secondary" style={{ aspectRatio: "2/3" }}>
+        {book.coverUrl ? (
+          <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover object-center" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center"><BookOpen className="h-3 w-3 text-muted-foreground" /></div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold truncate">{book.title}</p>
+        <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+      </div>
+      {(session.reread_number ?? 0) > 0 && (
+        <span className="text-[10px] font-medium bg-accent text-accent-foreground rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
+          Relecture {session.reread_number}
+        </span>
+      )}
+      <span className="text-xs font-medium whitespace-nowrap shrink-0">
+        {formatDurationFull(session.duration_minutes)}
+      </span>
+      {session.last_page_reached != null && totalPages > 0 && (
+        <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+          Page {session.last_page_reached} / {totalPages}
+        </span>
+      )}
+      {pagesRead > 0 && (
+        <span className="text-xs font-medium bg-muted rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
+          +{pagesRead} pages
+        </span>
+      )}
+      <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+        {formatDateFR(session.session_date)}
+      </span>
+      <button onClick={() => onDelete(session)} className="text-muted-foreground hover:text-foreground shrink-0 p-1">
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
 function SessionListView({ sessions, books, onDelete }: {
   sessions: ReadingSession[];
   books: Book[];
   onDelete: (s: ReadingSession) => void;
 }) {
+  // Group sessions by year, then by month — most recent first
+  const grouped = useMemo(() => {
+    const sorted = [...sessions].sort(
+      (a, b) => new Date(b.session_date).getTime() - new Date(a.session_date).getTime(),
+    );
+    const byYear = new Map<number, Map<number, ReadingSession[]>>();
+    for (const s of sorted) {
+      const d = new Date(s.session_date);
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      if (!byYear.has(y)) byYear.set(y, new Map());
+      const byMonth = byYear.get(y)!;
+      if (!byMonth.has(m)) byMonth.set(m, []);
+      byMonth.get(m)!.push(s);
+    }
+    const years = [...byYear.entries()]
+      .sort((a, b) => b[0] - a[0])
+      .map(([year, byMonth]) => ({
+        year,
+        months: [...byMonth.entries()]
+          .sort((a, b) => b[0] - a[0])
+          .map(([month, items]) => ({ month, sessions: items })),
+      }));
+    return years;
+  }, [sessions]);
+
+  // Default: only the most recent year + most recent month open
+  const [openYears, setOpenYears] = useState<Record<number, boolean>>(() => {
+    if (grouped.length === 0) return {};
+    return { [grouped[0].year]: true };
+  });
+  const [openMonths, setOpenMonths] = useState<Record<string, boolean>>(() => {
+    if (grouped.length === 0 || grouped[0].months.length === 0) return {};
+    const k = `${grouped[0].year}-${grouped[0].months[0].month}`;
+    return { [k]: true };
+  });
+
+  const toggleYear = (y: number) => setOpenYears((p) => ({ ...p, [y]: !p[y] }));
+  const toggleMonth = (k: string) => setOpenMonths((p) => ({ ...p, [k]: !p[k] }));
+
   return (
-    <div className="space-y-2">
-      {sessions.map((session, idx) => {
-        const book = books.find(b => b.id === session.book_id);
-        if (!book) return null;
-        const bookSessions = sessions.filter(s => s.book_id === session.book_id);
-        const pagesRead = getSessionPagesRead(session, bookSessions);
-        const totalPages = book.pages ?? 0;
-
+    <div className="space-y-3">
+      {grouped.map(({ year, months }) => {
+        const yearOpen = openYears[year] ?? false;
+        const yearTotal = months.reduce((sum, m) => sum + m.sessions.length, 0);
         return (
-          <div
-            key={session.id}
-            className={`flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50 ${idx % 2 === 1 ? "bg-muted/20" : "bg-card"}`}
-          >
-            {/* Cover */}
-            <div className="w-9 shrink-0 rounded overflow-hidden bg-secondary" style={{ aspectRatio: "2/3" }}>
-              {book.coverUrl ? (
-                <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover object-center" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center"><BookOpen className="h-3 w-3 text-muted-foreground" /></div>
-              )}
-            </div>
-
-            {/* Title + Author */}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold truncate">{book.title}</p>
-              <p className="text-xs text-muted-foreground truncate">{book.author}</p>
-            </div>
-
-            {/* Reread badge */}
-            {(session.reread_number ?? 0) > 0 && (
-              <span className="text-[10px] font-medium bg-accent text-accent-foreground rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
-                Relecture {session.reread_number}
+          <div key={year} className="rounded-lg border border-border bg-card overflow-hidden">
+            <button
+              onClick={() => toggleYear(year)}
+              className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-semibold hover:bg-muted/50 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <ChevronDown className={`h-4 w-4 transition-transform ${yearOpen ? "" : "-rotate-90"}`} />
+                {year}
               </span>
-            )}
-
-            {/* Duration */}
-            <span className="text-xs font-medium whitespace-nowrap shrink-0">
-              {formatDurationFull(session.duration_minutes)}
-            </span>
-
-            {/* Page */}
-            {session.last_page_reached != null && totalPages > 0 && (
-              <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-                Page {session.last_page_reached} / {totalPages}
+              <span className="text-xs text-muted-foreground font-normal">
+                {yearTotal} session{yearTotal > 1 ? "s" : ""}
               </span>
-            )}
-
-            {/* Pages read badge */}
-            {pagesRead > 0 && (
-              <span className="text-xs font-medium bg-muted rounded-full px-2 py-0.5 whitespace-nowrap shrink-0">
-                +{pagesRead} pages
-              </span>
-            )}
-
-            {/* Date */}
-            <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-              {formatDateFR(session.session_date)}
-            </span>
-
-            {/* Delete */}
-            <button onClick={() => onDelete(session)} className="text-muted-foreground hover:text-foreground shrink-0 p-1">
-              <Trash2 className="h-3.5 w-3.5" />
             </button>
+            {yearOpen && (
+              <div className="border-t border-border divide-y divide-border">
+                {months.map(({ month, sessions: monthSessions }) => {
+                  const k = `${year}-${month}`;
+                  const monthOpen = openMonths[k] ?? false;
+                  return (
+                    <div key={k}>
+                      <button
+                        onClick={() => toggleMonth(k)}
+                        className="flex items-center justify-between w-full px-4 py-2 text-xs font-medium hover:bg-muted/30 transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${monthOpen ? "" : "-rotate-90"}`} />
+                          {MONTH_NAMES_FR[month]}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-normal">
+                          {monthSessions.length} session{monthSessions.length > 1 ? "s" : ""}
+                        </span>
+                      </button>
+                      {monthOpen && (
+                        <div className="px-3 pb-3 pt-1 space-y-2">
+                          {monthSessions.map((session, idx) => {
+                            const book = books.find((b) => b.id === session.book_id);
+                            if (!book) return null;
+                            const bookSessions = sessions.filter((s) => s.book_id === session.book_id);
+                            return (
+                              <SessionRow
+                                key={session.id}
+                                session={session}
+                                book={book}
+                                allBookSessions={bookSessions}
+                                onDelete={onDelete}
+                                idx={idx}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}
