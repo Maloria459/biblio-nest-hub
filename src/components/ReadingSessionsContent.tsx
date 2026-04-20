@@ -10,9 +10,10 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Trash2, BookOpen, ChevronDown, List, Library, Play } from "lucide-react";
+import { Trash2, BookOpen, ChevronDown, List, Library, Play, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { ReadingSessionTimer } from "@/components/ReadingSessionTimer";
+import { SessionsCalendarView } from "@/components/SessionsCalendarView";
 import type { Book } from "@/data/mockBooks";
 
 function formatDateFR(dateStr: string) {
