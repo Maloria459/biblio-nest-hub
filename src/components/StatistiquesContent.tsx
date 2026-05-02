@@ -295,12 +295,18 @@ export function StatistiquesContent() {
         byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
     } else {
-      // all: by month
+      // all: by month — use sortable key (yyyy-MM) and a separate label
+      const labelByKey = new Map<string, string>();
       filteredSessions.forEach((s) => {
         const d = new Date(s.session_date);
+        const key = format(d, "yyyy-MM");
         const label = format(d, "MMM yy", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
+        labelByKey.set(key, label);
+        byKey.set(key, (byKey.get(key) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
+      return Array.from(byKey.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([key, pages]) => ({ label: labelByKey.get(key)!, pages }));
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
