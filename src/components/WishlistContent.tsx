@@ -42,7 +42,17 @@ export function WishlistContent() {
     (id: string) => {
       const book = books.find((b) => b.id === id);
       if (book) {
-        updateBook({ ...book, status: "Acheté", acquiredFromWishlist: true });
+        updateBook({ ...book, status: "Acheté", acquiredFromWishlist: true, gifted: false });
+      }
+    },
+    [books, updateBook],
+  );
+
+  const handleMarkOffert = useCallback(
+    (id: string) => {
+      const book = books.find((b) => b.id === id);
+      if (book) {
+        updateBook({ ...book, status: "Acheté", acquiredFromWishlist: true, gifted: true });
       }
     },
     [books, updateBook],
