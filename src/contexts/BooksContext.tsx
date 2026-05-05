@@ -161,6 +161,7 @@ function bookToRow(book: Book, userId: string) {
     personnages_preferes: JSON.stringify(book.personnagesPreferes ?? []),
     chapter_notes: (book.chapterNotes ?? []) as any,
     acquired_from_wishlist: book.acquiredFromWishlist ?? false,
+    gifted: book.gifted ?? false,
     chapter_notes_enabled: book.chapterNotesEnabled ?? false,
     secondary_status: book.secondaryStatus ?? null,
     loan_date: book.loanDate ?? null,
