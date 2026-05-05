@@ -58,6 +58,7 @@ export type Database = {
           end_date: string | null
           format: string | null
           genre: string | null
+          gifted: boolean
           has_epilogue: boolean | null
           has_prologue: boolean | null
           id: string
@@ -104,6 +105,7 @@ export type Database = {
           end_date?: string | null
           format?: string | null
           genre?: string | null
+          gifted?: boolean
           has_epilogue?: boolean | null
           has_prologue?: boolean | null
           id?: string
@@ -150,6 +152,7 @@ export type Database = {
           end_date?: string | null
           format?: string | null
           genre?: string | null
+          gifted?: boolean
           has_epilogue?: boolean | null
           has_prologue?: boolean | null
           id?: string

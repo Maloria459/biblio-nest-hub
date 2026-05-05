@@ -65,6 +65,7 @@ export interface Book {
   synopsis?: string;
   isbn?: string;
   acquiredFromWishlist?: boolean;
+  gifted?: boolean;
   hasPrologue?: boolean;
   hasEpilogue?: boolean;
 }

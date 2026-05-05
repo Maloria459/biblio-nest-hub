@@ -370,7 +370,7 @@ export function StatistiquesContent() {
 
   const totalBooksOwned = books.filter((b) => b.status !== "Wishlist").length;
   const booksAcquired = useMemo(() => filteredBooks.filter((b) => b.acquiredFromWishlist).length, [filteredBooks]);
-  const totalSpent = useMemo(() => filteredBooks.filter((b) => b.acquiredFromWishlist).reduce((s, b) => s + (b.price ?? 0), 0), [filteredBooks]);
+  const totalSpent = useMemo(() => filteredBooks.filter((b) => b.acquiredFromWishlist && !b.gifted).reduce((s, b) => s + (b.price ?? 0), 0), [filteredBooks]);
 
   // ── Objectifs ──
   const { data: objectives = [] } = useQuery({
