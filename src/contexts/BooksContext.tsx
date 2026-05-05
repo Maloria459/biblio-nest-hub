@@ -115,6 +115,7 @@ function rowToBook(row: any): Book {
     chapterNotes: parseChapterNotes(row.chapter_notes),
     chapterNotesEnabled: row.chapter_notes_enabled ?? undefined,
     acquiredFromWishlist: (row as any).acquired_from_wishlist ?? false,
+    gifted: (row as any).gifted ?? false,
     secondaryStatus: row.secondary_status ?? undefined,
     loanDate: row.loan_date ?? undefined,
     borrowerName: row.borrower_name ?? undefined,
