@@ -131,15 +131,26 @@ export function WishlistContent() {
                             <span className="text-xs text-foreground">
                               {book.price != null ? `${book.price.toFixed(2)} €` : "— €"}
                             </span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMarkAchete(book.id);
-                              }}
-                              className="rounded-md border border-foreground px-3 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
-                            >
-                              Acheté
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkOffert(book.id);
+                                }}
+                                className="rounded-md border border-foreground px-3 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+                              >
+                                Offert
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkAchete(book.id);
+                                }}
+                                className="rounded-md border border-foreground px-3 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+                              >
+                                Acheté
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}
