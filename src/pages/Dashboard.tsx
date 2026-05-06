@@ -67,7 +67,14 @@ const Dashboard = () => {
   const lastRead = useMemo(() => {
     const finished = books.filter((b) => (b.status === "Lecture terminée" || b.status === "Lu") && b.endDate);
     if (!finished.length) return null;
-    return finished.sort((a, b) => (b.endDate ?? "").localeCompare(a.endDate ?? ""))[0];
+    const toTime = (s?: string) => {
+      if (!s) return 0;
+      // Accept DD/MM/YYYY or YYYY-MM-DD
+      const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (m) return new Date(`${m[3]}-${m[2]}-${m[1]}`).getTime();
+      return new Date(s).getTime() || 0;
+    };
+    return finished.sort((a, b) => toTime(b.endDate) - toTime(a.endDate))[0];
   }, [books]);
 
   const lastCoupDeCoeur = useMemo(() => {
