@@ -30,6 +30,7 @@ export interface Book {
   id: string;
   title: string;
   author: string;
+  updatedAt?: string;
   coverUrl?: string;
   rating?: number;
   coupDeCoeur?: boolean;

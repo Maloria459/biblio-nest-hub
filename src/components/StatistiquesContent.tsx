@@ -209,14 +209,19 @@ export function StatistiquesContent() {
 
   // ── Lecture block data ──
   const booksFinished = filteredBooks.filter((b) => finishedStatuses.includes(b.status)).length;
+  const legacyManualEntries = useMemo(() => books
+    .filter((b) => !booksWithAnyActivity.has(b.id) && (b.pagesRead ?? 0) > 0)
+    .map((b) => ({ book: b, date: safeParseDate(b.updatedAt || b.endDate || b.startDate || "") }))
+    .filter((entry): entry is { book: typeof books[number]; date: Date } => Boolean(entry.date) && dateInRange(entry.date!.toISOString(), rangeStart, rangeEnd)),
+    [books, booksWithAnyActivity, rangeStart, rangeEnd]
+  );
+
   const totalPagesRead = useMemo(() => {
     const sessionPages = filteredSessions.reduce((s, se) => s + (sessionPagesMap.get(se.id) ?? 0), 0);
     const manualPages = filteredManualUpdates.reduce((s, u: any) => s + Math.max(0, u.pages_delta ?? 0), 0);
-    const legacyPages = filteredBooks
-      .filter((b) => !booksWithAnyActivity.has(b.id) && (b.pagesRead ?? 0) > 0)
-      .reduce((s, b) => s + (b.pagesRead ?? 0), 0);
+    const legacyPages = legacyManualEntries.reduce((s, { book }) => s + (book.pagesRead ?? 0), 0);
     return sessionPages + manualPages + legacyPages;
-  }, [filteredSessions, filteredManualUpdates, filteredBooks, sessionPagesMap, booksWithAnyActivity]);
+  }, [filteredSessions, filteredManualUpdates, legacyManualEntries, sessionPagesMap]);
   const totalReadingMinutes = filteredSessions.reduce((s, se) => s + se.duration_minutes, 0);
   const totalSessions = filteredSessions.length;
   const avgReadingMinutes = totalSessions > 0 ? totalReadingMinutes / totalSessions : null;
@@ -288,15 +293,9 @@ export function StatistiquesContent() {
       const delta = Math.max(0, u.pages_delta ?? 0);
       if (delta > 0) manualEntries.push({ date: d, pages: delta });
     });
-    filteredBooks
-      .filter((b) => !booksWithAnyActivity.has(b.id) && (b.pagesRead ?? 0) > 0)
-      .forEach((b) => {
-        const ref = b.endDate || b.startDate;
-        if (!ref) return;
-        const d = safeParseDate(ref);
-        if (!d) return;
-        manualEntries.push({ date: d, pages: b.pagesRead ?? 0 });
-      });
+    legacyManualEntries.forEach(({ book, date }) => {
+      manualEntries.push({ date, pages: book.pagesRead ?? 0 });
+    });
 
     if (filteredSessions.length === 0 && manualEntries.length === 0) return [];
     const byKey = new Map<string, number>();
@@ -352,7 +351,7 @@ export function StatistiquesContent() {
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, filteredBooks, filteredManualUpdates, booksWithAnyActivity, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
+  }, [filteredSessions, filteredManualUpdates, legacyManualEntries, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
