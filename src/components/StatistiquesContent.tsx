@@ -110,6 +110,20 @@ export function StatistiquesContent() {
   const { user } = useAuth();
   const memberSince = useMemberSince();
 
+  const { data: manualUpdates = [] } = useQuery({
+    queryKey: ["manual_page_updates", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("manual_page_updates")
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+  });
+
   const weekOptions = useMemo(() => getWeekOptions(), []);
   const monthOptions = useMemo(() => getMonthOptions(), []);
   const yearOptions = useMemo(() => getYearOptions(memberSince), [memberSince]);
