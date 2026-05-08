@@ -199,12 +199,24 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       onSave({ ...eb });
       // Only record activity if pages were manually changed (not notes/ratings/etc.)
       if (pagesManuallyChanged.current && user) {
+        const newPages = eb.pagesRead ?? 0;
+        const delta = newPages - prevPagesReadRef.current;
         supabase.from("reading_activity").upsert(
           { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
           { onConflict: "user_id,activity_date" }
         ).then(() => {
           invalidateSessions();
         });
+        if (delta !== 0) {
+          supabase.from("manual_page_updates").insert({
+            user_id: user.id,
+            book_id: eb.id,
+            update_date: new Date().toISOString(),
+            pages_delta: delta,
+            pages_value: newPages,
+            reread_number: eb.rereadCount ?? 0,
+          }).then();
+        }
       }
     }
     setEditBook(null);
