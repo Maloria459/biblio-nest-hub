@@ -217,7 +217,9 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
             pages_delta: delta,
             pages_value: newPages,
             reread_number: eb.rereadCount ?? 0,
-          }).then();
+          }).then(() => {
+            queryClient.invalidateQueries({ queryKey: ["manual_page_updates", user.id] });
+          });
         }
       }
     }
