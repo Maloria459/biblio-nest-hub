@@ -88,6 +88,7 @@ function rowToBook(row: any): Book {
     id: row.id,
     title: row.title,
     author: row.author,
+    updatedAt: row.updated_at ?? undefined,
     coverUrl: row.cover_url ?? undefined,
     rating: row.rating ?? undefined,
     coupDeCoeur: row.coup_de_coeur ?? undefined,
