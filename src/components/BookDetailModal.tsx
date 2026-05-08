@@ -129,6 +129,7 @@ interface BookDetailModalProps {
 export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, allBooks, genres, formats, statuses }: BookDetailModalProps) {
   const { user } = useAuth();
   const invalidateSessions = useInvalidateSessions();
+  const queryClient = useQueryClient();
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
