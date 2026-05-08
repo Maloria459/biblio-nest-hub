@@ -279,11 +279,17 @@ export function StatistiquesContent() {
 
   // Evolution chart — labels by day for week/month, by month for year/all
   const evolutionData = useMemo(() => {
-    // Build manual contributions: books with pagesRead but no sessions, using endDate or startDate
-    const booksWithSessions = new Set(sessions.map((s) => s.book_id));
+    // Manual entries: each logged manual update contributes its delta on its own date.
+    // Legacy fallback: books with pagesRead but no sessions and no manual updates → use endDate/startDate.
     const manualEntries: { date: Date; pages: number }[] = [];
+    filteredManualUpdates.forEach((u: any) => {
+      const d = safeParseDate(u.update_date);
+      if (!d) return;
+      const delta = Math.max(0, u.pages_delta ?? 0);
+      if (delta > 0) manualEntries.push({ date: d, pages: delta });
+    });
     filteredBooks
-      .filter((b) => !booksWithSessions.has(b.id) && (b.pagesRead ?? 0) > 0)
+      .filter((b) => !booksWithAnyActivity.has(b.id) && (b.pagesRead ?? 0) > 0)
       .forEach((b) => {
         const ref = b.endDate || b.startDate;
         if (!ref) return;
