@@ -256,61 +256,74 @@ export function StatistiquesContent() {
 
   // Evolution chart — labels by day for week/month, by month for year/all
   const evolutionData = useMemo(() => {
-    if (filteredSessions.length === 0) return [];
+    // Build manual contributions: books with pagesRead but no sessions, using endDate or startDate
+    const booksWithSessions = new Set(sessions.map((s) => s.book_id));
+    const manualEntries: { date: Date; pages: number }[] = [];
+    filteredBooks
+      .filter((b) => !booksWithSessions.has(b.id) && (b.pagesRead ?? 0) > 0)
+      .forEach((b) => {
+        const ref = b.endDate || b.startDate;
+        if (!ref) return;
+        const d = safeParseDate(ref);
+        if (!d) return;
+        manualEntries.push({ date: d, pages: b.pagesRead ?? 0 });
+      });
+
+    if (filteredSessions.length === 0 && manualEntries.length === 0) return [];
     const byKey = new Map<string, number>();
 
     if (filterMode === "week") {
-      // By day of week
       const days = rangeStart && rangeEnd ? eachDayOfInterval({ start: rangeStart, end: rangeEnd }) : [];
-      days.forEach(d => {
-        const label = format(d, "EEE dd", { locale: fr });
-        byKey.set(label, 0);
-      });
+      days.forEach(d => byKey.set(format(d, "EEE dd", { locale: fr }), 0));
       filteredSessions.forEach((s) => {
-        const d = new Date(s.session_date);
-        const label = format(d, "EEE dd", { locale: fr });
+        const label = format(new Date(s.session_date), "EEE dd", { locale: fr });
         byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
+      });
+      manualEntries.forEach(({ date, pages }) => {
+        const label = format(date, "EEE dd", { locale: fr });
+        if (byKey.has(label)) byKey.set(label, (byKey.get(label) ?? 0) + pages);
       });
     } else if (filterMode === "month") {
-      // By day
       const days = rangeStart && rangeEnd ? eachDayOfInterval({ start: rangeStart, end: rangeEnd }) : [];
-      days.forEach(d => {
-        const label = format(d, "dd", { locale: fr });
-        byKey.set(label, 0);
-      });
+      days.forEach(d => byKey.set(format(d, "dd", { locale: fr }), 0));
       filteredSessions.forEach((s) => {
-        const d = new Date(s.session_date);
-        const label = format(d, "dd", { locale: fr });
+        const label = format(new Date(s.session_date), "dd", { locale: fr });
         byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
+      });
+      manualEntries.forEach(({ date, pages }) => {
+        const label = format(date, "dd", { locale: fr });
+        if (byKey.has(label)) byKey.set(label, (byKey.get(label) ?? 0) + pages);
       });
     } else if (filterMode === "year") {
-      // By month
       for (let m = 0; m < 12; m++) {
-        const label = format(new Date(2024, m, 1), "MMM", { locale: fr });
-        byKey.set(label, 0);
+        byKey.set(format(new Date(2024, m, 1), "MMM", { locale: fr }), 0);
       }
       filteredSessions.forEach((s) => {
-        const d = new Date(s.session_date);
-        const label = format(d, "MMM", { locale: fr });
+        const label = format(new Date(s.session_date), "MMM", { locale: fr });
         byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
       });
+      manualEntries.forEach(({ date, pages }) => {
+        const label = format(date, "MMM", { locale: fr });
+        if (byKey.has(label)) byKey.set(label, (byKey.get(label) ?? 0) + pages);
+      });
     } else {
-      // all: by month — use sortable key (yyyy-MM) and a separate label
+      // all: by month — sortable key (yyyy-MM)
       const labelByKey = new Map<string, string>();
-      filteredSessions.forEach((s) => {
-        const d = new Date(s.session_date);
+      const addEntry = (d: Date, pages: number) => {
         const key = format(d, "yyyy-MM");
         const label = format(d, "MMM yy", { locale: fr });
         labelByKey.set(key, label);
-        byKey.set(key, (byKey.get(key) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
-      });
+        byKey.set(key, (byKey.get(key) ?? 0) + pages);
+      };
+      filteredSessions.forEach((s) => addEntry(new Date(s.session_date), sessionPagesMap.get(s.id) ?? 0));
+      manualEntries.forEach(({ date, pages }) => addEntry(date, pages));
       return Array.from(byKey.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([key, pages]) => ({ label: labelByKey.get(key)!, pages }));
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
+  }, [filteredSessions, filteredBooks, sessions, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
