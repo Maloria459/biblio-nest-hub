@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { EditBookModal } from "@/components/EditBookModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -128,6 +129,7 @@ interface BookDetailModalProps {
 export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, allBooks, genres, formats, statuses }: BookDetailModalProps) {
   const { user } = useAuth();
   const invalidateSessions = useInvalidateSessions();
+  const queryClient = useQueryClient();
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -199,12 +201,26 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
       onSave({ ...eb });
       // Only record activity if pages were manually changed (not notes/ratings/etc.)
       if (pagesManuallyChanged.current && user) {
+        const newPages = eb.pagesRead ?? 0;
+        const delta = newPages - prevPagesReadRef.current;
         supabase.from("reading_activity").upsert(
           { user_id: user.id, activity_date: new Date().toISOString().slice(0, 10) },
           { onConflict: "user_id,activity_date" }
         ).then(() => {
           invalidateSessions();
         });
+        if (delta !== 0) {
+          supabase.from("manual_page_updates").insert({
+            user_id: user.id,
+            book_id: eb.id,
+            update_date: new Date().toISOString(),
+            pages_delta: delta,
+            pages_value: newPages,
+            reread_number: eb.rereadCount ?? 0,
+          }).then(() => {
+            queryClient.invalidateQueries({ queryKey: ["manual_page_updates", user.id] });
+          });
+        }
       }
     }
     setEditBook(null);

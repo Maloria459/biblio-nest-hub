@@ -110,6 +110,20 @@ export function StatistiquesContent() {
   const { user } = useAuth();
   const memberSince = useMemberSince();
 
+  const { data: manualUpdates = [] } = useQuery({
+    queryKey: ["manual_page_updates", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("manual_page_updates")
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user,
+  });
+
   const weekOptions = useMemo(() => getWeekOptions(), []);
   const monthOptions = useMemo(() => getMonthOptions(), []);
   const yearOptions = useMemo(() => getYearOptions(memberSince), [memberSince]);
@@ -156,11 +170,14 @@ export function StatistiquesContent() {
 
   const filteredBooks = useMemo(() => books.filter((b) => dateInRange(b.endDate || b.startDate, rangeStart, rangeEnd)), [books, rangeStart, rangeEnd]);
   const filteredSessions = useMemo(() => sessions.filter((s) => dateInRange(s.session_date, rangeStart, rangeEnd)), [sessions, rangeStart, rangeEnd]);
+  const filteredManualUpdates = useMemo(
+    () => manualUpdates.filter((u: any) => dateInRange(u.update_date, rangeStart, rangeEnd)),
+    [manualUpdates, rangeStart, rangeEnd]
+  );
 
   // Pre-compute page deltas for each session (pages read = delta from previous session of same book/reread)
   const sessionPagesMap = useMemo(() => {
     const map = new Map<string, number>();
-    // Group ALL sessions by book+reread, sorted by date ascending
     const grouped = new Map<string, ReadingSession[]>();
     sessions.forEach((s) => {
       const key = `${s.book_id}__${s.reread_number}`;
@@ -180,20 +197,26 @@ export function StatistiquesContent() {
     return map;
   }, [sessions]);
 
+  // Books with no logged activity at all (legacy fallback)
+  const booksWithAnyActivity = useMemo(() => {
+    const set = new Set<string>();
+    sessions.forEach((s) => set.add(s.book_id));
+    manualUpdates.forEach((u: any) => set.add(u.book_id));
+    return set;
+  }, [sessions, manualUpdates]);
+
   const finishedStatuses = ["Lu", "Lecture terminée"];
 
   // ── Lecture block data ──
   const booksFinished = filteredBooks.filter((b) => finishedStatuses.includes(b.status)).length;
-  // Total pages read: sum of session deltas + manual pages from books without sessions
   const totalPagesRead = useMemo(() => {
     const sessionPages = filteredSessions.reduce((s, se) => s + (sessionPagesMap.get(se.id) ?? 0), 0);
-    // Add pages from books that have pagesRead but no sessions in the period
-    const booksWithSessions = new Set(filteredSessions.map((s) => s.book_id));
-    const manualPages = filteredBooks
-      .filter((b) => !booksWithSessions.has(b.id) && (b.pagesRead ?? 0) > 0)
+    const manualPages = filteredManualUpdates.reduce((s, u: any) => s + Math.max(0, u.pages_delta ?? 0), 0);
+    const legacyPages = filteredBooks
+      .filter((b) => !booksWithAnyActivity.has(b.id) && (b.pagesRead ?? 0) > 0)
       .reduce((s, b) => s + (b.pagesRead ?? 0), 0);
-    return sessionPages + manualPages;
-  }, [filteredSessions, filteredBooks, sessionPagesMap]);
+    return sessionPages + manualPages + legacyPages;
+  }, [filteredSessions, filteredManualUpdates, filteredBooks, sessionPagesMap, booksWithAnyActivity]);
   const totalReadingMinutes = filteredSessions.reduce((s, se) => s + se.duration_minutes, 0);
   const totalSessions = filteredSessions.length;
   const avgReadingMinutes = totalSessions > 0 ? totalReadingMinutes / totalSessions : null;
@@ -256,11 +279,17 @@ export function StatistiquesContent() {
 
   // Evolution chart — labels by day for week/month, by month for year/all
   const evolutionData = useMemo(() => {
-    // Build manual contributions: books with pagesRead but no sessions, using endDate or startDate
-    const booksWithSessions = new Set(sessions.map((s) => s.book_id));
+    // Manual entries: each logged manual update contributes its delta on its own date.
+    // Legacy fallback: books with pagesRead but no sessions and no manual updates → use endDate/startDate.
     const manualEntries: { date: Date; pages: number }[] = [];
+    filteredManualUpdates.forEach((u: any) => {
+      const d = safeParseDate(u.update_date);
+      if (!d) return;
+      const delta = Math.max(0, u.pages_delta ?? 0);
+      if (delta > 0) manualEntries.push({ date: d, pages: delta });
+    });
     filteredBooks
-      .filter((b) => !booksWithSessions.has(b.id) && (b.pagesRead ?? 0) > 0)
+      .filter((b) => !booksWithAnyActivity.has(b.id) && (b.pagesRead ?? 0) > 0)
       .forEach((b) => {
         const ref = b.endDate || b.startDate;
         if (!ref) return;
@@ -323,7 +352,7 @@ export function StatistiquesContent() {
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, filteredBooks, sessions, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
+  }, [filteredSessions, filteredBooks, filteredManualUpdates, booksWithAnyActivity, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
