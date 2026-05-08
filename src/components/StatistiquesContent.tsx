@@ -352,7 +352,7 @@ export function StatistiquesContent() {
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, filteredBooks, sessions, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
+  }, [filteredSessions, filteredBooks, filteredManualUpdates, booksWithAnyActivity, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
