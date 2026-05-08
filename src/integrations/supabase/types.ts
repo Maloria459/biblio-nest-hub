@@ -392,6 +392,39 @@ export type Database = {
         }
         Relationships: []
       }
+      manual_page_updates: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          pages_delta: number
+          pages_value: number
+          reread_number: number
+          update_date: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          pages_delta?: number
+          pages_value?: number
+          reread_number?: number
+          update_date?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          pages_delta?: number
+          pages_value?: number
+          reread_number?: number
+          update_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       personal_objectives: {
         Row: {
           created_at: string
