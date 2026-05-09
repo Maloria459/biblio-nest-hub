@@ -342,7 +342,7 @@ export function StatistiquesContent() {
       days.forEach(d => byKey.set(format(d, "dd", { locale: fr }), 0));
       filteredSessions.forEach((s) => {
         const label = format(new Date(s.session_date), "dd", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (progressPagesMap.get(`session:${s.id}`) ?? 0));
       });
       manualEntries.forEach(({ date, pages }) => {
         const label = format(date, "dd", { locale: fr });
@@ -354,7 +354,7 @@ export function StatistiquesContent() {
       }
       filteredSessions.forEach((s) => {
         const label = format(new Date(s.session_date), "MMM", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (progressPagesMap.get(`session:${s.id}`) ?? 0));
       });
       manualEntries.forEach(({ date, pages }) => {
         const label = format(date, "MMM", { locale: fr });
@@ -369,7 +369,7 @@ export function StatistiquesContent() {
         labelByKey.set(key, label);
         byKey.set(key, (byKey.get(key) ?? 0) + pages);
       };
-      filteredSessions.forEach((s) => addEntry(new Date(s.session_date), sessionPagesMap.get(s.id) ?? 0));
+      filteredSessions.forEach((s) => addEntry(new Date(s.session_date), progressPagesMap.get(`session:${s.id}`) ?? 0));
       manualEntries.forEach(({ date, pages }) => addEntry(date, pages));
       return Array.from(byKey.entries())
         .sort(([a], [b]) => a.localeCompare(b))
