@@ -243,11 +243,11 @@ export function StatistiquesContent() {
   );
 
   const totalPagesRead = useMemo(() => {
-    const sessionPages = filteredSessions.reduce((s, se) => s + (sessionPagesMap.get(se.id) ?? 0), 0);
-    const manualPages = filteredManualUpdates.reduce((s, u: any) => s + Math.max(0, u.pages_delta ?? 0), 0);
+    const sessionPages = filteredSessions.reduce((s, se) => s + (progressPagesMap.get(`session:${se.id}`) ?? 0), 0);
+    const manualPages = filteredManualUpdates.reduce((s, u: any) => s + (progressPagesMap.get(`manual:${u.id}`) ?? 0), 0);
     const legacyPages = legacyManualEntries.reduce((s, { book }) => s + (book.pagesRead ?? 0), 0);
     return sessionPages + manualPages + legacyPages;
-  }, [filteredSessions, filteredManualUpdates, legacyManualEntries, sessionPagesMap]);
+  }, [filteredSessions, filteredManualUpdates, legacyManualEntries, progressPagesMap]);
   const totalReadingMinutes = filteredSessions.reduce((s, se) => s + se.duration_minutes, 0);
   const totalSessions = filteredSessions.length;
   const avgReadingMinutes = totalSessions > 0 ? totalReadingMinutes / totalSessions : null;
@@ -316,7 +316,7 @@ export function StatistiquesContent() {
     filteredManualUpdates.forEach((u: any) => {
       const d = safeParseDate(u.update_date);
       if (!d) return;
-      const delta = Math.max(0, u.pages_delta ?? 0);
+      const delta = progressPagesMap.get(`manual:${u.id}`) ?? 0;
       if (delta > 0) manualEntries.push({ date: d, pages: delta });
     });
     legacyManualEntries.forEach(({ book, date }) => {
@@ -331,7 +331,7 @@ export function StatistiquesContent() {
       days.forEach(d => byKey.set(format(d, "EEE dd", { locale: fr }), 0));
       filteredSessions.forEach((s) => {
         const label = format(new Date(s.session_date), "EEE dd", { locale: fr });
-        byKey.set(label, (byKey.get(label) ?? 0) + (sessionPagesMap.get(s.id) ?? 0));
+        byKey.set(label, (byKey.get(label) ?? 0) + (progressPagesMap.get(`session:${s.id}`) ?? 0));
       });
       manualEntries.forEach(({ date, pages }) => {
         const label = format(date, "EEE dd", { locale: fr });
@@ -377,7 +377,7 @@ export function StatistiquesContent() {
     }
 
     return Array.from(byKey.entries()).map(([label, pages]) => ({ label, pages }));
-  }, [filteredSessions, filteredManualUpdates, legacyManualEntries, filterMode, rangeStart, rangeEnd, sessionPagesMap]);
+  }, [filteredSessions, filteredManualUpdates, legacyManualEntries, filterMode, rangeStart, rangeEnd, progressPagesMap]);
 
   // Weekday chart
   const weekdayMinutes = useMemo(() => {
