@@ -66,6 +66,15 @@ function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+type ProgressEvent = {
+  id: string;
+  bookId: string;
+  rereadNumber: number;
+  date: Date;
+  pagesValue: number;
+  source: "session" | "manual";
+};
+
 // Generate week options for current year
 function getWeekOptions() {
   const now = new Date();
@@ -117,7 +126,8 @@ export function StatistiquesContent() {
       const { data, error } = await supabase
         .from("manual_page_updates")
         .select("*")
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .order("update_date", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
