@@ -185,27 +185,43 @@ export function StatistiquesContent() {
     [manualUpdates, rangeStart, rangeEnd]
   );
 
-  // Pre-compute page deltas for each session (pages read = delta from previous session of same book/reread)
-  const sessionPagesMap = useMemo(() => {
+  // Pre-compute page deltas from the full chronological progress timeline.
+  // A manual value of page 124 after a previous value of page 50 counts as +74, not +124.
+  const progressPagesMap = useMemo(() => {
     const map = new Map<string, number>();
-    const grouped = new Map<string, ReadingSession[]>();
-    sessions.forEach((s) => {
-      const key = `${s.book_id}__${s.reread_number}`;
+    const grouped = new Map<string, ProgressEvent[]>();
+    const addEvent = (event: ProgressEvent) => {
+      const key = `${event.bookId}__${event.rereadNumber}`;
       if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key)!.push(s);
+      grouped.get(key)!.push(event);
+    };
+
+    sessions.forEach((s) => {
+      const pagesValue = s.last_page_reached ?? 0;
+      if (pagesValue > 0) addEvent({ id: s.id, bookId: s.book_id, rereadNumber: s.reread_number ?? 0, date: new Date(s.session_date), pagesValue, source: "session" });
     });
+    manualUpdates.forEach((u: any) => {
+      const date = safeParseDate(u.update_date);
+      const pagesValue = u.pages_value ?? 0;
+      if (date && pagesValue > 0) addEvent({ id: u.id, bookId: u.book_id, rereadNumber: u.reread_number ?? 0, date, pagesValue, source: "manual" });
+    });
+
     grouped.forEach((group) => {
-      const sorted = [...group].sort((a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime());
+      const sorted = [...group].sort((a, b) => {
+        const dateDiff = a.date.getTime() - b.date.getTime();
+        if (dateDiff !== 0) return dateDiff;
+        if (a.source !== b.source) return a.source === "session" ? -1 : 1;
+        return a.id.localeCompare(b.id);
+      });
       let prevPage = 0;
-      sorted.forEach((s) => {
-        const currentPage = s.last_page_reached ?? 0;
-        const delta = Math.max(0, currentPage - prevPage);
-        map.set(s.id, delta);
-        if (currentPage > 0) prevPage = currentPage;
+      sorted.forEach((event) => {
+        const delta = Math.max(0, event.pagesValue - prevPage);
+        map.set(`${event.source}:${event.id}`, delta);
+        prevPage = Math.max(prevPage, event.pagesValue);
       });
     });
     return map;
-  }, [sessions]);
+  }, [sessions, manualUpdates]);
 
   // Books with no logged activity at all (legacy fallback)
   const booksWithAnyActivity = useMemo(() => {
