@@ -180,6 +180,8 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
     const initialized = { ...canonicalBook, citations: canonicalBook.citations ? [...canonicalBook.citations] : [], chapterNotes: canonicalBook.chapterNotes ? [...canonicalBook.chapterNotes] : [] };
     setEditBook(initialized);
     setDirty(false);
+    prevPagesReadRef.current = canonicalBook.pagesRead ?? 0;
+    pagesManuallyChanged.current = false;
     return null;
   }
 
@@ -208,34 +210,46 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
   const handleDelete = () => { onDelete(eb.id); setDeleteConfirm(false); setEditBook(null); setDirty(false); onOpenChange(false); };
 
   const recordManualPageProgress = async (newPages: number, previousPages: number) => {
-    if (!user || newPages === previousPages) return;
+    if (!user) return;
     const rereadNumber = eb.rereadCount ?? 0;
-    const hasSessionHistory = allSessions.some((s) => s.book_id === eb.id && (s.reread_number ?? 0) === rereadNumber);
+
+    // Recompute the true previous max page from actual history (sessions + manual updates)
+    // to avoid trusting a stale in-memory ref.
+    const sessionMax = allSessions
+      .filter((s) => s.book_id === eb.id && (s.reread_number ?? 0) === rereadNumber)
+      .reduce((m, s) => Math.max(m, s.last_page_reached ?? 0), 0);
+
     const { data: existingUpdates, error: existingError } = await supabase
       .from("manual_page_updates")
-      .select("id")
+      .select("id, pages_value")
       .eq("user_id", user.id)
       .eq("book_id", eb.id)
       .eq("reread_number", rereadNumber)
+      .order("update_date", { ascending: false })
       .limit(1);
     if (existingError) {
       toast.error("Erreur lors de l'enregistrement de la progression");
       return;
     }
 
+    const lastManual = existingUpdates?.[0]?.pages_value ?? 0;
+    const truePrev = Math.max(sessionMax, lastManual, previousPages || 0);
+    if (newPages === truePrev) return;
+
     const entries: any[] = [];
-    if (!hasSessionHistory && !existingUpdates?.length && previousPages > 0) {
+    if (sessionMax === 0 && !existingUpdates?.length && truePrev > 0) {
       const baseline = progressBaselineDate(eb);
       if (baseline) {
-        entries.push({ user_id: user.id, book_id: eb.id, update_date: baseline, pages_delta: previousPages, pages_value: previousPages, reread_number: rereadNumber });
+        entries.push({ user_id: user.id, book_id: eb.id, update_date: baseline, pages_delta: truePrev, pages_value: truePrev, reread_number: rereadNumber });
       }
     }
-    entries.push({ user_id: user.id, book_id: eb.id, update_date: new Date().toISOString(), pages_delta: newPages - previousPages, pages_value: newPages, reread_number: rereadNumber });
+    entries.push({ user_id: user.id, book_id: eb.id, update_date: new Date().toISOString(), pages_delta: newPages - truePrev, pages_value: newPages, reread_number: rereadNumber });
 
     const { error } = await supabase.from("manual_page_updates").insert(entries);
     if (error) toast.error("Erreur lors de l'enregistrement de la progression");
     else queryClient.invalidateQueries({ queryKey: ["manual_page_updates", user.id] });
   };
+
 
   const handleClose = () => {
     if (dirty) {
