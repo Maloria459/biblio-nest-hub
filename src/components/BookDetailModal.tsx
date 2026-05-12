@@ -180,6 +180,8 @@ export function BookDetailModal({ book, open, onOpenChange, onSave, onDelete, al
     const initialized = { ...canonicalBook, citations: canonicalBook.citations ? [...canonicalBook.citations] : [], chapterNotes: canonicalBook.chapterNotes ? [...canonicalBook.chapterNotes] : [] };
     setEditBook(initialized);
     setDirty(false);
+    prevPagesReadRef.current = canonicalBook.pagesRead ?? 0;
+    pagesManuallyChanged.current = false;
     return null;
   }
 
