@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { ReadingSession } from "@/hooks/useReadingSessions";
+import type { ManualPageUpdate, ReadingSession } from "@/hooks/useReadingSessions";
 import { formatDurationFull } from "@/hooks/useReadingSessions";
 import type { Book } from "@/data/mockBooks";
 
@@ -9,10 +9,15 @@ const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 interface Props {
   sessions: ReadingSession[];
+  manualUpdates: ManualPageUpdate[];
   books: Book[];
 }
 
-export function SessionsCalendarView({ sessions, books }: Props) {
+type CalendarItem =
+  | { book: Book; kind: "session"; session: ReadingSession }
+  | { book: Book; kind: "manual"; update: ManualPageUpdate };
+
+export function SessionsCalendarView({ sessions, manualUpdates, books }: Props) {
   const now = new Date();
   const [monthOffset, setMonthOffset] = useState(0);
 
@@ -22,23 +27,29 @@ export function SessionsCalendarView({ sessions, books }: Props) {
   const monthLabel = viewDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
   // Group sessions of the visible month by day
-  const sessionsByDay = useMemo(() => {
-    const map = new Map<number, { book: Book; session: ReadingSession }[]>();
-    // Sort sessions chronologically (earliest first) so first read of the day comes first
-    const sortedAsc = [...sessions].sort(
-      (a, b) => new Date(a.session_date).getTime() - new Date(b.session_date).getTime(),
-    );
-    for (const s of sortedAsc) {
-      const d = new Date(s.session_date);
-      if (d.getFullYear() !== viewYear || d.getMonth() !== viewMonth) continue;
+  const activityByDay = useMemo(() => {
+    const map = new Map<number, CalendarItem[]>();
+    const items: Array<{ date: Date; item: CalendarItem }> = [];
+
+    sessions.forEach((s) => {
       const book = books.find((b) => b.id === s.book_id);
-      if (!book) continue;
+      if (book) items.push({ date: new Date(s.session_date), item: { book, kind: "session", session: s } });
+    });
+
+    manualUpdates.forEach((u) => {
+      const book = books.find((b) => b.id === u.book_id);
+      if (book) items.push({ date: new Date(u.update_date), item: { book, kind: "manual", update: u } });
+    });
+
+    const sortedAsc = items.sort((a, b) => a.date.getTime() - b.date.getTime());
+    for (const { date: d, item } of sortedAsc) {
+      if (d.getFullYear() !== viewYear || d.getMonth() !== viewMonth) continue;
       const day = d.getDate();
       if (!map.has(day)) map.set(day, []);
-      map.get(day)!.push({ book, session: s });
+      map.get(day)!.push(item);
     }
     return map;
-  }, [sessions, books, viewYear, viewMonth]);
+  }, [sessions, manualUpdates, books, viewYear, viewMonth]);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = (() => {
