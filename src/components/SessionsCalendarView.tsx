@@ -26,7 +26,7 @@ export function SessionsCalendarView({ sessions, manualUpdates, books }: Props) 
   const viewMonth = viewDate.getMonth();
   const monthLabel = viewDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
-  // Group sessions of the visible month by day
+  // Group reading sessions and manual page updates of the visible month by day
   const activityByDay = useMemo(() => {
     const map = new Map<number, CalendarItem[]>();
     const items: Array<{ date: Date; item: CalendarItem }> = [];
@@ -113,7 +113,7 @@ export function SessionsCalendarView({ sessions, manualUpdates, books }: Props) 
                 ? `${item.book.title} — ${formatDurationFull(item.session.duration_minutes)}${
                     item.session.last_page_reached != null ? ` (p.${item.session.last_page_reached})` : ""
                   }`
-                : `${item.book.title} — progression manuelle +${item.update.pages_delta} page${Math.abs(item.update.pages_delta) > 1 ? "s" : ""} (p.${item.update.pages_value})`,
+                : `${item.book.title} — progression manuelle ${item.update.pages_delta >= 0 ? "+" : ""}${item.update.pages_delta} page${Math.abs(item.update.pages_delta) > 1 ? "s" : ""} (p.${item.update.pages_value})`,
             );
 
             const cell = (
@@ -180,7 +180,7 @@ export function SessionsCalendarView({ sessions, manualUpdates, books }: Props) 
 
       {sessions.length + manualUpdates.length > 0 && activityByDay.size === 0 && (
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Aucune session de lecture ce mois-ci
+          Aucune activité de lecture ce mois-ci
         </p>
       )}
     </div>
