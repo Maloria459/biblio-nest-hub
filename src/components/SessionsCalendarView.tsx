@@ -98,7 +98,7 @@ export function SessionsCalendarView({ sessions, manualUpdates, books }: Props) 
           {cells.map((day, i) => {
             if (day === null) return <div key={i} />;
 
-            const dayItems = sessionsByDay.get(day) ?? [];
+            const dayItems = activityByDay.get(day) ?? [];
             // Unique books, preserving first-read order
             const uniqueBooksMap = new Map<string, Book>();
             dayItems.forEach((it) => {
@@ -108,11 +108,12 @@ export function SessionsCalendarView({ sessions, manualUpdates, books }: Props) 
             const hasContent = uniqueBooks.length > 0;
             const isToday = isCurrentMonth && day === today;
 
-            const tooltipLines = dayItems.map(
-              ({ book, session }) =>
-                `${book.title} — ${formatDurationFull(session.duration_minutes)}${
-                  session.last_page_reached != null ? ` (p.${session.last_page_reached})` : ""
-                }`,
+            const tooltipLines = dayItems.map((item) =>
+              item.kind === "session"
+                ? `${item.book.title} — ${formatDurationFull(item.session.duration_minutes)}${
+                    item.session.last_page_reached != null ? ` (p.${item.session.last_page_reached})` : ""
+                  }`
+                : `${item.book.title} — progression manuelle +${item.update.pages_delta} page${Math.abs(item.update.pages_delta) > 1 ? "s" : ""} (p.${item.update.pages_value})`,
             );
 
             const cell = (
@@ -177,7 +178,7 @@ export function SessionsCalendarView({ sessions, manualUpdates, books }: Props) 
         </div>
       </TooltipProvider>
 
-      {sessions.length > 0 && sessionsByDay.size === 0 && (
+      {sessions.length + manualUpdates.length > 0 && activityByDay.size === 0 && (
         <p className="text-center text-xs text-muted-foreground mt-6">
           Aucune session de lecture ce mois-ci
         </p>
