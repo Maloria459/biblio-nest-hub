@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useReadingSessions, formatDurationFull, formatTotalReadingTime, type ReadingSession } from "@/hooks/useReadingSessions";
+import { useManualPageUpdates, useReadingSessions, formatDurationFull, formatTotalReadingTime, type ReadingSession } from "@/hooks/useReadingSessions";
 import { useBooks } from "@/contexts/BooksContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,7 @@ function getSessionPagesRead(session: ReadingSession, allBookSessions: ReadingSe
 
 export function ReadingSessionsContent() {
   const { data: sessions = [], isLoading } = useReadingSessions();
+  const { data: manualUpdates = [], isLoading: manualUpdatesLoading } = useManualPageUpdates();
   const { books, updateBook } = useBooks();
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -43,6 +44,7 @@ export function ReadingSessionsContent() {
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["reading-sessions", user?.id] });
     qc.invalidateQueries({ queryKey: ["last-reading-session", user?.id] });
+    qc.invalidateQueries({ queryKey: ["manual_page_updates", user?.id] });
   };
 
   const handleDeleteSession = async () => {
@@ -91,7 +93,7 @@ export function ReadingSessionsContent() {
     });
   }, [sessions, books]);
 
-  if (isLoading) {
+  if (isLoading || manualUpdatesLoading) {
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex justify-center py-3">
@@ -139,7 +141,7 @@ export function ReadingSessionsContent() {
       </div>
 
       <div className={`flex-1 px-6 py-4 min-h-0 ${view === "calendar" ? "overflow-hidden" : "overflow-y-auto"}`}>
-        {sessions.length === 0 ? (
+        {sessions.length === 0 && manualUpdates.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center gap-2">
             <BookOpen className="h-10 w-10 text-muted-foreground/40" />
             <p className="text-sm font-medium text-muted-foreground">Aucune session de lecture enregistrée</p>
@@ -159,7 +161,7 @@ export function ReadingSessionsContent() {
             onStartSession={setTimerBook}
           />
         ) : (
-          <SessionsCalendarView sessions={sessions} books={books} />
+          <SessionsCalendarView sessions={sessions} manualUpdates={manualUpdates} books={books} />
         )}
       </div>
 

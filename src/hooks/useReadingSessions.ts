@@ -15,6 +15,17 @@ export interface ReadingSession {
   reread_number: number;
 }
 
+export interface ManualPageUpdate {
+  id: string;
+  book_id: string;
+  user_id: string;
+  update_date: string;
+  pages_value: number;
+  pages_delta: number;
+  created_at: string;
+  reread_number: number;
+}
+
 async function fetchAllSessions(userId: string): Promise<ReadingSession[]> {
   const rows: any[] = [];
   let from = 0;
@@ -33,6 +44,24 @@ async function fetchAllSessions(userId: string): Promise<ReadingSession[]> {
   return rows as ReadingSession[];
 }
 
+async function fetchAllManualPageUpdates(userId: string): Promise<ManualPageUpdate[]> {
+  const rows: any[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from("manual_page_updates")
+      .select("*")
+      .eq("user_id", userId)
+      .order("update_date", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    if (data) rows.push(...data);
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return rows as ManualPageUpdate[];
+}
+
 export function useReadingSessions() {
   const { user } = useAuth();
 
@@ -46,6 +75,17 @@ export function useReadingSessions() {
   return query;
 }
 
+export function useManualPageUpdates() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["manual_page_updates", user?.id],
+    queryFn: () => fetchAllManualPageUpdates(user!.id),
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useInvalidateSessions() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -53,6 +93,7 @@ export function useInvalidateSessions() {
     qc.invalidateQueries({ queryKey: ["reading-sessions", user?.id] });
     qc.invalidateQueries({ queryKey: ["last-reading-session", user?.id] });
     qc.invalidateQueries({ queryKey: ["reading-activity", user?.id] });
+    qc.invalidateQueries({ queryKey: ["manual_page_updates", user?.id] });
   };
 }
 
