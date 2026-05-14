@@ -1,9 +1,16 @@
 import { useState } from "react";
 import type { Book } from "@/data/mockBooks";
-import { Search, SlidersHorizontal, Plus, Settings } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, Settings, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FlipBookCard } from "@/components/FlipBookCard";
 import { BookDetailModal } from "@/components/BookDetailModal";
 import { FiltersPanel, emptyFilters, type Filters } from "@/components/FiltersPanel";
