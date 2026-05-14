@@ -31,10 +31,26 @@ export function BibliothequeContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
+  const [sortBy, setSortBy] = useState<string>("updated-desc");
 
   const handleDeleteBook = (id: string) => {
     deleteBook(id);
     setSelectedBook(null);
+  };
+
+  const sorters: Record<string, (a: Book, b: Book) => number> = {
+    "updated-desc": (a, b) =>
+      new Date(b.updatedAt || b.id).getTime() - new Date(a.updatedAt || a.id).getTime(),
+    "updated-asc": (a, b) =>
+      new Date(a.updatedAt || a.id).getTime() - new Date(b.updatedAt || b.id).getTime(),
+    "title-asc": (a, b) => a.title.localeCompare(b.title, "fr"),
+    "title-desc": (a, b) => b.title.localeCompare(a.title, "fr"),
+    "author-asc": (a, b) => a.author.localeCompare(b.author, "fr"),
+    "author-desc": (a, b) => b.author.localeCompare(a.author, "fr"),
+    "rating-desc": (a, b) => (b.rating ?? 0) - (a.rating ?? 0),
+    "rating-asc": (a, b) => (a.rating ?? 0) - (b.rating ?? 0),
+    "pages-desc": (a, b) => (b.pages ?? 0) - (a.pages ?? 0),
+    "pages-asc": (a, b) => (a.pages ?? 0) - (b.pages ?? 0),
   };
 
   const visibleBooks = books
@@ -54,8 +70,8 @@ export function BibliothequeContent() {
       if (filters.minRating > 0 && (!b.rating || b.rating < filters.minRating)) return false;
       if (filters.coupDeCoeurOnly && !b.coupDeCoeur) return false;
       return true;
-    });
-
+    })
+    .sort(sorters[sortBy] || sorters["updated-desc"]);
   const libraryCount = books.filter(b => b.status !== "Wishlist").length;
 
   return (
