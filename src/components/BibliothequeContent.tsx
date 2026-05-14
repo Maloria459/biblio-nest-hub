@@ -91,6 +91,24 @@ export function BibliothequeContent() {
         <div className="inline-flex items-center justify-center rounded-md border border-border px-3 h-10 text-sm text-muted-foreground whitespace-nowrap select-none pointer-events-none">
           {libraryCount} {libraryCount <= 1 ? "livre" : "livres"}
         </div>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="h-10 w-[180px] gap-1 text-sm">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
+            <SelectValue placeholder="Trier par" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="updated-desc">Date (plus récent)</SelectItem>
+            <SelectItem value="updated-asc">Date (plus ancien)</SelectItem>
+            <SelectItem value="title-asc">Titre (A → Z)</SelectItem>
+            <SelectItem value="title-desc">Titre (Z → A)</SelectItem>
+            <SelectItem value="author-asc">Auteur (A → Z)</SelectItem>
+            <SelectItem value="author-desc">Auteur (Z → A)</SelectItem>
+            <SelectItem value="rating-desc">Note (plus haute)</SelectItem>
+            <SelectItem value="rating-asc">Note (plus basse)</SelectItem>
+            <SelectItem value="pages-desc">Pages (plus → moins)</SelectItem>
+            <SelectItem value="pages-asc">Pages (moins → plus)</SelectItem>
+          </SelectContent>
+        </Select>
         <Button variant="outline" size="default" onClick={() => setFiltersOpen(true)}>
           <SlidersHorizontal className="h-4 w-4 mr-1.5" />
           Filtres
