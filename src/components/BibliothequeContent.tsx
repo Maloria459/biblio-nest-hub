@@ -1,9 +1,16 @@
 import { useState } from "react";
 import type { Book } from "@/data/mockBooks";
-import { Search, SlidersHorizontal, Plus, Settings } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, Settings, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FlipBookCard } from "@/components/FlipBookCard";
 import { BookDetailModal } from "@/components/BookDetailModal";
 import { FiltersPanel, emptyFilters, type Filters } from "@/components/FiltersPanel";
@@ -24,10 +31,26 @@ export function BibliothequeContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
+  const [sortBy, setSortBy] = useState<string>("updated-desc");
 
   const handleDeleteBook = (id: string) => {
     deleteBook(id);
     setSelectedBook(null);
+  };
+
+  const sorters: Record<string, (a: Book, b: Book) => number> = {
+    "updated-desc": (a, b) =>
+      new Date(b.updatedAt || b.id).getTime() - new Date(a.updatedAt || a.id).getTime(),
+    "updated-asc": (a, b) =>
+      new Date(a.updatedAt || a.id).getTime() - new Date(b.updatedAt || b.id).getTime(),
+    "title-asc": (a, b) => a.title.localeCompare(b.title, "fr"),
+    "title-desc": (a, b) => b.title.localeCompare(a.title, "fr"),
+    "author-asc": (a, b) => a.author.localeCompare(b.author, "fr"),
+    "author-desc": (a, b) => b.author.localeCompare(a.author, "fr"),
+    "rating-desc": (a, b) => (b.rating ?? 0) - (a.rating ?? 0),
+    "rating-asc": (a, b) => (a.rating ?? 0) - (b.rating ?? 0),
+    "pages-desc": (a, b) => (b.pages ?? 0) - (a.pages ?? 0),
+    "pages-asc": (a, b) => (a.pages ?? 0) - (b.pages ?? 0),
   };
 
   const visibleBooks = books
@@ -47,8 +70,8 @@ export function BibliothequeContent() {
       if (filters.minRating > 0 && (!b.rating || b.rating < filters.minRating)) return false;
       if (filters.coupDeCoeurOnly && !b.coupDeCoeur) return false;
       return true;
-    });
-
+    })
+    .sort(sorters[sortBy] || sorters["updated-desc"]);
   const libraryCount = books.filter(b => b.status !== "Wishlist").length;
 
   return (
@@ -68,6 +91,24 @@ export function BibliothequeContent() {
         <div className="inline-flex items-center justify-center rounded-md border border-border px-3 h-10 text-sm text-muted-foreground whitespace-nowrap select-none pointer-events-none">
           {libraryCount} {libraryCount <= 1 ? "livre" : "livres"}
         </div>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="h-10 w-[180px] gap-1 text-sm">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
+            <SelectValue placeholder="Trier par" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="updated-desc">Date (plus récent)</SelectItem>
+            <SelectItem value="updated-asc">Date (plus ancien)</SelectItem>
+            <SelectItem value="title-asc">Titre (A → Z)</SelectItem>
+            <SelectItem value="title-desc">Titre (Z → A)</SelectItem>
+            <SelectItem value="author-asc">Auteur (A → Z)</SelectItem>
+            <SelectItem value="author-desc">Auteur (Z → A)</SelectItem>
+            <SelectItem value="rating-desc">Note (plus haute)</SelectItem>
+            <SelectItem value="rating-asc">Note (plus basse)</SelectItem>
+            <SelectItem value="pages-desc">Pages (plus → moins)</SelectItem>
+            <SelectItem value="pages-asc">Pages (moins → plus)</SelectItem>
+          </SelectContent>
+        </Select>
         <Button variant="outline" size="default" onClick={() => setFiltersOpen(true)}>
           <SlidersHorizontal className="h-4 w-4 mr-1.5" />
           Filtres
